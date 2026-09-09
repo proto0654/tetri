@@ -18,7 +18,7 @@
     >
         <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl">
-                {{ $settings['stories_section_title'] ?? 'СТОРИСЫ из MAX' }}
+                @typo($settings['stories_section_title'] ?? 'СТОРИСЫ из MAX')
             </h2>
 
             <x-site.mark

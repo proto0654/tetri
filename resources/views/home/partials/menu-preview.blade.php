@@ -16,12 +16,12 @@
                 />
 
                 <h2 class="mt-4 font-display text-4xl font-bold text-olive sm:text-5xl">
-                    {{ $settings['menu_section_title'] ?? 'МЕНЮ' }}
+                    @typo($settings['menu_section_title'] ?? 'МЕНЮ')
                 </h2>
 
                 @if (filled($settings['menu_section_description'] ?? null))
                     <p class="mt-4 text-base leading-relaxed text-ink">
-                        {{ $settings['menu_section_description'] }}
+                        @typo($settings['menu_section_description'])
                     </p>
                 @endif
 
@@ -44,7 +44,7 @@
                                 <x-media :path="$category->image" :alt="$category->title" class="aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-105" />
                             </div>
                             <p class="mt-4 text-center text-sm font-semibold uppercase tracking-wide text-ink">
-                                {{ $category->title }}
+                                @typo($category->title)
                             </p>
                         </a>
                     @endforeach

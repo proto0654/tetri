@@ -7,7 +7,7 @@
         />
 
         <h2 class="mt-4 max-w-4xl font-display text-3xl font-bold leading-tight text-olive sm:text-4xl lg:text-5xl">
-            {{ $settings['kids_title'] ?? '' }}
+            @typo($settings['kids_title'] ?? '')
         </h2>
 
         <div class="mt-12 grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
@@ -26,9 +26,9 @@
                                 @endif
                             </span>
                             @if (filled($benefitUrl))
-                                <a href="{{ $benefitUrl }}" class="pt-1.5 text-base hover:text-plum">{{ $benefit['text'] ?? '' }}</a>
+                                <a href="{{ $benefitUrl }}" class="pt-1.5 text-base hover:text-plum">@typo($benefit['text'] ?? '')</a>
                             @else
-                                <span class="pt-1.5 text-base">{{ $benefit['text'] ?? '' }}</span>
+                                <span class="pt-1.5 text-base">@typo($benefit['text'] ?? '')</span>
                             @endif
                         </li>
                     @endforeach
@@ -49,13 +49,13 @@
 
                 @if (filled($settings['kids_description'] ?? null))
                     <p class="mt-6 max-w-2xl text-sm uppercase leading-relaxed tracking-wide text-ink">
-                        {{ $settings['kids_description'] }}
+                        @typo($settings['kids_description'])
                     </p>
                 @endif
 
                 @if (filled($settings['kids_description_secondary'] ?? null))
                     <p class="mt-4 max-w-2xl text-sm uppercase leading-relaxed tracking-wide text-ink">
-                        {{ $settings['kids_description_secondary'] }}
+                        @typo($settings['kids_description_secondary'])
                     </p>
                 @endif
             </div>

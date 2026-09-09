@@ -48,16 +48,16 @@
 
         <div>
             <p class="max-w-md text-sm leading-relaxed text-cream/85">
-                {{ $settings['footer_about'] ?? '' }}
+                @typo($settings['footer_about'] ?? '')
             </p>
         </div>
     </div>
 
     <div class="border-t border-cream/15">
         <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-xs text-cream/60 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-            <span>{{ $settings['copyright'] ?? '© ТЕТРИ' }}</span>
+            <span>@typo($settings['copyright'] ?? '© ТЕТРИ')</span>
             @if (! empty($settings['design_credit']))
-                <span>{{ $settings['design_credit'] }}</span>
+                <span>@typo($settings['design_credit'])</span>
             @endif
         </div>
     </div>

@@ -32,6 +32,7 @@ Public website and Filament admin for family cafe **Тетри**. Stack: Laravel
 - Public icons: Heroicons select with SVG preview + optional custom SVG upload (`IconFieldSchema` / `HeroiconOptions`).
 - Booking: Livewire `BookingModal` via `<x-site.book-button>`; submit is a stub (alert), not a bot yet.
 - Public media URLs: relative `/storage/...` via `App\Support\PublicMedia`.
+- Seeders are idempotent: re-seed fills missing demo rows only; `migrate:fresh --seed` for a full wipe.
 
 ## Open questions
 
@@ -41,6 +42,7 @@ Public website and Filament admin for family cafe **Тетри**. Stack: Laravel
 
 ## Last actualized
 
+- 2026-09-09 — Idempotent seeders (`firstOrCreate` / skip existing settings); seeding directives in setup/content/tech.
 - 2026-09-09 — Accent copy fields, icon picker + custom SVG, booking modal stub; docs synced.
 - 2026-09-09 — Implemented Waves 1–4 (domain, Filament, home, MenuGrid, polish); docs updated from mockup plan.
 - 2026-09-09 — Initial hub + branches from project bootstrap dialogue.

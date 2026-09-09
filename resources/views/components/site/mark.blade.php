@@ -14,12 +14,12 @@
                 @else
                     <span aria-hidden="true"> </span>
                 @endif
-                {{ $text }}
+                @typo($text)
             </span>
         @endif
         @if (filled($note))
             <span>
-                <span aria-hidden="true">— </span>{{ $note }}
+                <span aria-hidden="true">— </span>@typo($note)
             </span>
         @endif
     </p>

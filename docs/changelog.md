@@ -4,6 +4,7 @@ Back to [project context](CONTEXT.md)
 
 ## 2026-09-09
 
+- Documented idempotent seeding: `CafeContentSeeder` / `DatabaseSeeder` use create-if-missing so Filament edits survive `db:seed`; full wipe via `migrate:fresh --seed` only. See [setup.md](setup.md#seeding-idempotent), [content.md](content.md).
 - Synced docs after public site polish: section accent fields (`*_eyebrow` / asides), Heroicon + custom SVG icons, Livewire booking modal stub, `PublicMedia`, Herd `tetri.test`.
 - Updated [CONTENT](content.md), [tech.md](tech.md), [design.md](design.md), [setup.md](setup.md), [CONTEXT.md](CONTEXT.md).
 - Implemented public site + admin content model from mockup (categories, menu items, stories, site settings, home, Livewire menu).

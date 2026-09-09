@@ -16,12 +16,12 @@
 
         <div>
             <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl lg:text-5xl">
-                {{ $settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ' }}
+                @typo($settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ')
             </h2>
             <dl class="mt-8 space-y-4 text-base text-ink">
                 <div>
                     <dt class="text-sm uppercase tracking-wide text-muted">Адрес</dt>
-                    <dd class="mt-1">{{ $settings['address'] ?? '' }}</dd>
+                    <dd class="mt-1">@typo($settings['address'] ?? '')</dd>
                 </div>
                 <div>
                     <dt class="text-sm uppercase tracking-wide text-muted">Телефон</dt>
@@ -35,7 +35,7 @@
                 </div>
                 <div>
                     <dt class="text-sm uppercase tracking-wide text-muted">Часы работы</dt>
-                    <dd class="mt-1">{{ $settings['working_hours'] ?? '' }}</dd>
+                    <dd class="mt-1">@typo($settings['working_hours'] ?? '')</dd>
                 </div>
             </dl>
         </div>

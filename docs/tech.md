@@ -32,6 +32,7 @@ Record settled technical choices for the Tetri Laravel application.
 - Media URLs for the public site: `App\Support\PublicMedia` → relative `/storage/...`.
 - Icon fields: `HeroiconOptions` + `IconFieldSchema` (Filament `Select::allowHtml()` previews must use fixed inline SVG size, not Tailwind `h-*`/`w-*`).
 - Livewire temp uploads raised for hero video (`config/livewire.php`); Herd PHP upload limits may need matching.
+- Seeders are idempotent (`firstOrCreate` / create-if-missing); `updateOrCreate` must not be used for demo cafe content. Details: [setup.md](setup.md#seeding-idempotent).
 
 ## Open questions
 

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\Story;
 use App\Settings\SiteSettings;
+use App\Support\Typograph;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -45,18 +46,18 @@ class HomePageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Т Е Т Р И', false);
-        $response->assertSee('МЕСТО ДЛЯ СЕМЬИ', false);
-        $response->assertSee('ДЛЯ ВСЕЙ СЕМЬИ', false);
-        $response->assertSee('пр-т. Кирова, 31А', false);
-        $response->assertSee('ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.', false);
-        $response->assertSee('От завтраков до десертов', false);
-        $response->assertSee('ЕДА С ХАРАКТЕРОМ', false);
-        $response->assertSee('СВОЯ КУХНЯ И ПЕКАРНЯ', false);
-        $response->assertSee('Кофе - выпечка — 10:00–23:00', false);
-        $response->assertSee('Новинки и атмосфера зала', false);
-        $response->assertSee('Смотрите в MAX', false);
-        $response->assertSee('МЫ В СИМФЕРОПОЛЕ', false);
-        $response->assertSee('Завтраки', false);
+        $response->assertSee(Typograph::apply('МЕСТО ДЛЯ СЕМЬИ'), false);
+        $response->assertSee(Typograph::apply('ДЛЯ ВСЕЙ СЕМЬИ'), false);
+        $response->assertSee(Typograph::apply('пр-т. Кирова, 31А'), false);
+        $response->assertSee(Typograph::apply('ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.'), false);
+        $response->assertSee(Typograph::apply('От завтраков до десертов'), false);
+        $response->assertSee(Typograph::apply('ЕДА С ХАРАКТЕРОМ'), false);
+        $response->assertSee(Typograph::apply('СВОЯ КУХНЯ И ПЕКАРНЯ'), false);
+        $response->assertSee(Typograph::apply('Кофе - выпечка — 10:00–23:00'), false);
+        $response->assertSee(Typograph::apply('Новинки и атмосфера зала'), false);
+        $response->assertSee(Typograph::apply('Смотрите в MAX'), false);
+        $response->assertSee(Typograph::apply('МЫ В СИМФЕРОПОЛЕ'), false);
+        $response->assertSee(Typograph::apply('Завтраки'), false);
         $response->assertSee('СТОРИСЫ', false);
         $response->assertSee(route('menu'), false);
     }
@@ -72,8 +73,8 @@ class HomePageTest extends TestCase
         $response = $this->get(route('menu'));
 
         $response->assertOk();
-        $response->assertSee('ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.', false);
-        $response->assertSee('Обеды · ужины · детское меню', false);
-        $response->assertSee('Обновляем сезонно', false);
+        $response->assertSee(Typograph::apply('ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.'), false);
+        $response->assertSee(Typograph::apply('Обеды · ужины · детское меню'), false);
+        $response->assertSee(Typograph::apply('Обновляем сезонно'), false);
     }
 }

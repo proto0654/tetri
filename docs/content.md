@@ -25,6 +25,12 @@ Active — IA and content model settled from UI mockup.
 - `Story` — `title`, `video_path`, `preview_image`, `sort_order`, `is_active`
 - `settings` key `site` — editable via Filament `ManageSiteSettings`
 
+## Demo seeding
+
+`Database\Seeders\CafeContentSeeder` inserts missing demo categories, dishes, stories, admin user, and site settings. Re-running seed is safe: existing rows and `settings.key=site` are left untouched. Stable keys: category `slug`, menu item (`category_id` + title/image path), story `video_path` (demo fingerprint), user `email`.
+
+See [setup.md](setup.md#seeding-idempotent) for commands and seeder directives. Use `migrate:fresh --seed` only when intentionally discarding local edits.
+
 ## SiteSettings accent / balance copy
 
 Decorative ◇ lines from the mockup are first-class settings (not hardcoded). Render with `<x-site.mark>`.

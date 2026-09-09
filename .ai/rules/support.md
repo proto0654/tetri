@@ -10,3 +10,6 @@ Public/site icons use Blade Heroicons (heroicon-o-*). Pick via HeroiconOptions::
 
 ## Heroicon select previews
 Filament Select allowHtml() previews must size SVGs with inline width/height (e.g. 20px), not Tailwind h-*/w-* — Filament/Choices containers stretch viewBox-only SVGs to huge sizes. Use HeroiconOptions::outlinedWithPreview() / previewSvgHtml().
+
+## Typography via akh/typograf and @typo
+Public CMS text is typographed with akh/typograf through App\Support\Typograph::apply() (Unicode nbsp after entity decode; Number\Sup|Sub|DimensionSup disabled). In Blade use @typo($field), not raw {{ $field }}, for hanging prepositions and quotes.

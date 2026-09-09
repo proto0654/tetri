@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Models\Setting;
 use App\Models\Story;
 use App\Models\User;
 use App\Settings\SiteSettings;
@@ -13,6 +14,12 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * Idempotent demo content. Prefer firstOrCreate / create-if-missing so re-seeding
+ * never overwrites fields already edited in Filament or the DB.
+ *
+ * To wipe and reseed from scratch: php artisan migrate:fresh --seed
+ */
 class CafeContentSeeder extends Seeder
 {
     /**
@@ -46,7 +53,7 @@ class CafeContentSeeder extends Seeder
 
     public function run(): void
     {
-        User::query()->updateOrCreate(
+        User::query()->firstOrCreate(
             ['email' => 'admin@tetri.test'],
             [
                 'name' => 'Admin',
@@ -67,14 +74,15 @@ class CafeContentSeeder extends Seeder
             $stock = $data['stock'];
             unset($data['stock']);
 
-            $category = Category::query()->updateOrCreate(
-                ['slug' => $data['slug']],
-                [
+            $category = Category::query()->where('slug', $data['slug'])->first();
+
+            if ($category === null) {
+                $category = Category::query()->create([
                     ...$data,
                     'image' => $this->storeStockImage($stock, "categories/{$data['slug']}.jpg"),
                     'is_active' => true,
-                ],
-            );
+                ]);
+            }
 
             $this->seedMenuItems($category, $index);
         }
@@ -83,15 +91,32 @@ class CafeContentSeeder extends Seeder
 
         foreach ($storyStocks as $i => $stock) {
             $n = $i + 1;
-            Story::query()->updateOrCreate(
-                ['title' => "Сторис {$n}"],
-                [
-                    'video_path' => $this->storePlaceholderVideo("stories/story-{$n}.mp4"),
-                    'preview_image' => $this->storeStockImage($stock, "stories/previews/story-{$n}.jpg"),
-                    'sort_order' => $n,
-                    'is_active' => true,
-                ],
-            );
+            $videoPath = "stories/story-{$n}.mp4";
+
+            // Stable demo key is video_path (not title — titles are edited in Filament).
+            if (Story::query()->where('video_path', $videoPath)->exists()) {
+                continue;
+            }
+
+            Story::query()->create([
+                'title' => "Сторис {$n}",
+                'video_path' => $this->storePlaceholderVideo($videoPath),
+                'preview_image' => $this->storeStockImage($stock, "stories/previews/story-{$n}.jpg"),
+                'sort_order' => $n,
+                'is_active' => true,
+            ]);
+        }
+
+        $this->seedSiteSettingsIfMissing();
+    }
+
+    /**
+     * Demo site settings only when the row is absent — never overwrite Filament edits.
+     */
+    protected function seedSiteSettingsIfMissing(): void
+    {
+        if (Setting::query()->where('key', SiteSettings::KEY)->exists()) {
+            return;
         }
 
         app(SiteSettings::class)->save([
@@ -147,19 +172,31 @@ class CafeContentSeeder extends Seeder
         ];
 
         foreach (array_slice($samples, 0, 4 + ($categoryIndex % 3)) as $itemIndex => [$title, $description, $price, $stock]) {
-            MenuItem::query()->updateOrCreate(
-                [
-                    'category_id' => $category->id,
-                    'title' => $title,
-                ],
-                [
-                    'description' => $description,
-                    'price' => $price,
-                    'image' => $this->storeStockImage($stock, 'menu-items/'.Str::slug($title).'.jpg'),
-                    'sort_order' => $itemIndex + 1,
-                    'is_active' => true,
-                ],
-            );
+            $imagePath = 'menu-items/'.Str::slug($title).'-'.$category->slug.'.jpg';
+            $legacyImagePath = 'menu-items/'.Str::slug($title).'.jpg';
+
+            $alreadySeeded = MenuItem::query()
+                ->where('category_id', $category->id)
+                ->where(function ($query) use ($title, $imagePath, $legacyImagePath): void {
+                    $query->where('title', $title)
+                        ->orWhere('image', $imagePath)
+                        ->orWhere('image', $legacyImagePath);
+                })
+                ->exists();
+
+            if ($alreadySeeded) {
+                continue;
+            }
+
+            MenuItem::query()->create([
+                'category_id' => $category->id,
+                'title' => $title,
+                'description' => $description,
+                'price' => $price,
+                'image' => $this->storeStockImage($stock, $imagePath),
+                'sort_order' => $itemIndex + 1,
+                'is_active' => true,
+            ]);
         }
     }
 

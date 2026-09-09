@@ -19,7 +19,7 @@
                     'bg-cream-dark text-ink hover:bg-plum/10' => $activeCategory?->id !== $category->id,
                 ])
             >
-                {{ mb_strtoupper($category->title) }}
+                @typo(mb_strtoupper($category->title))
             </button>
         @endforeach
     </div>
@@ -31,7 +31,7 @@
     >
         @if ($activeCategory)
             <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl">
-                {{ mb_strtoupper($activeCategory->title) }}
+                @typo(mb_strtoupper($activeCategory->title))
             </h2>
         @endif
 
@@ -46,13 +46,13 @@
                         />
                     </div>
                     <div class="mt-4 flex items-start justify-between gap-4">
-                        <h3 class="text-base font-semibold text-ink">{{ $item->title }}</h3>
+                        <h3 class="text-base font-semibold text-ink">@typo($item->title)</h3>
                         <p class="shrink-0 text-base font-semibold text-ink">
                             {{ number_format((float) $item->price, 0, '', ' ') }} ₽
                         </p>
                     </div>
                     @if ($item->description)
-                        <p class="mt-2 text-sm leading-relaxed text-muted">{{ $item->description }}</p>
+                        <p class="mt-2 text-sm leading-relaxed text-muted">@typo($item->description)</p>
                     @endif
                 </article>
             @empty

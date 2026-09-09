@@ -7,7 +7,7 @@
         />
 
         <h2 class="mt-5 max-w-4xl font-display text-3xl font-bold leading-tight text-olive sm:text-4xl lg:text-5xl">
-            {{ $settings['concept_title'] ?? '' }}
+            @typo($settings['concept_title'] ?? '')
         </h2>
 
         <div class="mt-10 grid gap-8 sm:grid-cols-[minmax(10rem,0.35fr)_minmax(0,1fr)] sm:items-start">
@@ -18,7 +18,7 @@
 
             <div>
                 <p class="text-sm uppercase leading-relaxed tracking-wide text-ink sm:text-base">
-                    {{ $settings['concept_description'] ?? '' }}
+                    @typo($settings['concept_description'] ?? '')
                 </p>
 
                 <x-site.book-button
