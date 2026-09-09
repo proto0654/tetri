@@ -6,12 +6,14 @@ use App\Settings\SiteSettings;
 use App\Support\IconFieldSchema;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
@@ -74,6 +76,23 @@ class ManageSiteSettings extends Page
                                     ->directory('site/hero')
                                     ->visibility('public')
                                     ->maxSize(5120),
+                                Fieldset::make('Градиент оверлея')
+                                    ->schema([
+                                        ColorPicker::make('hero_overlay_from')
+                                            ->label('Сверху')
+                                            ->rgba()
+                                            ->required(),
+                                        ColorPicker::make('hero_overlay_via')
+                                            ->label('Середина')
+                                            ->rgba()
+                                            ->required(),
+                                        ColorPicker::make('hero_overlay_to')
+                                            ->label('Снизу')
+                                            ->rgba()
+                                            ->required()
+                                            ->helperText('По умолчанию cream → фон следующей секции'),
+                                    ])
+                                    ->columns(3),
                                 Repeater::make('hero_icons')
                                     ->label('Иконки')
                                     ->schema(IconFieldSchema::withUrl())

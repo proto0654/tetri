@@ -25,14 +25,14 @@ class CafeContentSeederTest extends TestCase
 
         $this->assertDatabaseHas('users', ['email' => 'admin@tetri.test']);
         $this->assertSame(5, Category::query()->count());
-        $this->assertSame(5, Story::query()->count());
+        $this->assertSame(12, Story::query()->count());
         $this->assertTrue(Setting::query()->where('key', SiteSettings::KEY)->exists());
 
         $menuItemCount = MenuItem::query()->count();
         $this->assertGreaterThan(0, $menuItemCount);
 
         Category::query()->where('slug', 'zavtraki')->update(['title' => 'Завтраки (edited)']);
-        Story::query()->where('title', 'Сторис 1')->update(['title' => 'Сторис edited']);
+        Story::query()->where('title', 'Завтрак дня')->update(['title' => 'Сторис edited']);
         MenuItem::query()->where('title', 'Сырники со сметаной')->firstOrFail()->update([
             'description' => 'Custom description',
             'price' => 999,
@@ -44,7 +44,7 @@ class CafeContentSeederTest extends TestCase
         $this->seed(CafeContentSeeder::class);
 
         $this->assertSame(5, Category::query()->count());
-        $this->assertSame(5, Story::query()->count());
+        $this->assertSame(12, Story::query()->count());
         $this->assertSame($menuItemCount, MenuItem::query()->count());
         $this->assertSame(1, Setting::query()->where('key', SiteSettings::KEY)->count());
 

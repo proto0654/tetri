@@ -58,6 +58,9 @@ class SiteSettings
             'hero_background_image' => null,
             'hero_video_path' => null,
             'hero_video_preview' => null,
+            'hero_overlay_from' => 'rgba(0, 0, 0, 0.45)',
+            'hero_overlay_via' => 'rgba(0, 0, 0, 0.3)',
+            'hero_overlay_to' => 'rgba(245, 240, 230, 0.95)',
             'hero_icons' => [
                 ['icon' => 'heroicon-o-cake', 'url' => '#menu-preview'],
                 ['icon' => 'heroicon-o-beaker', 'url' => '#menu-preview'],

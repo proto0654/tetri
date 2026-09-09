@@ -17,6 +17,9 @@ class HomePageTest extends TestCase
     {
         app(SiteSettings::class)->save([
             'hero_title' => 'Т Е Т Р И',
+            'hero_overlay_from' => 'rgba(10, 20, 30, 0.5)',
+            'hero_overlay_via' => 'rgba(40, 50, 60, 0.4)',
+            'hero_overlay_to' => 'rgba(245, 240, 230, 0.95)',
             'kids_title' => 'МЕСТО ДЛЯ СЕМЬИ',
             'kids_eyebrow' => 'ДЛЯ ВСЕЙ СЕМЬИ',
             'kids_location_note' => 'пр-т. Кирова, 31А',
@@ -46,6 +49,7 @@ class HomePageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Т Е Т Р И', false);
+        $response->assertSee('linear-gradient(to bottom, rgba(10, 20, 30, 0.5), rgba(40, 50, 60, 0.4), rgba(245, 240, 230, 0.95))', false);
         $response->assertSee(Typograph::apply('МЕСТО ДЛЯ СЕМЬИ'), false);
         $response->assertSee(Typograph::apply('ДЛЯ ВСЕЙ СЕМЬИ'), false);
         $response->assertSee(Typograph::apply('пр-т. Кирова, 31А'), false);

@@ -33,15 +33,20 @@ Public website and Filament admin for family cafe **Тетри**. Stack: Laravel
 - Booking: Livewire `BookingModal` via `<x-site.book-button>`; submit is a stub (alert), not a bot yet.
 - Public media URLs: relative `/storage/...` via `App\Support\PublicMedia`.
 - Seeders are idempotent: re-seed fills missing demo rows only; `migrate:fresh --seed` for a full wipe.
+- Public carousels: local Swiper only (`npm` + Vite); markup via `data-swiper*` hooks.
+- Hero overlay gradient is CMS-editable (`hero_overlay_from` / `_via` / `_to`), sanitized with `CssColor::resolve`.
+- Demo MAX stories: 12 posts (food / kids / social), Unsplash posters + empty `mp4` until real video upload.
 
 ## Open questions
 
 - Production hosting and domain / DB engine.
 - Wire booking stub to Telegram/MAX bot.
 - Dedicated Banquet / About pages beyond home anchors.
+- Replace placeholder story/hero videos with real MAX footage.
 
 ## Last actualized
 
+- 2026-09-09 — Swiper carousels, CMS hero overlay colors, 12 themed MAX story demos; docs synced.
 - 2026-09-09 — Idempotent seeders (`firstOrCreate` / skip existing settings); seeding directives in setup/content/tech.
 - 2026-09-09 — Accent copy fields, icon picker + custom SVG, booking modal stub; docs synced.
 - 2026-09-09 — Implemented Waves 1–4 (domain, Filament, home, MenuGrid, polish); docs updated from mockup plan.

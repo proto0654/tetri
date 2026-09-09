@@ -4,6 +4,7 @@ Back to [project context](CONTEXT.md)
 
 ## 2026-09-09
 
+- Synced after Swiper carousels (menu preview + stories), CMS hero overlay colors (`CssColor`), and 12 themed MAX story demos (food / kids / social; empty video placeholders). See [content.md](content.md), [design.md](design.md), [tech.md](tech.md), [CONTEXT.md](CONTEXT.md).
 - Documented idempotent seeding: `CafeContentSeeder` / `DatabaseSeeder` use create-if-missing so Filament edits survive `db:seed`; full wipe via `migrate:fresh --seed` only. See [setup.md](setup.md#seeding-idempotent), [content.md](content.md).
 - Synced docs after public site polish: section accent fields (`*_eyebrow` / asides), Heroicon + custom SVG icons, Livewire booking modal stub, `PublicMedia`, Herd `tetri.test`.
 - Updated [CONTENT](content.md), [tech.md](tech.md), [design.md](design.md), [setup.md](setup.md), [CONTEXT.md](CONTEXT.md).

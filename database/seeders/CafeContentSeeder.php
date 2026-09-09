@@ -44,11 +44,19 @@ class CafeContentSeeder extends Seeder
         'hero-preview' => 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=1200&q=80',
         'kids-1' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&h=750&q=80',
         'kids-2' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&h=750&q=80',
+        // Stories for MAX — food / kids / social (poster placeholders; videos empty until upload)
         'story-1' => 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=720&h=1280&q=80',
         'story-2' => 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=720&h=1280&q=80',
         'story-3' => 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=720&h=1280&q=80',
         'story-4' => 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=720&h=1280&q=80',
         'story-5' => 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-6' => 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-7' => 'https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-8' => 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-9' => 'https://images.unsplash.com/photo-1566454825481-4e48f80aa4d7?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-10' => 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-11' => 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-12' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=720&h=1280&q=80',
     ];
 
     public function run(): void
@@ -87,10 +95,24 @@ class CafeContentSeeder extends Seeder
             $this->seedMenuItems($category, $index);
         }
 
-        $storyStocks = ['story-1', 'story-2', 'story-3', 'story-4', 'story-5'];
+        // Placeholder MAX stories: food / kids / social. Real videos replace empty mp4 later.
+        $stories = [
+            ['stock' => 'story-1', 'title' => 'Завтрак дня', 'sort_order' => 1],
+            ['stock' => 'story-2', 'title' => 'Горячее с кухни', 'sort_order' => 2],
+            ['stock' => 'story-3', 'title' => 'Кофе и десерт', 'sort_order' => 3],
+            ['stock' => 'story-4', 'title' => 'Ягодный чизкейк', 'sort_order' => 4],
+            ['stock' => 'story-5', 'title' => 'Сладкий день', 'sort_order' => 5],
+            ['stock' => 'story-6', 'title' => 'Детская игровая', 'sort_order' => 6],
+            ['stock' => 'story-7', 'title' => 'Семейный обед', 'sort_order' => 7],
+            ['stock' => 'story-8', 'title' => 'Малыши в Тетри', 'sort_order' => 8],
+            ['stock' => 'story-9', 'title' => 'Детский праздник', 'sort_order' => 9],
+            ['stock' => 'story-10', 'title' => 'За чашкой кофе', 'sort_order' => 10],
+            ['stock' => 'story-11', 'title' => 'Друзья за столом', 'sort_order' => 11],
+            ['stock' => 'story-12', 'title' => 'Вечер в зале', 'sort_order' => 12],
+        ];
 
-        foreach ($storyStocks as $i => $stock) {
-            $n = $i + 1;
+        foreach ($stories as $story) {
+            $n = $story['sort_order'];
             $videoPath = "stories/story-{$n}.mp4";
 
             // Stable demo key is video_path (not title — titles are edited in Filament).
@@ -99,9 +121,9 @@ class CafeContentSeeder extends Seeder
             }
 
             Story::query()->create([
-                'title' => "Сторис {$n}",
+                'title' => $story['title'],
                 'video_path' => $this->storePlaceholderVideo($videoPath),
-                'preview_image' => $this->storeStockImage($stock, "stories/previews/story-{$n}.jpg"),
+                'preview_image' => $this->storeStockImage($story['stock'], "stories/previews/story-{$n}.jpg"),
                 'sort_order' => $n,
                 'is_active' => true,
             ]);

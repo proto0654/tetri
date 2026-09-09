@@ -1,16 +1,22 @@
 @php
+    use App\Support\CssColor;
     use App\Support\PublicMedia;
 
     $bgUrl = PublicMedia::url($settings['hero_background_image'] ?? null);
     $videoUrl = PublicMedia::url($settings['hero_video_path'] ?? null);
     $posterUrl = PublicMedia::url($settings['hero_video_preview'] ?? null);
+
+    $overlayFrom = CssColor::resolve($settings['hero_overlay_from'] ?? null, 'rgba(0, 0, 0, 0.45)');
+    $overlayVia = CssColor::resolve($settings['hero_overlay_via'] ?? null, 'rgba(0, 0, 0, 0.3)');
+    $overlayTo = CssColor::resolve($settings['hero_overlay_to'] ?? null, 'rgba(245, 240, 230, 0.95)');
+    $overlayGradient = "linear-gradient(to bottom, {$overlayFrom}, {$overlayVia}, {$overlayTo})";
 @endphp
 
 <section class="relative flex min-h-[92vh] items-center justify-center overflow-hidden bg-olive-deep">
     @if ($bgUrl)
         <img src="{{ $bgUrl }}" alt="" class="absolute inset-0 h-full w-full object-cover opacity-70" loading="eager">
     @endif
-    <div class="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-cream/95"></div>
+    <div class="absolute inset-0" style="background: {{ $overlayGradient }}"></div>
 
     <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-4 pb-24 pt-32 text-center sm:px-6">
         <h1 class="font-display text-5xl font-bold tracking-[0.45em] text-white drop-shadow sm:text-6xl lg:text-7xl">

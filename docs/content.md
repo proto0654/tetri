@@ -29,6 +29,8 @@ Active — IA and content model settled from UI mockup.
 
 `Database\Seeders\CafeContentSeeder` inserts missing demo categories, dishes, stories, admin user, and site settings. Re-running seed is safe: existing rows and `settings.key=site` are left untouched. Stable keys: category `slug`, menu item (`category_id` + title/image path), story `video_path` (demo fingerprint), user `email`.
 
+Demo **stories (MAX)**: 12 items — themes food (1–5), kids (6–9), social (10–12). Preview images from Unsplash; `video_path` is an empty placeholder `mp4` until real clips are uploaded in Filament.
+
 See [setup.md](setup.md#seeding-idempotent) for commands and seeder directives. Use `migrate:fresh --seed` only when intentionally discarding local edits.
 
 ## SiteSettings accent / balance copy
@@ -42,6 +44,7 @@ Decorative ◇ lines from the mockup are first-class settings (not hardcoded). R
 | Menu page right meta | `menu_page_meta`, `menu_page_meta_note` |
 | Concept | `concept_eyebrow`, `concept_aside` |
 | Stories | `stories_section_aside`, `stories_section_aside_note` |
+| Hero overlay | `hero_overlay_from`, `hero_overlay_via`, `hero_overlay_to` (rgba; sanitized via `CssColor`) |
 
 Also: hero icons / kids benefits / social links use `icon` + optional `custom_icon` (uploaded SVG).
 
