@@ -31,6 +31,8 @@ Active — tokens taken from the ТЕТРИ UI mockup.
 - Section accents: small ◇ lines via `<x-site.mark>` for visual balance (eyebrow / aside / meta)
 - Icons on site: `<x-site.icon>` (Heroicon name or custom SVG from storage)
 - Carousels (menu preview, stories): local Swiper slides + prev/next; no Alpine overflow scroll
+- Contacts map: left-bleed card; radius + overflow clip on wrapper (`isolate`), not on iframe; right-only radius on lg while stacked with cream+olive
+- `design_credit`: single full-width strip under main/footer via `x-site.design-credit`
 
 ## Admin
 

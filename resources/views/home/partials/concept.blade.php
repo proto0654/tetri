@@ -1,23 +1,27 @@
-<section id="concept" class="bg-surface px-4 py-20 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-5xl">
-        <x-site.mark
-            :text="$settings['concept_eyebrow'] ?? null"
-            ruled
-            class="uppercase"
-        />
-
-        <h2 class="mt-5 max-w-4xl font-display text-3xl font-bold leading-tight text-olive sm:text-4xl lg:text-5xl">
-            @typo($settings['concept_title'] ?? '')
-        </h2>
-
-        <div class="mt-10 grid gap-8 sm:grid-cols-[minmax(10rem,0.35fr)_minmax(0,1fr)] sm:items-start">
+<section id="concept" class="bg-surface py-20">
+    <x-site.shell>
+        <div>
             <x-site.mark
-                :text="$settings['concept_aside'] ?? null"
-                class="text-sm text-ink sm:pt-1"
+                :text="$settings['concept_eyebrow'] ?? null"
+                ruled
+                class="uppercase"
             />
 
-            <div>
-                <p class="text-sm uppercase leading-relaxed tracking-wide text-ink sm:text-base">
+            <h2 class="mt-4 max-w-4xl font-display text-3xl font-bold leading-tight text-olive sm:text-4xl lg:text-5xl">
+                @typo($settings['concept_title'] ?? '')
+            </h2>
+        </div>
+
+        <div class="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-x-10">
+            <div class="lg:col-span-1">
+                <x-site.mark
+                    :text="$settings['concept_aside'] ?? null"
+                    class="text-sm text-ink"
+                />
+            </div>
+
+            <div class="lg:col-span-2">
+                <p class="max-w-2xl text-sm uppercase leading-relaxed tracking-wide text-ink sm:text-base">
                     @typo($settings['concept_description'] ?? '')
                 </p>
 
@@ -28,5 +32,5 @@
                 />
             </div>
         </div>
-    </div>
+    </x-site.shell>
 </section>

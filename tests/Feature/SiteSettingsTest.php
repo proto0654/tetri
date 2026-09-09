@@ -46,4 +46,52 @@ class SiteSettingsTest extends TestCase
         $this->assertSame('ДЛЯ ВСЕЙ СЕМЬИ', $loaded->get('kids_eyebrow'));
         $this->assertInstanceOf(Setting::class, Setting::query()->where('key', SiteSettings::KEY)->first());
     }
+
+    public function test_partial_save_preserves_existing_keys(): void
+    {
+        $settings = app(SiteSettings::class);
+
+        $settings->save([
+            'hero_title' => 'Custom Hero',
+            'hero_background_image' => 'site/hero/custom.jpg',
+            'address' => 'ул. Севастопольская',
+        ]);
+
+        $settings->save([
+            'map_latitude' => '44.950000',
+            'map_longitude' => '34.100000',
+        ]);
+
+        Cache::flush();
+
+        $loaded = app(SiteSettings::class);
+
+        $this->assertSame('Custom Hero', $loaded->get('hero_title'));
+        $this->assertSame('site/hero/custom.jpg', $loaded->get('hero_background_image'));
+        $this->assertSame('ул. Севастопольская', $loaded->get('address'));
+        $this->assertSame('44.950000', $loaded->get('map_latitude'));
+        $this->assertSame('34.100000', $loaded->get('map_longitude'));
+    }
+
+    public function test_fill_missing_only_writes_blank_keys(): void
+    {
+        $settings = app(SiteSettings::class);
+
+        $settings->save([
+            'hero_title' => 'Keep Me',
+            'address' => 'ул. Севастопольская',
+        ]);
+
+        $filled = $settings->fillMissing([
+            'hero_title' => 'Should Not Overwrite',
+            'map_latitude' => '44.950000',
+            'map_marker_label' => 'ТЕТРИ',
+        ]);
+
+        $this->assertSame(['map_latitude', 'map_marker_label'], array_keys($filled));
+        $this->assertSame('Keep Me', $settings->get('hero_title'));
+        $this->assertSame('ул. Севастопольская', $settings->get('address'));
+        $this->assertSame('44.950000', $settings->get('map_latitude'));
+        $this->assertSame('ТЕТРИ', $settings->get('map_marker_label'));
+    }
 }

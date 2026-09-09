@@ -66,6 +66,38 @@ class HomePageTest extends TestCase
         $response->assertSee(route('menu'), false);
     }
 
+    public function test_home_page_shows_yandex_route_link_when_map_coordinates_are_set(): void
+    {
+        app(SiteSettings::class)->save([
+            'map_latitude' => '44.950000',
+            'map_longitude' => '34.100000',
+            'map_marker_label' => 'ТЕТРИ',
+            'map_embed_url' => null,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('Проложить маршрут на карте', false);
+        $response->assertSee('https://yandex.ru/maps/?rtext=', false);
+        $response->assertSee('44.950000', false);
+        $response->assertSee('34.100000', false);
+    }
+
+    public function test_home_page_hides_yandex_route_link_without_map_coordinates(): void
+    {
+        app(SiteSettings::class)->save([
+            'map_latitude' => null,
+            'map_longitude' => null,
+            'map_embed_url' => null,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertDontSee('Проложить маршрут на карте', false);
+    }
+
     public function test_menu_route_is_available(): void
     {
         app(SiteSettings::class)->save([

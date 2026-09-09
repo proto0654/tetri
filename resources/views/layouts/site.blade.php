@@ -11,7 +11,7 @@
     @livewireStyles
     <style>[x-cloak]{display:none !important}</style>
 </head>
-<body class="min-h-screen font-sans">
+<body id="top" class="min-h-screen font-sans">
     @php($settings = $settings ?? app(\App\Settings\SiteSettings::class)->all())
 
     <x-site.header :settings="$settings" :transparent="Request::routeIs('home')" />
@@ -20,7 +20,11 @@
         @yield('content')
     </main>
 
-    <x-site.footer :settings="$settings" />
+    @unless (Request::routeIs('home'))
+        <x-site.footer :settings="$settings" />
+    @endunless
+
+    <x-site.design-credit :settings="$settings" />
 
     <livewire:booking-modal />
 

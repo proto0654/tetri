@@ -27,11 +27,11 @@ Active — IA and content model settled from UI mockup.
 
 ## Demo seeding
 
-`Database\Seeders\CafeContentSeeder` inserts missing demo categories, dishes, stories, admin user, and site settings. Re-running seed is safe: existing rows and `settings.key=site` are left untouched. Stable keys: category `slug`, menu item (`category_id` + title/image path), story `video_path` (demo fingerprint), user `email`.
+`Database\Seeders\CafeContentSeeder` inserts missing demo categories, dishes, stories, admin user, and **blank** site settings keys. Re-running seed is safe: existing model rows and non-blank `settings.key=site` values are left untouched; only null/`''`/`[]` settings keys are filled. Stable keys: category `slug`, menu item (`category_id` + title/image path), story `video_path` (demo fingerprint), user `email`.
 
 Demo **stories (MAX)**: 12 items — themes food (1–5), kids (6–9), social (10–12). Preview images from Unsplash; `video_path` is an empty placeholder `mp4` until real clips are uploaded in Filament.
 
-See [setup.md](setup.md#seeding-idempotent) for commands and seeder directives. Use `migrate:fresh --seed` only when intentionally discarding local edits.
+See [setup.md](setup.md#seeding-idempotent--fill-blanks-only) for commands and seeder directives. Use `migrate:fresh --seed` only when intentionally discarding local edits.
 
 ## SiteSettings accent / balance copy
 
@@ -45,8 +45,15 @@ Decorative ◇ lines from the mockup are first-class settings (not hardcoded). R
 | Concept | `concept_eyebrow`, `concept_aside` |
 | Stories | `stories_section_aside`, `stories_section_aside_note` |
 | Hero overlay | `hero_overlay_from`, `hero_overlay_via`, `hero_overlay_to` (rgba; sanitized via `CssColor`) |
+| Contacts map | `map_latitude`, `map_longitude`, `map_marker_label`; optional `map_embed_url` override. Route CTA via `YandexMap::routeUrl`. |
 
 Also: hero icons / kids benefits / social links use `icon` + optional `custom_icon` (uploaded SVG).
+
+## Contacts / map
+
+- Home contacts: map col1 left-bleed stretches cream+olive height; clip with `rounded` + `overflow-hidden` + `isolate` on the bleed **wrapper** (iframe stays unrounded).
+- «Проложить маршрут на карте» after working hours when coords are set.
+- `design_credit`: layout `x-site.design-credit` only (not inside contacts partial).
 
 ## Booking
 

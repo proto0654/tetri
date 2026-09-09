@@ -14,8 +14,8 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      *
-     * Idempotent: safe to re-run without wiping edited content.
-     * Full reset: php artisan migrate:fresh --seed
+     * Idempotent: fill missing models / blank SiteSettings keys only.
+     * Full reset (overwrite): php artisan migrate:fresh --seed
      */
     public function run(): void
     {

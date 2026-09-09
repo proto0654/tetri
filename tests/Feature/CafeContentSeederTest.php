@@ -61,4 +61,34 @@ class CafeContentSeederTest extends TestCase
         $this->assertSame('Custom Hero', $settings->get('hero_title'));
         $this->assertSame('Custom Address', $settings->get('address'));
     }
+
+    public function test_seeder_fills_blank_site_settings_keys_without_overwriting(): void
+    {
+        Http::fake();
+
+        app(SiteSettings::class)->save([
+            'hero_title' => 'Custom Hero',
+            'address' => 'Custom Address',
+            'hero_background_image' => null,
+            'map_latitude' => null,
+            'map_longitude' => null,
+            'map_marker_label' => null,
+        ]);
+
+        $this->seed(CafeContentSeeder::class);
+
+        $settings = app(SiteSettings::class);
+
+        $this->assertSame('Custom Hero', $settings->get('hero_title'));
+        $this->assertSame('Custom Address', $settings->get('address'));
+        $this->assertNotBlank($settings->get('hero_background_image'));
+        $this->assertSame('44.950000', $settings->get('map_latitude'));
+        $this->assertSame('34.100000', $settings->get('map_longitude'));
+        $this->assertSame('ТЕТРИ', $settings->get('map_marker_label'));
+    }
+
+    protected function assertNotBlank(mixed $value): void
+    {
+        $this->assertFalse(SiteSettings::isBlank($value), 'Failed asserting that value is not blank.');
+    }
 }

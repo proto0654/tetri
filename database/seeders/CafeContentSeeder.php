@@ -15,10 +15,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
- * Idempotent demo content. Prefer firstOrCreate / create-if-missing so re-seeding
- * never overwrites fields already edited in Filament or the DB.
- *
- * To wipe and reseed from scratch: php artisan migrate:fresh --seed
+ * Idempotent demo content: create-if-missing / fill blank SiteSettings keys only.
+ * Never overwrites Filament/DB edits. Intentional wipe: migrate:fresh --seed.
  */
 class CafeContentSeeder extends Seeder
 {
@@ -129,25 +127,27 @@ class CafeContentSeeder extends Seeder
             ]);
         }
 
-        $this->seedSiteSettingsIfMissing();
+        $this->seedSiteSettingsFillMissing();
     }
 
     /**
-     * Demo site settings only when the row is absent — never overwrite Filament edits.
+     * Fill blank SiteSettings keys only. Media downloaded lazily for keys that need filling.
      */
-    protected function seedSiteSettingsIfMissing(): void
+    protected function seedSiteSettingsFillMissing(): void
     {
-        if (Setting::query()->where('key', SiteSettings::KEY)->exists()) {
-            return;
+        $existing = Setting::query()->where('key', SiteSettings::KEY)->value('value') ?? [];
+        if (! is_array($existing)) {
+            $existing = [];
         }
 
-        app(SiteSettings::class)->save([
+        /** @var array<string, mixed|\Closure(): mixed> $candidates */
+        $candidates = [
             'hero_title' => 'Т Е Т Р И',
-            'hero_background_image' => $this->storeStockImage('hero-bg', 'site/hero/background.jpg'),
-            'hero_video_path' => $this->storePlaceholderVideo('site/hero/hero.mp4'),
-            'hero_video_preview' => $this->storeStockImage('hero-preview', 'site/hero/preview.jpg'),
+            'hero_background_image' => fn (): string => $this->storeStockImage('hero-bg', 'site/hero/background.jpg'),
+            'hero_video_path' => fn (): string => $this->storePlaceholderVideo('site/hero/hero.mp4'),
+            'hero_video_preview' => fn (): string => $this->storeStockImage('hero-preview', 'site/hero/preview.jpg'),
             'kids_eyebrow' => 'ДЛЯ ВСЕЙ СЕМЬИ',
-            'kids_images' => [
+            'kids_images' => fn (): array => [
                 $this->storeStockImage('kids-1', 'site/kids/exterior.jpg'),
                 $this->storeStockImage('kids-2', 'site/kids/veranda.jpg'),
             ],
@@ -177,8 +177,24 @@ class CafeContentSeeder extends Seeder
                 ['icon' => 'heroicon-o-paper-airplane', 'text' => 'Telegram', 'url' => 'https://t.me'],
                 ['icon' => 'heroicon-o-chat-bubble-left-right', 'text' => 'VK', 'url' => 'https://vk.com'],
             ],
-            'map_embed_url' => 'https://yandex.ru/map-widget/v1/?ll=34.100000%2C44.950000&z=16',
-        ]);
+            'map_latitude' => '44.950000',
+            'map_longitude' => '34.100000',
+            'map_marker_label' => 'ТЕТРИ',
+        ];
+
+        $toFill = [];
+
+        foreach ($candidates as $key => $value) {
+            if (! SiteSettings::isBlank($existing[$key] ?? null)) {
+                continue;
+            }
+
+            $toFill[$key] = $value instanceof \Closure ? $value() : $value;
+        }
+
+        if ($toFill !== []) {
+            app(SiteSettings::class)->save($toFill);
+        }
     }
 
     protected function seedMenuItems(Category $category, int $categoryIndex): void

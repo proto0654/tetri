@@ -10,6 +10,11 @@ class SiteSettings
     public const KEY = 'site';
 
     /**
+     * @var list<string>
+     */
+    public const LIST_KEYS = ['hero_icons', 'kids_benefits', 'kids_images', 'phones', 'social_links'];
+
+    /**
      * @return array<string, mixed>
      */
     public function all(): array
@@ -27,16 +32,25 @@ class SiteSettings
     }
 
     /**
+     * Persist settings. Merges defaults → existing row → $data so partial updates
+     * do not wipe unrelated keys. List fields in $data replace wholesale.
+     *
      * @param  array<string, mixed>  $data
      */
     public function save(array $data): void
     {
-        $merged = array_replace_recursive(self::defaults(), $data);
+        $existing = Setting::query()->where('key', self::KEY)->value('value') ?? [];
+        if (! is_array($existing)) {
+            $existing = [];
+        }
 
-        // List fields must be replaced wholesale, not merged by index.
-        foreach (['hero_icons', 'kids_benefits', 'kids_images', 'phones', 'social_links'] as $listKey) {
+        $merged = array_replace_recursive(self::defaults(), $existing, $data);
+
+        foreach (self::LIST_KEYS as $listKey) {
             if (array_key_exists($listKey, $data)) {
                 $merged[$listKey] = $data[$listKey];
+            } elseif (array_key_exists($listKey, $existing)) {
+                $merged[$listKey] = $existing[$listKey];
             }
         }
 
@@ -46,6 +60,39 @@ class SiteSettings
         );
 
         Cache::forget(self::cacheKey());
+    }
+
+    /**
+     * Write only blank keys from $data. Never overwrites non-blank stored values.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed> keys that were filled
+     */
+    public function fillMissing(array $data): array
+    {
+        $existing = Setting::query()->where('key', self::KEY)->value('value') ?? [];
+        if (! is_array($existing)) {
+            $existing = [];
+        }
+
+        $toFill = [];
+
+        foreach ($data as $key => $value) {
+            if (self::isBlank($existing[$key] ?? null)) {
+                $toFill[$key] = $value;
+            }
+        }
+
+        if ($toFill !== []) {
+            $this->save($toFill);
+        }
+
+        return $toFill;
+    }
+
+    public static function isBlank(mixed $value): bool
+    {
+        return $value === null || $value === '' || $value === [];
     }
 
     /**
@@ -99,6 +146,9 @@ class SiteSettings
                 ['number' => '+7 (978) 000-00-00'],
             ],
             'working_hours' => 'Ежедневно 10:00–23:00',
+            'map_latitude' => null,
+            'map_longitude' => null,
+            'map_marker_label' => null,
             'map_embed_url' => null,
             'footer_about' => 'Семейное кафе ТЕТРИ — место, где хорошо и детям, и родителям.',
             'social_links' => [
@@ -109,7 +159,7 @@ class SiteSettings
             'booking_cta_label' => 'БРОНИРОВАНИЕ',
             'booking_cta_url' => '#contacts',
             'copyright' => '© ТЕТРИ',
-            'design_credit' => '',
+            'design_credit' => null,
         ];
     }
 

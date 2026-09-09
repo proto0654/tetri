@@ -202,9 +202,20 @@ class ManageSiteSettings extends Page
                                     ->columnSpanFull(),
                                 TextInput::make('working_hours')
                                     ->label('Часы работы'),
+                                TextInput::make('map_latitude')
+                                    ->label('Широта метки')
+                                    ->numeric()
+                                    ->step('any'),
+                                TextInput::make('map_longitude')
+                                    ->label('Долгота метки')
+                                    ->numeric()
+                                    ->step('any'),
+                                TextInput::make('map_marker_label')
+                                    ->label('Текст метки на карте'),
                                 Textarea::make('map_embed_url')
                                     ->label('URL карты (iframe src)')
                                     ->rows(2)
+                                    ->helperText('Если пусто — iframe собирается из широты, долготы и текста метки.')
                                     ->columnSpanFull(),
                             ]),
                         Tab::make('Подвал и CTA')

@@ -1,17 +1,19 @@
-<section id="kids" class="bg-cream px-4 py-20 sm:px-6 lg:px-8">
-    <div class="mx-auto max-w-7xl">
-        <x-site.mark
-            :text="$settings['kids_eyebrow'] ?? null"
-            ruled
-            class="uppercase"
-        />
+<section id="kids" class="bg-cream py-20">
+    <x-site.shell>
+        <div>
+            <x-site.mark
+                :text="$settings['kids_eyebrow'] ?? null"
+                ruled
+                class="uppercase"
+            />
 
-        <h2 class="mt-4 max-w-4xl font-display text-3xl font-bold leading-tight text-olive sm:text-4xl lg:text-5xl">
-            @typo($settings['kids_title'] ?? '')
-        </h2>
+            <h2 class="mt-4 max-w-4xl font-display text-3xl font-bold leading-tight text-olive sm:text-4xl lg:text-5xl">
+                @typo($settings['kids_title'] ?? '')
+            </h2>
+        </div>
 
-        <div class="mt-12 grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
-            <div class="flex h-full flex-col">
+        <div class="mt-12 grid gap-10 lg:grid-cols-3 lg:gap-x-10 lg:gap-y-8">
+            <div class="flex flex-col lg:col-span-1">
                 <ul class="space-y-4">
                     @foreach ($settings['kids_benefits'] ?? [] as $benefit)
                         <li class="flex items-start gap-3 text-ink">
@@ -36,11 +38,11 @@
 
                 <x-site.mark
                     :text="$settings['kids_location_note'] ?? null"
-                    class="mt-auto pt-10 text-sm text-ink"
+                    class="mt-10 text-sm text-ink lg:mt-auto lg:pt-10"
                 />
             </div>
 
-            <div>
+            <div class="lg:col-span-2">
                 <div class="grid gap-4 sm:grid-cols-2">
                     @foreach ($settings['kids_images'] ?? [] as $image)
                         <x-media :path="$image" alt="" class="aspect-[4/3] w-full rounded-3xl object-cover" />
@@ -58,15 +60,13 @@
                         @typo($settings['kids_description_secondary'])
                     </p>
                 @endif
+
+                <x-site.book-button
+                    source="kids"
+                    :label="$settings['kids_cta_label'] ?? ($settings['booking_cta_label'] ?? 'БРОНИРОВАНИЕ')"
+                    class="mt-8 inline-flex rounded-full bg-plum px-6 py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-plum-dark"
+                />
             </div>
         </div>
-
-        <div class="mt-12 flex justify-center">
-            <x-site.book-button
-                source="kids"
-                :label="$settings['kids_cta_label'] ?? ($settings['booking_cta_label'] ?? 'БРОНИРОВАНИЕ')"
-                class="inline-flex rounded-full bg-plum px-6 py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-plum-dark"
-            />
-        </div>
-    </div>
+    </x-site.shell>
 </section>

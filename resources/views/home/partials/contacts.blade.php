@@ -1,43 +1,79 @@
-<section id="contacts" class="bg-cream px-4 py-20 sm:px-6 lg:px-8">
-    <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center">
-        <div class="overflow-hidden rounded-[2rem] bg-cream-dark shadow-sm">
-            @if (! empty($settings['map_embed_url']))
-                <iframe
-                    src="{{ $settings['map_embed_url'] }}"
-                    class="aspect-square w-full border-0 lg:aspect-[4/3]"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                    title="Карта ТЕТРИ"
-                ></iframe>
-            @else
-                <div class="flex aspect-square items-center justify-center text-muted lg:aspect-[4/3]">Карта</div>
-            @endif
-        </div>
+@php
+    $mapLatitude = $settings['map_latitude'] ?? null;
+    $mapLongitude = $settings['map_longitude'] ?? null;
+    $mapMarkerLabel = $settings['map_marker_label'] ?? null;
+    $mapEmbedUrl = $settings['map_embed_url'] ?? null;
+    $mapSrc = filled($mapEmbedUrl)
+        ? $mapEmbedUrl
+        : \App\Support\YandexMap::widgetUrl($mapLatitude, $mapLongitude, $mapMarkerLabel);
+    $mapRouteUrl = \App\Support\YandexMap::routeUrl($mapLatitude, $mapLongitude);
+    $mapTitle = filled($mapMarkerLabel) ? $mapMarkerLabel : 'Карта ТЕТРИ';
+@endphp
 
-        <div>
-            <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl lg:text-5xl">
-                @typo($settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ')
-            </h2>
-            <dl class="mt-8 space-y-4 text-base text-ink">
-                <div>
-                    <dt class="text-sm uppercase tracking-wide text-muted">Адрес</dt>
-                    <dd class="mt-1">@typo($settings['address'] ?? '')</dd>
+<section id="contacts" class="overflow-x-clip">
+    <x-site.shell>
+        <div class="grid lg:grid-cols-3 lg:items-stretch">
+            <div class="relative min-h-[16rem] max-lg:mb-8 lg:min-h-0">
+                <div class="site-bleed-left z-10 isolate overflow-hidden rounded-[2rem] bg-cream-dark shadow-sm max-lg:relative max-lg:min-h-[16rem] lg:absolute lg:inset-y-0 lg:left-0 lg:rounded-l-none lg:rounded-r-[2rem]">
+                    @if (! empty($mapSrc))
+                        <iframe
+                            src="{{ $mapSrc }}"
+                            class="absolute inset-0 h-full w-full border-0 max-lg:min-h-[16rem]"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="{{ $mapTitle }}"
+                        ></iframe>
+                    @else
+                        <div class="flex h-full min-h-[16rem] items-center justify-center text-muted lg:absolute lg:inset-0">Карта</div>
+                    @endif
                 </div>
-                <div>
-                    <dt class="text-sm uppercase tracking-wide text-muted">Телефон</dt>
-                    <dd class="mt-1 space-y-1">
-                        @foreach ($settings['phones'] ?? [] as $phone)
-                            <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone['number'] ?? '') }}" class="block hover:text-plum">
-                                {{ $phone['number'] ?? '' }}
+            </div>
+
+            <div class="flex min-w-0 flex-col lg:col-span-2">
+                <div class="site-bleed-right bg-cream">
+                    <div class="py-16 sm:py-20 lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
+                        <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl lg:text-5xl">
+                            @typo($settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ')
+                        </h2>
+                        <div class="mt-8 space-y-2 text-base text-ink">
+                            @if (filled($settings['address'] ?? null))
+                                <p>@typo($settings['address'])</p>
+                            @endif
+                            @foreach ($settings['phones'] ?? [] as $phone)
+                                <p>
+                                    <a href="tel:{{ preg_replace('/[^\d+]/', '', $phone['number'] ?? '') }}" class="hover:text-plum">
+                                        {{ $phone['number'] ?? '' }}
+                                    </a>
+                                </p>
+                            @endforeach
+                            @if (filled($settings['working_hours'] ?? null))
+                                <p>@typo($settings['working_hours'])</p>
+                            @endif
+                        </div>
+                        @if ($mapRouteUrl)
+                            <a
+                                href="{{ $mapRouteUrl }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="mt-6 inline-flex rounded-full bg-plum px-6 py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-plum-dark"
+                            >
+                                Проложить маршрут на карте
                             </a>
-                        @endforeach
-                    </dd>
+                        @endif
+                    </div>
                 </div>
-                <div>
-                    <dt class="text-sm uppercase tracking-wide text-muted">Часы работы</dt>
-                    <dd class="mt-1">@typo($settings['working_hours'] ?? '')</dd>
+
+                <div class="site-bleed-right flex flex-1 flex-col bg-olive-deep text-cream">
+                    <div class="py-14 lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
+                        <x-site.footer-main :settings="$settings" />
+                    </div>
+
+                    <div class="mt-auto border-t border-cream/15 py-4 text-xs text-cream/60 sm:flex sm:items-center sm:justify-between lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
+                        <span>@typo($settings['copyright'] ?? '© ТЕТРИ')</span>
+                        <a href="#top" class="mt-2 inline-block hover:text-cream sm:mt-0">Наверх ↑</a>
+                    </div>
                 </div>
-            </dl>
+            </div>
         </div>
-    </div>
+    </x-site.shell>
 </section>

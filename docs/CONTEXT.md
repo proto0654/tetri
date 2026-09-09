@@ -32,10 +32,12 @@ Public website and Filament admin for family cafe **Тетри**. Stack: Laravel
 - Public icons: Heroicons select with SVG preview + optional custom SVG upload (`IconFieldSchema` / `HeroiconOptions`).
 - Booking: Livewire `BookingModal` via `<x-site.book-button>`; submit is a stub (alert), not a bot yet.
 - Public media URLs: relative `/storage/...` via `App\Support\PublicMedia`.
-- Seeders are idempotent: re-seed fills missing demo rows only; `migrate:fresh --seed` for a full wipe.
+- Seeders are idempotent: re-seed fills missing demo rows and blank SiteSettings keys only; `migrate:fresh --seed` for a full wipe/overwrite.
 - Public carousels: local Swiper only (`npm` + Vite); markup via `data-swiper*` hooks.
 - Hero overlay gradient is CMS-editable (`hero_overlay_from` / `_via` / `_to`), sanitized with `CssColor::resolve`.
 - Demo MAX stories: 12 posts (food / kids / social), Unsplash posters + empty `mp4` until real video upload.
+- Contacts map: Yandex embed/route from `map_latitude` / `map_longitude` / `map_marker_label` (+ optional `map_embed_url`); clip radius on bleed wrapper (`overflow-hidden` + `isolate`), not the iframe.
+- `design_credit` once via `x-site.design-credit` in the site layout (fallback winbaba.ru).
 
 ## Open questions
 
@@ -46,6 +48,9 @@ Public website and Filament admin for family cafe **Тетри**. Stack: Laravel
 
 ## Last actualized
 
+- 2026-09-09 — Yandex map route/marker settings; SiteSettings merge + fill-blanks seeders; map wrapper clip; design_credit strip.
+- 2026-09-09 — SiteSettings partial-save merge + seeder fill-blanks-only (no overwrite); design_credit only via layout strip; map fields documented.
+- 2026-09-09 — Swiper carousels, CMS hero overlay colors, 12 themed MAX story demos; docs synced.
 - 2026-09-09 — Swiper carousels, CMS hero overlay colors, 12 themed MAX story demos; docs synced.
 - 2026-09-09 — Idempotent seeders (`firstOrCreate` / skip existing settings); seeding directives in setup/content/tech.
 - 2026-09-09 — Accent copy fields, icon picker + custom SVG, booking modal stub; docs synced.
