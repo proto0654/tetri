@@ -30,7 +30,7 @@
         wire:target="setCategory"
     >
         @if ($activeCategory)
-            <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl">
+            <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
                 @typo(mb_strtoupper($activeCategory->title))
             </h2>
         @endif

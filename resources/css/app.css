@@ -160,4 +160,21 @@
             --site-shell-pad: 2rem;
         }
     }
+
+    /*
+     * Desktop hanging indent: first line flush left; wrapped lines at
+     * 30cqw + gap-x-10 (2.5rem). Use cqw (not %) — text-indent % resolves
+     * against the content box after padding, so equal % values do not cancel.
+     * Parent must be a size container (.site-text-shift-scope).
+     */
+    .site-text-shift-scope {
+        container-type: inline-size;
+    }
+
+    @media (min-width: 1024px) {
+        .site-text-shift {
+            padding-left: calc(30cqw + 2.5rem);
+            text-indent: calc(-30cqw - 2.5rem);
+        }
+    }
 }

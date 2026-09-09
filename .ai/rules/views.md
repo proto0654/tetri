@@ -22,3 +22,6 @@ On home, contacts+footer share one 1/3+2/3 column: cream band = map (col1, left-
 
 ## Design credit strip outside map flow
 design_credit is always rendered via x-site.design-credit as its own full-width strip after main/footer — outside the contacts/map grid. Empty CMS value falls back to «Разработка сайта winbaba.ru». html/body use overflow-x: clip to kill horizontal scroll from bleeds/100vw.
+
+## Section title type scale
+Public section titles share one scale: text-4xl sm:text-5xl lg:text-6xl (kids, concept, menu-preview, stories, contacts, menu page h1, menu-grid category). Hero brand stays larger (up to lg:text-7xl). Do not bump only one section.

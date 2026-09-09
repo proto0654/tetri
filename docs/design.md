@@ -31,8 +31,13 @@ Active — tokens taken from the ТЕТРИ UI mockup.
 - Section accents: small ◇ lines via `<x-site.mark>` for visual balance (eyebrow / aside / meta)
 - Icons on site: `<x-site.icon>` (Heroicon name or custom SVG from storage)
 - Carousels (menu preview, stories): local Swiper slides + prev/next; no Alpine overflow scroll
+- Section titles share one scale: `text-4xl sm:text-5xl lg:text-6xl` (home sections, menu page, category heading). Hero brand stays larger (`lg:text-7xl`)
+- Kids/concept title hanging indent (lg+): `.site-text-shift` inside `.site-text-shift-scope` (`container-type: inline-size`); `padding-left` / `text-indent: calc(30cqw + 2.5rem)`. Use `cqw`, not `%` — `text-indent` % resolves against the content box after padding and will not cancel
+- Menu-preview: col1 stretches (eyebrow/title/desc top, CTA `lg:mt-auto`); Swiper arrows under `.site-bleed-right` in col2–3; category titles white overlay on image with light `from-black/60` gradient
+- Concept aside (`concept_aside`) sits at the bottom of col1 on lg (`lg:mt-auto`)
 - Contacts map: left-bleed card; radius + overflow clip on wrapper (`isolate`), not on iframe; right-only radius on lg while stacked with cream+olive
 - Map column olive half-band: `.site-contacts-map-olive-half` (`::before` bottom 50%, `100vw`, z-index -1) so the rounded bottom-right sits on olive; contacts copy column uses `z-10`
+- Home olive footer column: no `.site-bleed-right` (nav/social/copy stay inside 2/3 shell); cream contacts band may still bleed
 - `design_credit`: single full-width strip under main/footer via `x-site.design-credit`
 
 ## Admin

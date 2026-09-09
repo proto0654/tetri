@@ -1,22 +1,22 @@
 <section id="concept" class="bg-surface py-20">
     <x-site.shell>
-        <div>
+        <div class="site-text-shift-scope">
             <x-site.mark
                 :text="$settings['concept_eyebrow'] ?? null"
                 ruled
                 class="uppercase"
             />
 
-            <h2 class="mt-4 max-w-4xl font-display text-3xl font-bold leading-tight text-olive sm:text-4xl lg:text-5xl">
+            <h2 class="site-text-shift mt-4 font-display text-4xl font-bold leading-tight text-olive sm:text-5xl lg:text-6xl">
                 @typo($settings['concept_title'] ?? '')
             </h2>
         </div>
 
         <div class="mt-10 grid gap-8 lg:grid-cols-3 lg:gap-x-10">
-            <div class="lg:col-span-1">
+            <div class="flex flex-col lg:col-span-1 lg:h-full">
                 <x-site.mark
                     :text="$settings['concept_aside'] ?? null"
-                    class="text-sm text-ink"
+                    class="text-sm text-ink lg:mt-auto"
                 />
             </div>
 

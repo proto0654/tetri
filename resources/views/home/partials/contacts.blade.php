@@ -32,7 +32,7 @@
             <div class="relative z-10 flex min-w-0 flex-col lg:col-span-2">
                 <div class="site-bleed-right bg-cream">
                     <div class="py-16 sm:py-20 lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
-                        <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl lg:text-5xl">
+                        <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
                             @typo($settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ')
                         </h2>
                         <div class="mt-8 space-y-2 text-base text-ink">
@@ -63,12 +63,12 @@
                     </div>
                 </div>
 
-                <div class="site-bleed-right flex flex-1 flex-col bg-olive-deep text-cream">
-                    <div class="py-14 lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
+                <div class="flex flex-1 flex-col bg-olive-deep text-cream">
+                    <div class="py-14 lg:pl-10">
                         <x-site.footer-main :settings="$settings" />
                     </div>
 
-                    <div class="mt-auto border-t border-cream/15 py-4 text-xs text-cream/60 sm:flex sm:items-center sm:justify-between lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
+                    <div class="mt-auto border-t border-cream/15 py-4 text-xs text-cream/60 sm:flex sm:items-center sm:justify-between lg:pl-10">
                         <span>@typo($settings['copyright'] ?? '© ТЕТРИ')</span>
                         <a href="#top" class="mt-2 inline-block hover:text-cream sm:mt-0">Наверх ↑</a>
                     </div>

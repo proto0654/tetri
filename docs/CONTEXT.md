@@ -37,6 +37,9 @@ Public website and Filament admin for family cafe **Тетри**. Stack: Laravel
 - Hero overlay gradient is CMS-editable (`hero_overlay_from` / `_via` / `_to`), sanitized with `CssColor::resolve`.
 - Demo MAX stories: 12 posts (food / kids / social), Unsplash posters + empty `mp4` until real video upload.
 - Contacts map: Yandex embed/route from `map_latitude` / `map_longitude` / `map_marker_label` (+ optional `map_embed_url`); clip radius on bleed wrapper (`overflow-hidden` + `isolate`), not the iframe. Map column `.site-contacts-map-olive-half` paints a full-viewport olive band on the bottom 50% (`::before`, z-index -1) so the rounded BR reads on olive; right column is `relative z-10` above that band.
+- Home olive footer: no right-bleed; content stays in the 2/3 shell column (cream contacts may still bleed).
+- Section titles: shared scale `text-4xl sm:text-5xl lg:text-6xl`; kids/concept use `.site-text-shift` + `cqw` hanging indent on lg (not `%`).
+- Menu-preview: arrows under swiper column; CTA bottom of col1; category labels overlay images.
 - `design_credit` once via `x-site.design-credit` in the site layout (fallback winbaba.ru).
 
 ## Open questions
@@ -48,6 +51,7 @@ Public website and Filament admin for family cafe **Тетри**. Stack: Laravel
 
 ## Last actualized
 
+- 2026-09-09 — Homepage desktop UI: title text-shift (cqw), shared section type scale, menu overlay/arrows, olive footer no right-bleed; docs synced.
 - 2026-09-09 — Contacts map olive half-band (`site-contacts-map-olive-half`) + right column z-10 stacking; docs synced.
 - 2026-09-09 — Yandex map route/marker settings; SiteSettings merge + fill-blanks seeders; map wrapper clip; design_credit strip.
 - 2026-09-09 — Idempotent seeders (`firstOrCreate` / skip existing settings); seeding directives in setup/content/tech.

@@ -12,7 +12,7 @@
             />
 
             <div class="mt-4 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                <h1 class="font-display text-4xl font-bold text-olive sm:text-5xl">
+                <h1 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
                     @typo($settings['menu_section_title'] ?? 'МЕНЮ')
                 </h1>
 
