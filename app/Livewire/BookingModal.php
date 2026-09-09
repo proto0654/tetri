@@ -4,29 +4,71 @@ namespace App\Livewire;
 
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
-use Livewire\Attributes\Validate;
 use Livewire\Component;
 
 class BookingModal extends Component
 {
     public bool $show = false;
 
-    #[Validate('required|string|min:2|max:120')]
     public string $name = '';
 
-    #[Validate('required|string|min:5|max:40')]
     public string $phone = '';
 
-    #[Validate('nullable|date')]
     public ?string $date = null;
 
-    #[Validate('nullable|integer|min:1|max:50')]
     public ?int $guests = null;
 
-    #[Validate('nullable|string|max:1000')]
     public string $comment = '';
 
     public string $source = 'site';
+
+    /**
+     * @return array<string, list<string>>
+     */
+    protected function rules(): array
+    {
+        return [
+            'name' => ['required', 'string', 'min:2', 'max:120'],
+            'phone' => ['required', 'string', 'min:10', 'max:40', 'regex:/^[\d\s+\-()]+$/'],
+            'date' => ['required', 'date', 'after_or_equal:today'],
+            'guests' => ['required', 'integer', 'min:1', 'max:50'],
+            'comment' => ['nullable', 'string', 'max:1000'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'name.required' => 'Укажите имя.',
+            'name.min' => 'Имя должно содержать не менее :min символов.',
+            'phone.required' => 'Укажите телефон.',
+            'phone.min' => 'Введите телефон полностью.',
+            'phone.regex' => 'Телефон может содержать только цифры и символы + - ( ).',
+            'date.required' => 'Укажите дату.',
+            'date.after_or_equal' => 'Дата не может быть в прошлом.',
+            'guests.required' => 'Укажите число гостей.',
+            'guests.min' => 'Нужен хотя бы один гость.',
+            'guests.max' => 'Максимум :max гостей.',
+            'comment.max' => 'Комментарий слишком длинный.',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'name' => 'имя',
+            'phone' => 'телефон',
+            'date' => 'дата',
+            'guests' => 'гостей',
+            'comment' => 'комментарий',
+        ];
+    }
 
     #[On('booking-open')]
     public function open(string $source = 'site'): void
@@ -48,8 +90,8 @@ class BookingModal extends Component
         $payload = [
             'name' => $data['name'],
             'phone' => $data['phone'],
-            'date' => $data['date'] ?? null,
-            'guests' => $data['guests'] ?? null,
+            'date' => $data['date'],
+            'guests' => $data['guests'],
             'comment' => $data['comment'] ?? '',
             'source' => $this->source,
         ];
@@ -59,8 +101,8 @@ class BookingModal extends Component
             "Заявка на бронь (заглушка):\n".
             'Имя: '.$payload['name']."\n".
             'Телефон: '.$payload['phone']."\n".
-            'Дата: '.($payload['date'] ?: '—')."\n".
-            'Гостей: '.($payload['guests'] ?? '—')."\n".
+            'Дата: '.$payload['date']."\n".
+            'Гостей: '.$payload['guests']."\n".
             'Комментарий: '.($payload['comment'] !== '' ? $payload['comment'] : '—')."\n".
             'Источник: '.$payload['source'],
             JSON_UNESCAPED_UNICODE

@@ -29,11 +29,11 @@
         <div class="swiper mt-10" data-swiper data-space-between="16">
             <div class="swiper-wrapper">
                 @foreach ($stories as $story)
-                    <div class="swiper-slide !w-40 sm:!w-48">
+                    <div class="swiper-slide !w-56 sm:!w-64">
                         <article>
                             <button
                                 type="button"
-                                class="w-full overflow-hidden rounded-[1.5rem] bg-cream-dark text-left shadow-sm"
+                                class="w-full overflow-hidden rounded-[1.75rem] bg-cream-dark text-left shadow-sm"
                                 @click="play($event)"
                                 aria-label="{{ $story->title ? 'Смотреть '.$story->title : 'Смотреть сторис' }}"
                             >
@@ -43,7 +43,7 @@
                                 @endphp
                                 @if ($videoUrl)
                                     <video
-                                        class="aspect-[9/16] w-full object-cover"
+                                        class="aspect-[3/4] w-full object-cover"
                                         muted
                                         loop
                                         playsinline
@@ -53,7 +53,7 @@
                                         <source src="{{ $videoUrl }}" type="video/mp4">
                                     </video>
                                 @else
-                                    <x-media :path="$story->preview_image" :alt="$story->title ?? 'Сторис'" class="aspect-[9/16] w-full object-cover" />
+                                    <x-media :path="$story->preview_image" :alt="$story->title ?? 'Сторис'" class="aspect-[3/4] w-full object-cover" />
                                 @endif
                             </button>
                         </article>
