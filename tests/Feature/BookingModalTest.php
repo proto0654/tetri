@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Livewire\BookingModal;
+use App\Settings\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
@@ -18,6 +21,11 @@ class BookingModalTest extends TestCase
         parent::setUp();
 
         Carbon::setTestNow('2026-09-09 12:00:00');
+
+        app(SiteSettings::class)->save([
+            'max_bot_token' => 'test-token',
+            'max_chat_id' => '12345',
+        ]);
     }
 
     public function test_home_page_includes_booking_modal(): void
@@ -90,8 +98,13 @@ class BookingModalTest extends TestCase
         ];
     }
 
-    public function test_submit_accepts_valid_payload_and_closes(): void
+    public function test_submit_sends_max_notification_and_closes(): void
     {
+        Http::preventStrayRequests();
+        Http::fake([
+            'platform-api2.max.ru/*' => Http::response(['ok' => true], 200),
+        ]);
+
         Livewire::test(BookingModal::class)
             ->dispatch('booking-open', source: 'kids')
             ->set('name', 'Анна')
@@ -103,10 +116,21 @@ class BookingModalTest extends TestCase
             ->assertHasNoErrors()
             ->assertSet('show', false)
             ->assertSet('name', '');
+
+        Http::assertSent(function (Request $request): bool {
+            return str_contains($request->url(), 'chat_id=12345')
+                && str_contains((string) $request['text'], 'Анна')
+                && str_contains((string) $request['text'], 'Источник: kids');
+        });
     }
 
     public function test_submit_allows_empty_comment(): void
     {
+        Http::preventStrayRequests();
+        Http::fake([
+            'platform-api2.max.ru/*' => Http::response(['ok' => true], 200),
+        ]);
+
         Livewire::test(BookingModal::class)
             ->dispatch('booking-open')
             ->set('name', 'Анна')
@@ -117,5 +141,25 @@ class BookingModalTest extends TestCase
             ->call('submit')
             ->assertHasNoErrors()
             ->assertSet('show', false);
+    }
+
+    public function test_submit_keeps_modal_open_when_max_api_fails(): void
+    {
+        Http::preventStrayRequests();
+        Http::fake([
+            'platform-api2.max.ru/*' => Http::response(['error' => 'fail'], 500),
+        ]);
+
+        Livewire::test(BookingModal::class)
+            ->dispatch('booking-open')
+            ->set('name', 'Анна')
+            ->set('phone', '+7 978 000-00-00')
+            ->set('date', '2026-09-20')
+            ->set('guests', 2)
+            ->call('submit')
+            ->assertHasErrors(['form'])
+            ->assertSee('Не удалось отправить заявку')
+            ->assertSet('show', true)
+            ->assertSet('name', 'Анна');
     }
 }

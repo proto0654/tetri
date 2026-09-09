@@ -46,8 +46,12 @@ Decorative ◇ lines from the mockup are first-class settings (not hardcoded). R
 | Stories | `stories_section_aside`, `stories_section_aside_note` |
 | Hero overlay | `hero_overlay_from`, `hero_overlay_via`, `hero_overlay_to` (rgba; sanitized via `CssColor`) |
 | Contacts map | `map_latitude`, `map_longitude`, `map_marker_label`; optional `map_embed_url` override. Route CTA via `YandexMap::routeUrl`. |
+| Favicon | `favicon` (public disk path; Filament «Подвал и CTA») |
+| MAX bot | `max_bot_token`, `max_chat_id` (Filament tab «Интеграция с мессенджером MAX»; both required to save settings) |
 
 Also: hero icons / kids benefits / social links use `icon` + optional `custom_icon` (uploaded SVG).
+
+Section title fields (kids / menu / concept / stories / contacts) are Textareas — Enter or `<br>` become line breaks via `@typoBr`. Hero brand title stays plain.
 
 ## Contacts / map
 
@@ -60,8 +64,14 @@ Also: hero icons / kids benefits / social links use `icon` + optional `custom_ic
 
 - CTA components: `<x-site.book-button>` → `Livewire.dispatch('booking-open')`
 - Modal: `App\Livewire\BookingModal` in site layout
-- Submit: stub (`alert` with form payload); production bot integration still open
+- Submit: `MaxNotificationService::sendFormNotification()` → MAX group chat; on failure show `@error('form')` and keep modal open
+- Credentials: SiteSettings `max_bot_token` + `max_chat_id` (see [tech.md](tech.md))
 - `booking_cta_url` kept for legacy; buttons prefer the modal
+
+## Favicon
+
+- Upload in ManageSiteSettings «Подвал и CTA» → `SiteSettings.favicon`
+- Render only via `<x-site.favicon>` in `layouts/site.blade.php` (`PublicMedia::url`); no hardcoded `public/favicon.ico`
 
 ## Links
 

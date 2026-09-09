@@ -17,7 +17,7 @@
         <div data-swiper-root>
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
-                    @typo($settings['stories_section_title'] ?? 'СТОРИСЫ из MAX')
+                    @typoBr($settings['stories_section_title'] ?? 'СТОРИСЫ из MAX')
                 </h2>
 
                 <x-site.mark

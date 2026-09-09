@@ -32,5 +32,9 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('typo', function (string $expression): string {
             return "<?php echo e(\\App\\Support\\Typograph::apply($expression)); ?>";
         });
+
+        Blade::directive('typoBr', function (string $expression): string {
+            return "<?php echo \\App\\Support\\Typograph::applyWithBreaks($expression); ?>";
+        });
     }
 }

@@ -13,3 +13,6 @@ Filament Select allowHtml() previews must size SVGs with inline width/height (e.
 
 ## Typography via akh/typograf and @typo
 Public CMS text is typographed with akh/typograf through App\Support\Typograph::apply() (Unicode nbsp after entity decode; Number\Sup|Sub|DimensionSup disabled). In Blade use @typo($field), not raw {{ $field }}, for hanging prepositions and quotes.
+
+## Section titles allow safe br via applyWithBreaks
+Main section titles may include intentional line breaks. Use Typograph::applyWithBreaks() / @typoBr — accepts Enter newlines and <br>, strips other HTML, escapes each line. Keep plain @typo / apply() for non-title CMS copy.

@@ -37,7 +37,7 @@ class SiteSettingsTest extends TestCase
         $this->assertSame('ТЕТРИ', $loaded->get('hero_title'));
         $this->assertSame('rgba(0, 0, 0, 0.45)', $loaded->get('hero_overlay_from'));
         $this->assertSame('rgba(0, 0, 0, 0.3)', $loaded->get('hero_overlay_via'));
-        $this->assertSame('rgba(245, 240, 230, 0.95)', $loaded->get('hero_overlay_to'));
+        $this->assertSame('rgba(237, 226, 207, 0.95)', $loaded->get('hero_overlay_to'));
         $this->assertSame('ул. Севастопольская', $loaded->get('address'));
         $this->assertSame('+7 (978) 111-22-33', $loaded->get('phones.0.number'));
         $this->assertSame('МЕНЮ', $loaded->get('menu_section_title'));

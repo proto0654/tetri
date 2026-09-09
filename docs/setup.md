@@ -46,7 +46,8 @@ Directives for seeders:
 ## Not done yet
 
 - Production deploy / hosting.
-- Booking bot integration beyond modal stub.
+- Production TLS CA for MAX `platform-api2` (replace `withoutVerifying()` fallback).
+- Fill MAX bot token + chat id in Filament after deploy (required to save site settings).
 
 ## Links
 

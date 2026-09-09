@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Services\MaxNotificationService;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -83,7 +84,7 @@ class BookingModal extends Component
         $this->show = false;
     }
 
-    public function submit(): void
+    public function submit(MaxNotificationService $max): void
     {
         $data = $this->validate();
 
@@ -96,17 +97,11 @@ class BookingModal extends Component
             'source' => $this->source,
         ];
 
-        // TODO: send to Telegram / MAX bot.
-        $this->js('alert('.json_encode(
-            "Заявка на бронь (заглушка):\n".
-            'Имя: '.$payload['name']."\n".
-            'Телефон: '.$payload['phone']."\n".
-            'Дата: '.$payload['date']."\n".
-            'Гостей: '.$payload['guests']."\n".
-            'Комментарий: '.($payload['comment'] !== '' ? $payload['comment'] : '—')."\n".
-            'Источник: '.$payload['source'],
-            JSON_UNESCAPED_UNICODE
-        ).')');
+        if (! $max->sendFormNotification($payload)) {
+            $this->addError('form', 'Не удалось отправить заявку. Попробуйте позже или позвоните нам.');
+
+            return;
+        }
 
         $this->reset(['name', 'phone', 'date', 'guests', 'comment', 'source']);
         $this->show = false;

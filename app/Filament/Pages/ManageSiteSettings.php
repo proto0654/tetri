@@ -106,9 +106,11 @@ class ManageSiteSettings extends Page
                                 TextInput::make('kids_eyebrow')
                                     ->label('Надзаголовок (◇)')
                                     ->helperText('Декоративная строка над заголовком'),
-                                TextInput::make('kids_title')
+                                Textarea::make('kids_title')
                                     ->label('Заголовок')
+                                    ->rows(2)
                                     ->required()
+                                    ->helperText('Перенос строки: Enter или тег <br>')
                                     ->columnSpanFull(),
                                 Repeater::make('kids_benefits')
                                     ->label('Бенефиты')
@@ -146,8 +148,10 @@ class ManageSiteSettings extends Page
                                 TextInput::make('menu_section_eyebrow')
                                     ->label('Надзаголовок (◇) — главная и /menu')
                                     ->columnSpanFull(),
-                                TextInput::make('menu_section_title')
-                                    ->label('Заголовок секции'),
+                                Textarea::make('menu_section_title')
+                                    ->label('Заголовок секции')
+                                    ->rows(2)
+                                    ->helperText('Перенос строки: Enter или тег <br>'),
                                 Textarea::make('menu_section_description')
                                     ->label('Описание на главной')
                                     ->rows(2)
@@ -164,8 +168,10 @@ class ManageSiteSettings extends Page
                                 TextInput::make('concept_eyebrow')
                                     ->label('Надзаголовок (◇)')
                                     ->columnSpanFull(),
-                                TextInput::make('concept_title')
+                                Textarea::make('concept_title')
                                     ->label('Заголовок')
+                                    ->rows(2)
+                                    ->helperText('Перенос строки: Enter или тег <br>')
                                     ->columnSpanFull(),
                                 TextInput::make('concept_aside')
                                     ->label('Боковая пометка (◇)')
@@ -179,8 +185,10 @@ class ManageSiteSettings extends Page
                             ]),
                         Tab::make('Сторисы')
                             ->schema([
-                                TextInput::make('stories_section_title')
-                                    ->label('Заголовок секции'),
+                                Textarea::make('stories_section_title')
+                                    ->label('Заголовок секции')
+                                    ->rows(2)
+                                    ->helperText('Перенос строки: Enter или тег <br>'),
                                 TextInput::make('stories_section_aside')
                                     ->label('Правая пометка, строка 1'),
                                 TextInput::make('stories_section_aside_note')
@@ -188,8 +196,10 @@ class ManageSiteSettings extends Page
                             ]),
                         Tab::make('Контакты')
                             ->schema([
-                                TextInput::make('contacts_title')
-                                    ->label('Заголовок'),
+                                Textarea::make('contacts_title')
+                                    ->label('Заголовок')
+                                    ->rows(2)
+                                    ->helperText('Перенос строки: Enter или тег <br>'),
                                 TextInput::make('address')
                                     ->label('Адрес'),
                                 Repeater::make('phones')
@@ -220,6 +230,22 @@ class ManageSiteSettings extends Page
                             ]),
                         Tab::make('Подвал и CTA')
                             ->schema([
+                                FileUpload::make('favicon')
+                                    ->label('Favicon')
+                                    ->acceptedFileTypes([
+                                        'image/png',
+                                        'image/x-icon',
+                                        'image/vnd.microsoft.icon',
+                                        'image/svg+xml',
+                                        'image/webp',
+                                        'image/jpeg',
+                                    ])
+                                    ->disk('public')
+                                    ->directory('site/favicon')
+                                    ->visibility('public')
+                                    ->maxSize(1024)
+                                    ->helperText('Квадрат, лучше PNG/SVG, минимум 48×48 px (Google).')
+                                    ->columnSpanFull(),
                                 Textarea::make('footer_about')
                                     ->label('Описание в подвале')
                                     ->rows(3)
@@ -238,6 +264,20 @@ class ManageSiteSettings extends Page
                                     ->label('Копирайт'),
                                 TextInput::make('design_credit')
                                     ->label('Design by'),
+                            ]),
+                        Tab::make('Интеграция с мессенджером MAX')
+                            ->schema([
+                                TextInput::make('max_bot_token')
+                                    ->label('Токен бота MAX')
+                                    ->password()
+                                    ->revealable()
+                                    ->required()
+                                    ->columnSpanFull(),
+                                TextInput::make('max_chat_id')
+                                    ->label('ID чата группы MAX')
+                                    ->required()
+                                    ->helperText('Числовой ID группового чата, куда бот отправляет заявки.')
+                                    ->columnSpanFull(),
                             ]),
                     ])
                     ->columnSpanFull(),

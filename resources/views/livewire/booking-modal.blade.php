@@ -34,6 +34,10 @@
             </div>
 
             <form wire:submit="submit" novalidate class="mt-6 space-y-4">
+                @error('form')
+                    <p class="rounded-2xl bg-plum/10 px-4 py-3 text-sm text-plum" role="alert">{{ $message }}</p>
+                @enderror
+
                 <div>
                     <label for="booking-name" class="mb-1.5 block text-sm font-medium text-ink">
                         Имя <span class="text-plum" aria-hidden="true">*</span>

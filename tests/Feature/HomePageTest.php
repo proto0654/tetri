@@ -50,20 +50,34 @@ class HomePageTest extends TestCase
         $response->assertOk();
         $response->assertSee('Т Е Т Р И', false);
         $response->assertSee('linear-gradient(to bottom, rgba(10, 20, 30, 0.5), rgba(40, 50, 60, 0.4), rgba(245, 240, 230, 0.95))', false);
-        $response->assertSee(Typograph::apply('МЕСТО ДЛЯ СЕМЬИ'), false);
+        $response->assertSee(Typograph::applyWithBreaks('МЕСТО ДЛЯ СЕМЬИ'), false);
         $response->assertSee(Typograph::apply('ДЛЯ ВСЕЙ СЕМЬИ'), false);
         $response->assertSee(Typograph::apply('пр-т. Кирова, 31А'), false);
         $response->assertSee(Typograph::apply('ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.'), false);
         $response->assertSee(Typograph::apply('От завтраков до десертов'), false);
-        $response->assertSee(Typograph::apply('ЕДА С ХАРАКТЕРОМ'), false);
+        $response->assertSee(Typograph::applyWithBreaks('ЕДА С ХАРАКТЕРОМ'), false);
         $response->assertSee(Typograph::apply('СВОЯ КУХНЯ И ПЕКАРНЯ'), false);
         $response->assertSee(Typograph::apply('Кофе - выпечка — 10:00–23:00'), false);
         $response->assertSee(Typograph::apply('Новинки и атмосфера зала'), false);
         $response->assertSee(Typograph::apply('Смотрите в MAX'), false);
-        $response->assertSee(Typograph::apply('МЫ В СИМФЕРОПОЛЕ'), false);
+        $response->assertSee(Typograph::applyWithBreaks('МЫ В СИМФЕРОПОЛЕ'), false);
         $response->assertSee(Typograph::apply('Завтраки'), false);
         $response->assertSee('СТОРИСЫ', false);
         $response->assertSee(route('menu'), false);
+    }
+
+    public function test_home_page_renders_line_breaks_in_section_titles(): void
+    {
+        app(SiteSettings::class)->save([
+            'kids_title' => 'МЕСТО<br>ДЛЯ СЕМЬИ',
+            'concept_title' => "ЕДА\nС ХАРАКТЕРОМ",
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee(Typograph::applyWithBreaks('МЕСТО<br>ДЛЯ СЕМЬИ'), false);
+        $response->assertSee(Typograph::applyWithBreaks("ЕДА\nС ХАРАКТЕРОМ"), false);
     }
 
     public function test_home_page_shows_yandex_route_link_when_map_coordinates_are_set(): void
@@ -112,5 +126,32 @@ class HomePageTest extends TestCase
         $response->assertSee(Typograph::apply('ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.'), false);
         $response->assertSee(Typograph::apply('Обеды · ужины · детское меню'), false);
         $response->assertSee(Typograph::apply('Обновляем сезонно'), false);
+    }
+
+    public function test_home_page_renders_favicon_links_when_set(): void
+    {
+        app(SiteSettings::class)->save([
+            'favicon' => 'site/favicon/icon.png',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('rel="icon"', false);
+        $response->assertSee('/storage/site/favicon/icon.png', false);
+        $response->assertSee('rel="apple-touch-icon"', false);
+    }
+
+    public function test_home_page_omits_favicon_links_when_unset(): void
+    {
+        app(SiteSettings::class)->save([
+            'favicon' => null,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertDontSee('rel="icon"', false);
+        $response->assertDontSee('rel="apple-touch-icon"', false);
     }
 }

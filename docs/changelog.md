@@ -2,6 +2,10 @@
 
 Back to [project context](CONTEXT.md)
 
+## 2026-09-10
+
+- Synced all open project diffs: MAX booking via `MaxNotificationService` + SiteSettings credentials; favicon CMS + `x-site.favicon`; `@typoBr` for section titles; cream pill header; hero brand/icons polish; cream token `#ede2cf`. See [CONTEXT.md](CONTEXT.md), [content.md](content.md), [tech.md](tech.md), [design.md](design.md), [setup.md](setup.md).
+
 ## 2026-09-09
 
 - Homepage desktop UI polish: kids/concept title hanging indent via `.site-text-shift` + `cqw` (avoid `%` mismatch); shared section title scale `text-4xl/5xl/6xl`; menu-preview arrows under swiper + image label overlays; concept aside bottom-aligned; olive footer without right-bleed. See [design.md](design.md), [CONTEXT.md](CONTEXT.md).

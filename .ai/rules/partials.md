@@ -34,3 +34,6 @@ Menu-preview col1 stretches full height: eyebrow/title/desc top, CTA lg:mt-auto.
 
 ## Olive footer column has no right-bleed
 Home contacts olive footer (footer-main + copyright bar) stays inside the 2/3 shell column — no .site-bleed-right and no shell-pad right padding. Cream contacts band may still bleed; viewport olive behind the map uses .site-contacts-map-olive-half.
+
+## Hero brand bottom overlap and half-out icons
+Hero: centered stories frame; brand h1 absolute at bottom of the stack with translate-y so letters slightly overlap the frame. Fluid size via clamp(vw) capped to the max-w container — not fixed text-5xl/lg:text-7xl. Amenity icons sit absolute bottom-0 with translate-y-1/2 (half into the next cream section). Section uses overflow-x-clip only (not overflow-hidden) so icons can protrude.

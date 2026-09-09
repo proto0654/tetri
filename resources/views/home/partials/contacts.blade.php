@@ -33,7 +33,7 @@
                 <div class="site-bleed-right bg-cream">
                     <div class="py-16 sm:py-20 lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
                         <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
-                            @typo($settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ')
+                            @typoBr($settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ')
                         </h2>
                         <div class="mt-8 space-y-2 text-base text-ink">
                             @if (filled($settings['address'] ?? null))

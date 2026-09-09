@@ -36,12 +36,14 @@ Record settled technical choices for the Tetri Laravel application.
 - Livewire temp uploads raised for hero video (`config/livewire.php`); Herd PHP upload limits may need matching.
 - Seeders are idempotent (`firstOrCreate` / create-if-missing for models; SiteSettings fill blank keys only). `updateOrCreate` must not be used for demo cafe content. Overwrite only via `migrate:fresh --seed`. Details: [setup.md](setup.md#seeding-idempotent--fill-blanks-only).
 - Unsafe CSS color strings from CMS: `App\Support\CssColor::resolve` (rgba/hex allowlist + fallback).
+- Russian typography: `akh/typograf` via `App\Support\Typograph`; Blade `@typo` (strip all HTML) and `@typoBr` (keep newlines/`<br>` for section titles).
+- Booking → MAX: `App\Services\MaxNotificationService` posts to `https://platform-api2.max.ru/messages?chat_id=`; `Authorization` is the raw bot token (no Bearer). Credentials: SiteSettings `max_bot_token` / `max_chat_id`. Temporary `withoutVerifying()` for Минцифры TLS — prefer installing the CA in production.
 
 ## Open questions
 
 - Switch local/prod DB from SQLite to MySQL/Postgres.
 - Production hosting and domain.
-- Booking modal → Telegram/MAX bot.
+- Production TLS trust store for MAX API (drop `withoutVerifying()` when CA is installed).
 
 ## Links
 

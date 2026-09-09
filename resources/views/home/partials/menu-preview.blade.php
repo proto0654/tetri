@@ -10,7 +10,7 @@
                     />
 
                     <h2 class="mt-4 font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
-                        @typo($settings['menu_section_title'] ?? 'МЕНЮ')
+                        @typoBr($settings['menu_section_title'] ?? 'МЕНЮ')
                     </h2>
 
                     @if (filled($settings['menu_section_description'] ?? null))

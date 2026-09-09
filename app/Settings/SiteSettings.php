@@ -107,7 +107,7 @@ class SiteSettings
             'hero_video_preview' => null,
             'hero_overlay_from' => 'rgba(0, 0, 0, 0.45)',
             'hero_overlay_via' => 'rgba(0, 0, 0, 0.3)',
-            'hero_overlay_to' => 'rgba(245, 240, 230, 0.95)',
+            'hero_overlay_to' => 'rgba(237, 226, 207, 0.95)',
             'hero_icons' => [
                 ['icon' => 'heroicon-o-cake', 'url' => '#menu-preview'],
                 ['icon' => 'heroicon-o-beaker', 'url' => '#menu-preview'],
@@ -160,6 +160,9 @@ class SiteSettings
             'booking_cta_url' => '#contacts',
             'copyright' => '© ТЕТРИ',
             'design_credit' => null,
+            'favicon' => null,
+            'max_bot_token' => null,
+            'max_chat_id' => null,
         ];
     }
 

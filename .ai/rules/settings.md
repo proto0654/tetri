@@ -19,3 +19,9 @@ Contacts map uses SiteSettings map_latitude, map_longitude, map_marker_label. Ro
 
 ## Partial SiteSettings saves merge existing
 SiteSettings::save merges defaults → existing DB row → incoming data. Partial updates must not wipe unrelated keys. Use fillMissing() / seeder fill-blanks for demo gaps; list keys in the payload replace wholesale.
+
+## Favicon via SiteSettings.favicon
+Site favicon lives in SiteSettings key favicon (public disk path, upload in ManageSiteSettings «Подвал и CTA»). Render only from layouts/site.blade.php via x-site.favicon + PublicMedia::url — rel=icon (type by extension, sizes=any) and apple-touch-icon for non-SVG. Do not hardcode public/favicon.ico or add a second apple-touch field.
+
+## MAX credentials in SiteSettings
+max_bot_token and max_chat_id are SiteSettings JSON keys (not Spatie). BookingModal reads them via MaxNotificationService. Both are required on the Filament settings form.

@@ -24,4 +24,10 @@ On home, contacts+footer share one 1/3+2/3 column: cream band = map (col1, left-
 design_credit is always rendered via x-site.design-credit as its own full-width strip after main/footer — outside the contacts/map grid. Empty CMS value falls back to «Разработка сайта winbaba.ru». html/body use overflow-x: clip to kill horizontal scroll from bleeds/100vw.
 
 ## Section title type scale
-Public section titles share one scale: text-4xl sm:text-5xl lg:text-6xl (kids, concept, menu-preview, stories, contacts, menu page h1, menu-grid category). Hero brand stays larger (up to lg:text-7xl). Do not bump only one section.
+Public section titles share one scale: text-4xl sm:text-5xl lg:text-6xl (kids, concept, menu-preview, stories, contacts, menu page h1, menu-grid category). Hero brand uses fluid clamp(vw) sized to the hero container, not the section title scale. Do not bump only one section.
+
+## Section titles use @typoBr
+Render kids/concept/menu/stories/contacts section titles with @typoBr(...), not @typo(...), so CMS <br> or newlines become real line breaks. Hero brand title stays plain.
+
+## Header cream pill bar
+Public site header is a rounded-full cream pill (logo + nav + CTA) inside max-w-7xl padding. Home: absolute over hero. Other pages: sticky. Link/brand colors on the pill are always dark (ink/olive), never white — cream plate provides contrast. No full-bleed border-b bar.

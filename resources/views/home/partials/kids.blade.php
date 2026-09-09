@@ -8,7 +8,7 @@
             />
 
             <h2 class="site-text-shift mt-4 font-display text-4xl font-bold leading-tight text-olive sm:text-5xl lg:text-6xl">
-                @typo($settings['kids_title'] ?? '')
+                @typoBr($settings['kids_title'] ?? '')
             </h2>
         </div>
 
