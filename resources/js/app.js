@@ -29,6 +29,44 @@ const resolveSlidesOffset = (el, datasetKey) => {
     return Number.isFinite(parsed) ? parsed : 0;
 };
 
+/**
+ * Swiper loop needs enough slide width to fill ~2× the viewport.
+ * When short, duplicate the original slides once (×2) before init.
+ */
+const ensureEnoughLoopSlides = (el, spaceBetween) => {
+    const wrapper = el.querySelector('.swiper-wrapper');
+
+    if (! wrapper || wrapper.dataset.loopDuplicated === 'true') {
+        return;
+    }
+
+    const slides = Array.from(wrapper.children);
+
+    if (slides.length === 0) {
+        return;
+    }
+
+    const slidesWidth = slides.reduce((sum, slide, index) => {
+        return sum + slide.offsetWidth + (index > 0 ? spaceBetween : 0);
+    }, 0);
+
+    // Need roughly two track lengths for loop + clones to work with slidesPerView: auto.
+    if (slidesWidth >= el.offsetWidth * 2) {
+        return;
+    }
+
+    slides.forEach((slide) => {
+        const clone = slide.cloneNode(true);
+        clone.setAttribute('aria-hidden', 'true');
+        clone.querySelectorAll('a, button, [tabindex]').forEach((node) => {
+            node.setAttribute('tabindex', '-1');
+        });
+        wrapper.appendChild(clone);
+    });
+
+    wrapper.dataset.loopDuplicated = 'true';
+};
+
 const initSwipers = (root = document) => {
     root.querySelectorAll('[data-swiper]').forEach((el) => {
         if (el.swiper) {
@@ -40,13 +78,21 @@ const initSwipers = (root = document) => {
         const slidesOffsetBefore = resolveSlidesOffset(el, 'slidesOffsetBefore');
         const slidesOffsetAfter = resolveSlidesOffset(el, 'slidesOffsetAfter');
 
+        const loop = el.hasAttribute('data-loop') && el.dataset.loop !== 'false';
+
+        if (loop) {
+            ensureEnoughLoopSlides(el, spaceBetween);
+        }
+
         const swiper = new Swiper(el, {
             modules: [Navigation],
             slidesPerView: 'auto',
             spaceBetween,
             slidesOffsetBefore,
             slidesOffsetAfter,
-            watchOverflow: true,
+            loop,
+            loopAdditionalSlides: loop ? 2 : 0,
+            watchOverflow: ! loop,
             navigation: {
                 prevEl: container?.querySelector('[data-swiper-prev]') ?? null,
                 nextEl: container?.querySelector('[data-swiper-next]') ?? null,

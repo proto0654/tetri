@@ -30,7 +30,7 @@
 
             <div class="min-w-0 lg:col-span-2">
                 <div class="site-bleed-right">
-                    <div class="swiper" data-swiper data-space-between="20">
+                    <div class="swiper" data-swiper data-loop data-space-between="20">
                         <div class="swiper-wrapper">
                             @foreach ($categories as $category)
                                 <div class="swiper-slide !w-56 sm:!w-64">

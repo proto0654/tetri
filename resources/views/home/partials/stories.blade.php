@@ -31,6 +31,7 @@
                 <div
                     class="swiper"
                     data-swiper
+                    data-loop
                     data-space-between="16"
                     data-slides-offset-before="shell"
                 >
