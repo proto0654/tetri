@@ -15,21 +15,31 @@ Active — IA and content model settled from UI mockup.
 | Route / anchor | Source |
 | --- | --- |
 | `/` Home sections: hero, kids, menu preview, concept, stories, contacts | `SiteSettings` + `Category` + `Story` |
-| `/menu` Interactive menu tabs + page accents | Livewire `MenuGrid` + `SiteSettings` |
+| `/menu` All-menu blocks (default tab) + page accents | Livewire `MenuGrid` + `SiteSettings` |
+| `/menu/{category}` Category grid (4-col, paginate 12) + SEO URL | Livewire `MenuGrid` + `MenuController` |
+| `/menu/{category}/{item}` Dish detail + related from same category | `MenuItemController` + `MenuItem` |
+| `/privacy` Privacy policy page | `PrivacyController` + SiteSettings |
 | Nav «О нас» → `#concept`, «Детская» → `#kids`, «Банкет» / booking CTAs → `BookingModal` | Settings + Livewire |
 
 ## Domain models
 
-- `Category` — `title`, `slug`, `image`, `columns` (2|3), `sort_order`, `is_active`
-- `MenuItem` — belongs to category; `title`, `description`, `price`, `image`, `sort_order`, `is_active`
+- `Category` — `title`, `slug`, `image`, `columns` (2|3 preview items in «Все меню»), `sort_order`, `is_active`
+- `MenuItem` — belongs to category; `title`, `slug` (unique per category), `description`, `price`, `image`, `sort_order`, `is_active`
 - `Story` — `title`, `video_path`, `preview_image`, `sort_order`, `is_active`
 - `settings` key `site` — editable via Filament `ManageSiteSettings`
 
 ## Demo seeding
 
-`Database\Seeders\CafeContentSeeder` inserts missing demo categories, dishes, stories, admin user, and **blank** site settings keys. Re-running seed is safe: existing model rows and non-blank `settings.key=site` values are left untouched; only null/`''`/`[]` settings keys are filled. Stable keys: category `slug`, menu item (`category_id` + title/image path), story `video_path` (demo fingerprint), user `email`.
+`Database\Seeders\CafeContentSeeder` inserts missing demo categories, dishes, stories, admin user, and **blank** site settings keys. Re-running seed is safe: existing model rows and non-blank `settings.key=site` values are left untouched; only null/`''`/`[]` settings keys are filled. On disk, stock images are written only when missing or ≤50KB (solid fallback); videos are never overwritten if the path already exists. Stable keys: category `slug`, menu item (`category_id` + title/image path), story `video_path` (demo fingerprint), user `email`.
 
 Demo **stories (MAX)**: 12 items — themes food (1–5), kids (6–9), social (10–12). Preview images from Unsplash; `video_path` is an empty placeholder `mp4` until real clips are uploaded in Filament.
+
+## Menu page behavior
+
+- Default `/menu`: tab «Все меню» — each active category as a block; preview count = `Category.columns` (2|3, default 3).
+- Category tab / `/menu/{slug}`: single grid `lg:grid-cols-4`, Livewire `paginate(12)`; pills sync path via `history.pushState`.
+- Legacy `?category=` redirects to `/menu/{slug}`.
+- Home menu-preview cards → `route('menu.category')`; CTA «Смотреть все» → `/menu`.
 
 See [setup.md](setup.md#seeding-idempotent--fill-blanks-only) for commands and seeder directives. Use `migrate:fresh --seed` only when intentionally discarding local edits.
 

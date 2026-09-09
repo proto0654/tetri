@@ -1,27 +1,9 @@
-@props([
-    'settings',
-    'withMain' => true,
-    'withBar' => true,
-])
+@props(['settings'])
 
-<footer class="bg-olive-deep text-cream">
-    @if ($withMain)
-        <x-site.shell class="py-14">
-            <div class="grid gap-10 lg:grid-cols-3 lg:gap-x-10">
-                <div class="hidden lg:block" aria-hidden="true"></div>
-                <div class="lg:col-span-2">
-                    <x-site.footer-main :settings="$settings" />
-                </div>
-            </div>
-        </x-site.shell>
+<footer {{ $attributes->class(['flex flex-1 flex-col bg-olive-deep text-cream']) }}>
+    <div class="py-14 lg:pl-10">
+        <x-site.footer-main :settings="$settings" />
+    </div>
 
-        @if ($withBar)
-            <div class="border-t border-cream/15">
-                <x-site.shell class="flex flex-col gap-2 py-4 text-xs text-cream/60 sm:flex-row sm:items-center sm:justify-between">
-                    <span>@typo($settings['copyright'] ?? '© ТЕТРИ')</span>
-                    <a href="#top" class="hover:text-cream">Наверх ↑</a>
-                </x-site.shell>
-            </div>
-        @endif
-    @endif
+    <x-site.footer-bar :settings="$settings" class="mt-auto lg:pl-10" />
 </footer>

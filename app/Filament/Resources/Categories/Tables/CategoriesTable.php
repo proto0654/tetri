@@ -26,7 +26,7 @@ class CategoriesTable
                 TextColumn::make('slug')
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('columns')
-                    ->label('Колонки')
+                    ->label('Превью')
                     ->sortable(),
                 TextColumn::make('sort_order')
                     ->label('Порядок')

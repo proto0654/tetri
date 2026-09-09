@@ -64,6 +64,7 @@ class HomePageTest extends TestCase
         $response->assertSee(Typograph::apply('Завтраки'), false);
         $response->assertSee('СТОРИСЫ', false);
         $response->assertSee(route('menu'), false);
+        $response->assertSee(route('menu.category', 'zavtraki'), false);
     }
 
     public function test_home_page_renders_line_breaks_in_section_titles(): void
@@ -128,6 +129,43 @@ class HomePageTest extends TestCase
         $response->assertSee(Typograph::apply('Обновляем сезонно'), false);
     }
 
+    public function test_home_and_menu_reuse_the_same_contacts_footer_block(): void
+    {
+        app(SiteSettings::class)->save([
+            'contacts_title' => 'МЫ В ТЕСТЕ',
+            'address' => 'ул. Тестовая, 1',
+            'copyright' => '© ТЕТРИ тест',
+            'footer_about' => 'Семейное кафе в футере',
+            'cookie_notice' => 'Cookie-уведомление в футере. Подробнее — в {privacy}.',
+            'privacy_title' => 'Политика в футере',
+            'map_latitude' => '44.950000',
+            'map_longitude' => '34.100000',
+        ]);
+
+        $home = $this->get(route('home'));
+        $menu = $this->get(route('menu'));
+
+        $home->assertOk();
+        $menu->assertOk();
+
+        foreach ([$home, $menu] as $response) {
+            $response->assertSee(Typograph::applyWithBreaks('МЫ В ТЕСТЕ'), false);
+            $response->assertSee(Typograph::apply('ул. Тестовая, 1'), false);
+            $response->assertSee('Проложить маршрут на карте', false);
+            $response->assertSee('id="contacts"', false);
+            $response->assertSee('НАВИГАЦИЯ', false);
+            $response->assertSee('МЫ В СЕТИ', false);
+            $response->assertDontSee(Typograph::apply('© ТЕТРИ тест'), false);
+            $response->assertSee(Typograph::apply('Семейное кафе в футере'), false);
+            $response->assertSee(Typograph::apply('Cookie-уведомление в футере. Подробнее — в '), false);
+            $response->assertSee(
+                '<a href="'.route('privacy').'" class="underline underline-offset-2 hover:text-cream">'.Typograph::apply('Политика в футере').'</a>',
+                false,
+            );
+            $response->assertSee('Наверх ↑', false);
+        }
+    }
+
     public function test_home_page_renders_favicon_links_when_set(): void
     {
         app(SiteSettings::class)->save([
@@ -153,5 +191,60 @@ class HomePageTest extends TestCase
         $response->assertOk();
         $response->assertDontSee('rel="icon"', false);
         $response->assertDontSee('rel="apple-touch-icon"', false);
+    }
+
+    public function test_home_page_renders_logo_image_when_set(): void
+    {
+        app(SiteSettings::class)->save([
+            'logo' => 'site/logo/mark.png',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('/storage/site/logo/mark.png', false);
+        $response->assertSee('alt="ТЕТРИ"', false);
+    }
+
+    public function test_home_page_falls_back_to_text_logo_when_unset(): void
+    {
+        app(SiteSettings::class)->save([
+            'logo' => null,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertDontSee('/storage/site/logo/', false);
+        $response->assertSee('ТЕТРИ', false);
+    }
+
+    public function test_home_page_renders_og_image_when_set(): void
+    {
+        app(SiteSettings::class)->save([
+            'og_image' => 'site/og/share.jpg',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('property="og:image"', false);
+        $response->assertSee('/storage/site/og/share.jpg', false);
+        $response->assertSee('name="twitter:card"', false);
+        $response->assertSee('summary_large_image', false);
+    }
+
+    public function test_home_page_omits_og_image_when_unset(): void
+    {
+        app(SiteSettings::class)->save([
+            'og_image' => null,
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertDontSee('property="og:image"', false);
+        $response->assertDontSee('name="twitter:image"', false);
+        $response->assertDontSee('summary_large_image', false);
     }
 }

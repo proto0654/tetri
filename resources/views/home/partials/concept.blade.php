@@ -21,7 +21,7 @@
             </div>
 
             <div class="lg:col-span-2">
-                <p class="max-w-2xl text-sm uppercase leading-relaxed tracking-wide text-ink sm:text-base">
+                <p class="site-info">
                     @typo($settings['concept_description'] ?? '')
                 </p>
 

@@ -16,7 +16,8 @@ use Illuminate\Support\Str;
 
 /**
  * Idempotent demo content: create-if-missing / fill blank SiteSettings keys only.
- * Never overwrites Filament/DB edits. Intentional wipe: migrate:fresh --seed.
+ * Never overwrites Filament/DB edits or existing real media files on disk.
+ * Intentional wipe: migrate:fresh --seed.
  */
 class CafeContentSeeder extends Seeder
 {
@@ -29,7 +30,7 @@ class CafeContentSeeder extends Seeder
         'zavtraki' => 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=900&h=1200&q=80',
         'osnovnoe-menyu' => 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&h=1200&q=80',
         'detskoe-menyu' => 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&h=1200&q=80',
-        'deserty' => 'https://images.unsplash.com/photo-1563805042-7684c019e1cd?auto=format&fit=crop&w=900&h=1200&q=80',
+        'deserty' => 'https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=900&h=1200&q=80',
         'kofe-i-napitki' => 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&h=1200&q=80',
         'syrniki' => 'https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=1000&h=750&q=80',
         'avokado' => 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1000&h=750&q=80',
@@ -81,13 +82,20 @@ class CafeContentSeeder extends Seeder
             unset($data['stock']);
 
             $category = Category::query()->where('slug', $data['slug'])->first();
+            $demoImagePath = "categories/{$data['slug']}.jpg";
 
             if ($category === null) {
                 $category = Category::query()->create([
                     ...$data,
-                    'image' => $this->storeStockImage($stock, "categories/{$data['slug']}.jpg"),
+                    'image' => $this->storeStockImage($stock, $demoImagePath),
                     'is_active' => true,
                 ]);
+            } elseif (blank($category->image)) {
+                $category->update([
+                    'image' => $this->storeStockImage($stock, $demoImagePath),
+                ]);
+            } elseif ($category->image === $demoImagePath) {
+                $this->storeStockImage($stock, $demoImagePath);
             }
 
             $this->seedMenuItems($category, $index);
@@ -112,22 +120,35 @@ class CafeContentSeeder extends Seeder
         foreach ($stories as $story) {
             $n = $story['sort_order'];
             $videoPath = "stories/story-{$n}.mp4";
+            $previewPath = "stories/previews/story-{$n}.jpg";
+            $existing = Story::query()->where('video_path', $videoPath)->first();
 
             // Stable demo key is video_path (not title — titles are edited in Filament).
-            if (Story::query()->where('video_path', $videoPath)->exists()) {
+            if ($existing !== null) {
+                if (blank($existing->preview_image) || $existing->preview_image === $previewPath) {
+                    $preview = $this->storeStockImage($story['stock'], $previewPath);
+
+                    if (blank($existing->preview_image)) {
+                        $existing->update(['preview_image' => $preview]);
+                    }
+                }
+
+                $this->storePlaceholderVideo($videoPath);
+
                 continue;
             }
 
             Story::query()->create([
                 'title' => $story['title'],
                 'video_path' => $this->storePlaceholderVideo($videoPath),
-                'preview_image' => $this->storeStockImage($story['stock'], "stories/previews/story-{$n}.jpg"),
+                'preview_image' => $this->storeStockImage($story['stock'], $previewPath),
                 'sort_order' => $n,
                 'is_active' => true,
             ]);
         }
 
         $this->seedSiteSettingsFillMissing();
+        $this->ensureSiteSettingsDemoMedia();
     }
 
     /**
@@ -197,6 +218,43 @@ class CafeContentSeeder extends Seeder
         }
     }
 
+    /**
+     * Re-download missing/tiny demo media for SiteSettings paths already stored in DB.
+     */
+    protected function ensureSiteSettingsDemoMedia(): void
+    {
+        $settings = app(SiteSettings::class)->all();
+
+        $heroBg = $settings['hero_background_image'] ?? null;
+        if (is_string($heroBg) && $heroBg === 'site/hero/background.jpg') {
+            $this->storeStockImage('hero-bg', $heroBg);
+        }
+
+        $heroPreview = $settings['hero_video_preview'] ?? null;
+        if (is_string($heroPreview) && $heroPreview === 'site/hero/preview.jpg') {
+            $this->storeStockImage('hero-preview', $heroPreview);
+        }
+
+        $heroVideo = $settings['hero_video_path'] ?? null;
+        if (is_string($heroVideo) && $heroVideo === 'site/hero/hero.mp4') {
+            $this->storePlaceholderVideo($heroVideo);
+        }
+
+        $kidsImages = $settings['kids_images'] ?? null;
+        if (is_array($kidsImages)) {
+            $demoKids = [
+                'site/kids/exterior.jpg' => 'kids-1',
+                'site/kids/veranda.jpg' => 'kids-2',
+            ];
+
+            foreach ($kidsImages as $path) {
+                if (is_string($path) && isset($demoKids[$path])) {
+                    $this->storeStockImage($demoKids[$path], $path);
+                }
+            }
+        }
+    }
+
     protected function seedMenuItems(Category $category, int $categoryIndex): void
     {
         $samples = [
@@ -213,22 +271,29 @@ class CafeContentSeeder extends Seeder
             $imagePath = 'menu-items/'.Str::slug($title).'-'.$category->slug.'.jpg';
             $legacyImagePath = 'menu-items/'.Str::slug($title).'.jpg';
 
-            $alreadySeeded = MenuItem::query()
+            $item = MenuItem::query()
                 ->where('category_id', $category->id)
                 ->where(function ($query) use ($title, $imagePath, $legacyImagePath): void {
                     $query->where('title', $title)
                         ->orWhere('image', $imagePath)
                         ->orWhere('image', $legacyImagePath);
                 })
-                ->exists();
+                ->first();
 
-            if ($alreadySeeded) {
+            if ($item !== null) {
+                if (blank($item->image)) {
+                    $item->update(['image' => $this->storeStockImage($stock, $imagePath)]);
+                } elseif (in_array($item->image, [$imagePath, $legacyImagePath], true)) {
+                    $this->storeStockImage($stock, $item->image);
+                }
+
                 continue;
             }
 
             MenuItem::query()->create([
                 'category_id' => $category->id,
                 'title' => $title,
+                'slug' => Str::slug($title),
                 'description' => $description,
                 'price' => $price,
                 'image' => $this->storeStockImage($stock, $imagePath),
@@ -240,6 +305,10 @@ class CafeContentSeeder extends Seeder
 
     protected function storeStockImage(string $stockKey, string $path): string
     {
+        if ($this->publicFileLooksReal($path)) {
+            return $path;
+        }
+
         $url = self::STOCK[$stockKey] ?? null;
 
         if ($url) {
@@ -248,7 +317,7 @@ class CafeContentSeeder extends Seeder
                     ->withHeaders(['User-Agent' => 'TetriCafeSeeder/1.0'])
                     ->get($url);
 
-                if ($response->successful() && strlen($response->body()) > 10_000) {
+                if ($response->successful() && strlen($response->body()) > 50_000) {
                     Storage::disk('public')->put($path, $response->body());
 
                     return $path;
@@ -258,16 +327,36 @@ class CafeContentSeeder extends Seeder
             }
         }
 
-        Storage::disk('public')->put($path, $this->fallbackJpeg());
+        if (! Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->put($path, $this->fallbackJpeg());
+        }
 
         return $path;
     }
 
     protected function storePlaceholderVideo(string $path): string
     {
+        // Never clobber an uploaded or previously written video — even an empty demo stub.
+        if (Storage::disk('public')->exists($path)) {
+            return $path;
+        }
+
         Storage::disk('public')->put($path, '');
 
         return $path;
+    }
+
+    /**
+     * Treat existing public files as real media (Filament uploads or prior Unsplash stock).
+     * Solid-color JPEG fallback is ~13KB — keep threshold above that so re-seed can replace stubs.
+     */
+    protected function publicFileLooksReal(string $path): bool
+    {
+        if (! Storage::disk('public')->exists($path)) {
+            return false;
+        }
+
+        return Storage::disk('public')->size($path) > 50_000;
     }
 
     /**

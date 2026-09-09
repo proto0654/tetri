@@ -1,6 +1,6 @@
 @extends('layouts.site')
 
-@section('title', 'Меню — ТЕТРИ')
+@section('title', ($category?->title ? $category->title.' — ' : '').'Меню — ТЕТРИ')
 
 @section('content')
     <section class="bg-cream px-4 pb-24 pt-10 sm:px-6 lg:px-8">
@@ -24,7 +24,7 @@
             </div>
 
             <div class="mt-10">
-                <livewire:menu-grid />
+                <livewire:menu-grid :category-slug="$category?->slug" />
             </div>
         </div>
     </section>

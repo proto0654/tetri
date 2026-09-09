@@ -44,6 +44,9 @@ class SiteSettingsTest extends TestCase
         $this->assertSame('ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.', $loaded->get('menu_section_eyebrow'));
         $this->assertSame('СВОЯ КУХНЯ И ПЕКАРНЯ', $loaded->get('concept_eyebrow'));
         $this->assertSame('ДЛЯ ВСЕЙ СЕМЬИ', $loaded->get('kids_eyebrow'));
+        $this->assertSame('Мы используем файлы cookie для улучшения работы сайта. Подробнее — в {privacy}.', $loaded->get('cookie_notice'));
+        $this->assertSame('Политика конфиденциальности', $loaded->get('privacy_title'));
+        $this->assertNotEmpty($loaded->get('privacy_body'));
         $this->assertInstanceOf(Setting::class, Setting::query()->where('key', SiteSettings::KEY)->first());
     }
 
@@ -93,5 +96,30 @@ class SiteSettingsTest extends TestCase
         $this->assertSame('ул. Севастопольская', $settings->get('address'));
         $this->assertSame('44.950000', $settings->get('map_latitude'));
         $this->assertSame('ТЕТРИ', $settings->get('map_marker_label'));
+    }
+
+    public function test_all_merges_new_defaults_even_when_cache_predates_them(): void
+    {
+        Setting::query()->updateOrCreate(
+            ['key' => SiteSettings::KEY],
+            ['value' => [
+                'hero_title' => 'Cached Hero',
+                'copyright' => '© ТЕТРИ',
+            ]],
+        );
+
+        Cache::forever('site_settings.'.SiteSettings::KEY, [
+            'hero_title' => 'Cached Hero',
+            'copyright' => '© ТЕТРИ',
+        ]);
+
+        $loaded = app(SiteSettings::class);
+
+        $this->assertSame('Cached Hero', $loaded->get('hero_title'));
+        $this->assertSame('© ТЕТРИ', $loaded->get('copyright'));
+        $this->assertSame(
+            'Мы используем файлы cookie для улучшения работы сайта. Подробнее — в {privacy}.',
+            $loaded->get('cookie_notice'),
+        );
     }
 }

@@ -11,6 +11,7 @@ use App\Settings\SiteSettings;
 use Database\Seeders\CafeContentSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CafeContentSeederTest extends TestCase
@@ -85,6 +86,21 @@ class CafeContentSeederTest extends TestCase
         $this->assertSame('44.950000', $settings->get('map_latitude'));
         $this->assertSame('34.100000', $settings->get('map_longitude'));
         $this->assertSame('ТЕТРИ', $settings->get('map_marker_label'));
+    }
+
+    public function test_seeder_does_not_overwrite_existing_real_media_files(): void
+    {
+        Http::fake([
+            'images.unsplash.com/*' => Http::response(str_repeat('x', 20_000), 200),
+        ]);
+
+        $path = 'categories/zavtraki.jpg';
+        $original = str_repeat('KEEP', 15_000); // > 50KB real-media threshold
+        Storage::disk('public')->put($path, $original);
+
+        $this->seed(CafeContentSeeder::class);
+
+        $this->assertSame($original, Storage::disk('public')->get($path));
     }
 
     protected function assertNotBlank(mixed $value): void

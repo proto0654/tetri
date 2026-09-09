@@ -38,7 +38,7 @@ What was already bootstrapped so agents do not redo or contradict it.
 Directives for seeders:
 
 1. Models: create-if-missing by stable keys — category `slug`, menu item (`category_id` + title **or** demo `image` path), story demo `video_path` (not editable title), user `email`. Do **not** use `updateOrCreate` for demo content.
-2. Download stock media only when inserting a new row or filling a blank media settings key (lazy), not when the value already exists.
+2. Download stock media only when inserting a new row, filling a blank media key, or replacing a missing/tiny file on disk. Never overwrite an existing public file that already looks real (>50KB for images — above the ~13KB solid fallback; any existing file for videos).
 3. `SiteSettings`: fill blank keys only (`SiteSettings::fillMissing` / seeder equivalent). Never overwrite non-blank keys on re-seed. `save()` merges with the existing row so partial updates are safe.
 4. Users: `firstOrCreate` by email — do not reset passwords/names on re-seed.
 5. Full reset of edited data is intentional only via `migrate:fresh --seed`.

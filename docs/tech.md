@@ -30,11 +30,12 @@ Record settled technical choices for the Tetri Laravel application.
 - Public frontend is Blade + Livewire (`MenuGrid`, `BookingModal`), not Inertia.
 - All public carousels/sliders use local Swiper (`npm` + `resources/js/app.js`); no Alpine overflow scroll or CDN.
 - Mockup is the source of truth over external entity summaries; stack versions in old briefs are ignored in favor of installed packages.
-- Category needs `image` + `columns` for homepage previews and menu grid density.
+- Category needs `image` + `columns` (2|3 preview count for «Все меню» blocks on `/menu`). Single-category menu view is always 4-col + paginate(12).
+- Menu routes: `/menu`, `/menu/{category}`, `/menu/{category}/{item}`; Livewire `MenuGrid` mounts from category slug; `?category=` redirects to path.
 - Media URLs for the public site: `App\Support\PublicMedia` → relative `/storage/...`.
 - Icon fields: `HeroiconOptions` + `IconFieldSchema` (Filament `Select::allowHtml()` previews must use fixed inline SVG size, not Tailwind `h-*`/`w-*`).
 - Livewire temp uploads raised for hero video (`config/livewire.php`); Herd PHP upload limits may need matching.
-- Seeders are idempotent (`firstOrCreate` / create-if-missing for models; SiteSettings fill blank keys only). `updateOrCreate` must not be used for demo cafe content. Overwrite only via `migrate:fresh --seed`. Details: [setup.md](setup.md#seeding-idempotent--fill-blanks-only).
+- Seeders are idempotent (`firstOrCreate` / create-if-missing for models; SiteSettings fill blank keys only). On-disk media: never overwrite images >50KB or any existing video file. `updateOrCreate` must not be used for demo cafe content. Overwrite only via `migrate:fresh --seed`. Details: [setup.md](setup.md#seeding-idempotent--fill-blanks-only).
 - Unsafe CSS color strings from CMS: `App\Support\CssColor::resolve` (rgba/hex allowlist + fallback).
 - Russian typography: `akh/typograf` via `App\Support\Typograph`; Blade `@typo` (strip all HTML) and `@typoBr` (keep newlines/`<br>` for section titles).
 - Booking → MAX: `App\Services\MaxNotificationService` posts to `https://platform-api2.max.ru/messages?chat_id=`; `Authorization` is the raw bot token (no Bearer). Credentials: SiteSettings `max_bot_token` / `max_chat_id`. Temporary `withoutVerifying()` for Минцифры TLS — prefer installing the CA in production.

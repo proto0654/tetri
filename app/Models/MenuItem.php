@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[Fillable([
     'category_id',
     'title',
+    'slug',
     'description',
     'price',
     'image',

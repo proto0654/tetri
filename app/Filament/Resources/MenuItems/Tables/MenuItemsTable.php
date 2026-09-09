@@ -24,6 +24,10 @@ class MenuItemsTable
                     ->label('Название')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('slug')
+                    ->label('Slug')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
                 TextColumn::make('category.title')
                     ->label('Категория')
                     ->sortable(),

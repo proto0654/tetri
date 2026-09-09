@@ -39,10 +39,13 @@
                         @foreach ($stories as $story)
                             <div class="swiper-slide !w-56 sm:!w-64">
                                 <article>
-                                    <button
-                                        type="button"
-                                        class="w-full overflow-hidden rounded-[1.75rem] bg-cream-dark text-left shadow-sm"
+                                    <div
+                                        role="button"
+                                        tabindex="0"
+                                        class="w-full cursor-pointer overflow-hidden rounded-[1.75rem] bg-cream-dark text-left shadow-sm select-none"
                                         @click="play($event)"
+                                        @keydown.enter.prevent="play($event)"
+                                        @keydown.space.prevent="play($event)"
                                         aria-label="{{ $story->title ? 'Смотреть '.$story->title : 'Смотреть сторис' }}"
                                     >
                                         @php
@@ -51,19 +54,21 @@
                                         @endphp
                                         @if ($videoUrl)
                                             <video
-                                                class="aspect-[3/4] w-full object-cover"
+                                                class="pointer-events-none aspect-[3/4] w-full object-cover"
                                                 muted
                                                 loop
                                                 playsinline
                                                 preload="metadata"
+                                                tabindex="-1"
+                                                draggable="false"
                                                 @if ($posterUrl) poster="{{ $posterUrl }}" @endif
                                             >
                                                 <source src="{{ $videoUrl }}" type="video/mp4">
                                             </video>
                                         @else
-                                            <x-media :path="$story->preview_image" :alt="$story->title ?? 'Сторис'" class="aspect-[3/4] w-full object-cover" />
+                                            <x-media :path="$story->preview_image" :alt="$story->title ?? 'Сторис'" class="pointer-events-none aspect-[3/4] w-full object-cover" />
                                         @endif
-                                    </button>
+                                    </div>
                                 </article>
                             </div>
                         @endforeach

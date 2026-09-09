@@ -50,13 +50,13 @@
                 </div>
 
                 @if (filled($settings['kids_description'] ?? null))
-                    <p class="mt-6 max-w-2xl text-sm uppercase leading-relaxed tracking-wide text-ink">
+                    <p class="site-info mt-6">
                         @typo($settings['kids_description'])
                     </p>
                 @endif
 
                 @if (filled($settings['kids_description_secondary'] ?? null))
-                    <p class="mt-4 max-w-2xl text-sm uppercase leading-relaxed tracking-wide text-ink">
+                    <p class="site-info mt-4">
                         @typo($settings['kids_description_secondary'])
                     </p>
                 @endif

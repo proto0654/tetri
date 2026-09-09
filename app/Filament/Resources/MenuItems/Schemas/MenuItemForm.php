@@ -7,7 +7,10 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Unique;
 
 class MenuItemForm
 {
@@ -24,7 +27,18 @@ class MenuItemForm
                 TextInput::make('title')
                     ->label('Название')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function (Set $set, ?string $state): void {
+                        $set('slug', Str::slug((string) $state));
+                    }),
+                TextInput::make('slug')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(
+                        ignoreRecord: true,
+                        modifyRuleUsing: fn (Unique $rule, callable $get): Unique => $rule->where('category_id', $get('category_id')),
+                    ),
                 Textarea::make('description')
                     ->label('Описание')
                     ->rows(3)

@@ -25,3 +25,15 @@ Site favicon lives in SiteSettings key favicon (public disk path, upload in Mana
 
 ## MAX credentials in SiteSettings
 max_bot_token and max_chat_id are SiteSettings JSON keys (not Spatie). BookingModal reads them via MaxNotificationService. Both are required on the Filament settings form.
+
+## Logo and OG image via SiteSettings
+Site logo and Open Graph image live in SiteSettings keys logo and og_image (public disk paths, upload in ManageSiteSettings «Подвал и CTA»). Render logo via x-site.logo in header and footer-main (text ТЕТРИ fallback when empty). Render og:image / twitter:image only from layouts/site.blade.php via PublicMedia::absoluteUrl — relative PublicMedia::url is not enough for crawlers. Do not hardcode logo files or a second brand mark field.
+
+## Cookie notice and privacy via SiteSettings
+cookie_notice, privacy_title, and privacy_body live in SiteSettings (ManageSiteSettings «Подвал и CTA»). Public page is GET /privacy (PrivacyController). Cookie notice + policy link render only in x-site.footer-bar; footer nav also links «Политика». Do not add a cookie banner/modal or a separate Page model.
+
+## cookie_notice uses {privacy} placeholder
+cookie_notice may include {privacy}; that token becomes the linked privacy_title on the public footer-bar. Default: «… Подробнее — в {privacy}.» Helper in ManageSiteSettings documents the placeholder.
+
+## SiteSettings merges defaults outside cache
+SiteSettings::all() caches only the DB JSON row, then always array_replace_recursive(defaults(), stored). New default keys (e.g. cookie_notice) appear even when forever-cache was warmed before those keys existed. Do not merge defaults inside the cache callback.

@@ -30,6 +30,12 @@ class MaxNotificationService
         }
 
         $text = $this->formatMessage($formData);
+        $payload = ['text' => $text];
+
+        $keyboard = $this->phoneActionKeyboard($formData['phone'] ?? null);
+        if ($keyboard !== null) {
+            $payload['attachments'] = [$keyboard];
+        }
 
         try {
             // MAX (platform-api2) serves a Минцифры TLS cert missing from many trust stores.
@@ -40,9 +46,7 @@ class MaxNotificationService
                 ->connectTimeout(3)
                 ->timeout(10)
                 ->withoutVerifying()
-                ->post(self::API_BASE.'/messages?chat_id='.urlencode((string) $chatId), [
-                    'text' => $text,
-                ]);
+                ->post(self::API_BASE.'/messages?chat_id='.urlencode((string) $chatId), $payload);
 
             if ($response->successful()) {
                 return true;
@@ -88,5 +92,64 @@ class MaxNotificationService
             'Комментарий: '.($comment !== '' ? $comment : '—'),
             'Источник: '.($formData['source'] ?? '—'),
         ]);
+    }
+
+    /**
+     * Inline keyboard with call + copy actions when the phone can be dialed.
+     *
+     * @return array{type: string, payload: array{buttons: list<list<array<string, string>>>}}|null
+     */
+    protected function phoneActionKeyboard(mixed $phone): ?array
+    {
+        $dialable = $this->normalizePhoneForDial($phone);
+
+        if ($dialable === null) {
+            return null;
+        }
+
+        return [
+            'type' => 'inline_keyboard',
+            'payload' => [
+                'buttons' => [[
+                    [
+                        'type' => 'link',
+                        'text' => 'Позвонить',
+                        'url' => 'tel:'.$dialable,
+                    ],
+                    [
+                        'type' => 'clipboard',
+                        'text' => 'Скопировать',
+                        'payload' => $dialable,
+                    ],
+                ]],
+            ],
+        ];
+    }
+
+    /**
+     * Normalize a display phone into +E.164-ish form for tel: / clipboard.
+     */
+    protected function normalizePhoneForDial(mixed $phone): ?string
+    {
+        if (! is_string($phone)) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+
+        if ($digits === '') {
+            return null;
+        }
+
+        // Local Russian numbers often start with 8XXXXXXXXXX.
+        if (strlen($digits) === 11 && str_starts_with($digits, '8')) {
+            $digits = '7'.substr($digits, 1);
+        }
+
+        if (strlen($digits) < 10 || strlen($digits) > 15) {
+            return null;
+        }
+
+        return '+'.$digits;
     }
 }

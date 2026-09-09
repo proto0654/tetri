@@ -21,6 +21,25 @@ class PublicMedia
         return '/storage/'.ltrim(str_replace('\\', '/', $path), '/');
     }
 
+    public static function absoluteUrl(?string $path): ?string
+    {
+        $url = self::url($path);
+
+        if (blank($url)) {
+            return null;
+        }
+
+        if (Str::startsWith($url, ['http://', 'https://'])) {
+            return $url;
+        }
+
+        if (Str::startsWith($url, '//')) {
+            return (request()->getScheme() ?? 'https').':'.$url;
+        }
+
+        return url($url);
+    }
+
     public static function exists(?string $path): bool
     {
         return filled($path) && Storage::disk('public')->exists($path);

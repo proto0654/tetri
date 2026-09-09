@@ -4,6 +4,7 @@ Back to [project context](CONTEXT.md)
 
 ## 2026-09-10
 
+- Menu polish: default «Все меню» blocks (`columns` = preview 2|3); category SEO `/menu/{slug}` + Livewire 4×12 pagination; dish show + privacy page; home deep-links; seeder never clobbers real media (>50KB / existing videos). Contacts/footer component split. See [CONTEXT.md](CONTEXT.md), [content.md](content.md), [tech.md](tech.md), [setup.md](setup.md), [design.md](design.md).
 - Synced all open project diffs: MAX booking via `MaxNotificationService` + SiteSettings credentials; favicon CMS + `x-site.favicon`; `@typoBr` for section titles; cream pill header; hero brand/icons polish; cream token `#ede2cf`. See [CONTEXT.md](CONTEXT.md), [content.md](content.md), [tech.md](tech.md), [design.md](design.md), [setup.md](setup.md).
 
 ## 2026-09-09

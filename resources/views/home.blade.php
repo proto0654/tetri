@@ -8,5 +8,4 @@
     @include('home.partials.menu-preview')
     @include('home.partials.concept')
     @include('home.partials.stories')
-    @include('home.partials.contacts')
 @endsection

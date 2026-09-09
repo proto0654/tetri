@@ -48,7 +48,78 @@ class MaxNotificationServiceTest extends TestCase
                     'Гостей: 4',
                     'Комментарий: Окно',
                     'Источник: kids',
-                ]);
+                ])
+                && ($request['attachments'][0]['type'] ?? null) === 'inline_keyboard'
+                && ($request['attachments'][0]['payload']['buttons'][0][0] ?? null) === [
+                    'type' => 'link',
+                    'text' => 'Позвонить',
+                    'url' => 'tel:+79780000000',
+                ]
+                && ($request['attachments'][0]['payload']['buttons'][0][1] ?? null) === [
+                    'type' => 'clipboard',
+                    'text' => 'Скопировать',
+                    'payload' => '+79780000000',
+                ];
+        });
+    }
+
+    public function test_omits_phone_buttons_when_phone_cannot_be_normalized(): void
+    {
+        Http::preventStrayRequests();
+        Http::fake([
+            'platform-api2.max.ru/*' => Http::response(['ok' => true], 200),
+        ]);
+
+        app(SiteSettings::class)->save([
+            'max_bot_token' => 'test-token',
+            'max_chat_id' => '12345',
+        ]);
+
+        $sent = app(MaxNotificationService::class)->sendFormNotification([
+            'name' => 'Анна',
+            'phone' => '---',
+            'date' => '2026-09-20',
+            'guests' => 2,
+            'comment' => '',
+            'source' => 'site',
+        ]);
+
+        $this->assertTrue($sent);
+
+        Http::assertSent(function (Request $request): bool {
+            return $request->url() === 'https://platform-api2.max.ru/messages?chat_id=12345'
+                && ! array_key_exists('attachments', $request->data());
+        });
+    }
+
+    public function test_normalizes_russian_8_prefix_for_call_button(): void
+    {
+        Http::preventStrayRequests();
+        Http::fake([
+            'platform-api2.max.ru/*' => Http::response(['ok' => true], 200),
+        ]);
+
+        app(SiteSettings::class)->save([
+            'max_bot_token' => 'test-token',
+            'max_chat_id' => '12345',
+        ]);
+
+        $sent = app(MaxNotificationService::class)->sendFormNotification([
+            'name' => 'Анна',
+            'phone' => '8 (978) 000-00-00',
+            'date' => '2026-09-20',
+            'guests' => 2,
+            'comment' => '',
+            'source' => 'site',
+        ]);
+
+        $this->assertTrue($sent);
+
+        Http::assertSent(function (Request $request): bool {
+            $buttons = $request['attachments'][0]['payload']['buttons'][0] ?? null;
+
+            return ($buttons[0]['url'] ?? null) === 'tel:+79780000000'
+                && ($buttons[1]['payload'] ?? null) === '+79780000000';
         });
     }
 

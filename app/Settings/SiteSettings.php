@@ -19,11 +19,14 @@ class SiteSettings
      */
     public function all(): array
     {
-        return Cache::rememberForever(self::cacheKey(), function (): array {
+        $stored = Cache::rememberForever(self::cacheKey(), function (): array {
             $setting = Setting::query()->where('key', self::KEY)->first();
+            $value = $setting?->value ?? [];
 
-            return array_replace_recursive(self::defaults(), $setting?->value ?? []);
+            return is_array($value) ? $value : [];
         });
+
+        return array_replace_recursive(self::defaults(), $stored);
     }
 
     public function get(string $key, mixed $default = null): mixed
@@ -159,8 +162,13 @@ class SiteSettings
             'booking_cta_label' => 'БРОНИРОВАНИЕ',
             'booking_cta_url' => '#contacts',
             'copyright' => '© ТЕТРИ',
+            'cookie_notice' => 'Мы используем файлы cookie для улучшения работы сайта. Подробнее — в {privacy}.',
+            'privacy_title' => 'Политика конфиденциальности',
+            'privacy_body' => "Настоящая политика описывает, как семейное кафе ТЕТРИ обрабатывает персональные данные и использует файлы cookie.\n\nМы можем собирать данные, которые вы оставляете при бронировании стола (имя, телефон и пожелания), а также технические данные, необходимые для работы сайта.\n\nФайлы cookie помогают корректно отображать страницы и улучшать работу сервиса. Продолжая пользоваться сайтом, вы соглашаетесь с использованием cookie в соответствии с этой политикой.\n\nПо вопросам обработки данных свяжитесь с нами по контактам, указанным на сайте.",
             'design_credit' => null,
             'favicon' => null,
+            'logo' => null,
+            'og_image' => null,
             'max_bot_token' => null,
             'max_chat_id' => null,
         ];

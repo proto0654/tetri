@@ -1,3 +1,5 @@
+@props(['settings'])
+
 @php
     $mapLatitude = $settings['map_latitude'] ?? null;
     $mapLongitude = $settings['map_longitude'] ?? null;
@@ -10,7 +12,7 @@
     $mapTitle = filled($mapMarkerLabel) ? $mapMarkerLabel : 'Карта ТЕТРИ';
 @endphp
 
-<section id="contacts" class="overflow-x-clip">
+<section id="contacts" {{ $attributes->class(['overflow-x-clip']) }}>
     <x-site.shell>
         <div class="grid lg:grid-cols-3 lg:items-stretch">
             <div class="site-contacts-map-olive-half relative min-h-[16rem] max-lg:mb-8 lg:min-h-0">
@@ -63,16 +65,7 @@
                     </div>
                 </div>
 
-                <div class="flex flex-1 flex-col bg-olive-deep text-cream">
-                    <div class="py-14 lg:pl-10">
-                        <x-site.footer-main :settings="$settings" />
-                    </div>
-
-                    <div class="mt-auto border-t border-cream/15 py-4 text-xs text-cream/60 sm:flex sm:items-center sm:justify-between lg:pl-10">
-                        <span>@typo($settings['copyright'] ?? '© ТЕТРИ')</span>
-                        <a href="#top" class="mt-2 inline-block hover:text-cream sm:mt-0">Наверх ↑</a>
-                    </div>
-                </div>
+                <x-site.footer :settings="$settings" />
             </div>
         </div>
     </x-site.shell>

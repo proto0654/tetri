@@ -177,4 +177,20 @@
             text-indent: calc(-30cqw - 2.5rem);
         }
     }
+
+    /*
+     * Info paragraph: uppercase, plum (CTA color), ~15% over base/lg, justified full column.
+     * Use for concept/kids CMS descriptions (not section titles or marks).
+     */
+    .site-info {
+        @apply w-full uppercase leading-relaxed tracking-wide text-plum text-justify;
+        font-size: 1.15rem; /* 15% over text-base (1rem) */
+        hyphens: auto;
+    }
+
+    @media (min-width: 640px) {
+        .site-info {
+            font-size: 1.29375rem; /* 15% over text-lg (1.125rem) */
+        }
+    }
 }

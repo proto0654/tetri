@@ -36,10 +36,10 @@ class CategoryForm
                     ->visibility('public')
                     ->maxSize(5120),
                 Select::make('columns')
-                    ->label('Колонки на странице меню')
+                    ->label('Превью в «Все меню»')
                     ->options([
-                        2 => '2 колонки',
-                        3 => '3 колонки',
+                        2 => '2 блюда',
+                        3 => '3 блюда',
                     ])
                     ->required()
                     ->default(3),

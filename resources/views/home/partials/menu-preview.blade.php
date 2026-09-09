@@ -34,7 +34,7 @@
                         <div class="swiper-wrapper">
                             @foreach ($categories as $category)
                                 <div class="swiper-slide !w-56 sm:!w-64">
-                                    <a href="{{ route('menu') }}" class="group relative block overflow-hidden rounded-[1.75rem] bg-cream-dark shadow-sm transition group-hover:shadow-md">
+                                    <a href="{{ route('menu.category', $category) }}" class="group relative block overflow-hidden rounded-[1.75rem] bg-cream-dark shadow-sm transition group-hover:shadow-md">
                                         <x-media :path="$category->image" :alt="$category->title" class="aspect-[3/4] w-full object-cover transition duration-500 group-hover:scale-105" />
                                         <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-4 pb-4 pt-12">
                                             <p class="text-sm font-semibold uppercase tracking-wide text-white">

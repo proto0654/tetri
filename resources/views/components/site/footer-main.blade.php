@@ -14,7 +14,7 @@
                 :label="'Банкет'"
                 class="bg-transparent p-0 text-left text-sm text-cream/85 shadow-none hover:bg-transparent hover:text-cream"
             />
-            <a href="{{ route('home') }}#contacts" class="hover:text-cream">Контакты</a>
+            <a href="#contacts" class="hover:text-cream">Контакты</a>
         </nav>
     </div>
 
@@ -52,7 +52,11 @@
     </div>
 
     <div class="sm:col-span-2 lg:col-span-1">
-        <p class="font-display text-3xl font-bold tracking-[0.2em]">ТЕТРИ</p>
+        <x-site.logo
+            :path="$settings['logo'] ?? null"
+            class="h-10 w-auto object-contain sm:h-12"
+            text-class="font-display text-3xl font-bold tracking-[0.2em]"
+        />
         <p class="mt-4 max-w-sm text-sm leading-relaxed text-cream/85">
             @typo($settings['footer_about'] ?? '')
         </p>

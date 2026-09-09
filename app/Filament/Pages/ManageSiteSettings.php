@@ -246,6 +246,34 @@ class ManageSiteSettings extends Page
                                     ->maxSize(1024)
                                     ->helperText('Квадрат, лучше PNG/SVG, минимум 48×48 px (Google).')
                                     ->columnSpanFull(),
+                                FileUpload::make('logo')
+                                    ->label('Логотип')
+                                    ->acceptedFileTypes([
+                                        'image/png',
+                                        'image/svg+xml',
+                                        'image/webp',
+                                        'image/jpeg',
+                                    ])
+                                    ->disk('public')
+                                    ->directory('site/logo')
+                                    ->visibility('public')
+                                    ->maxSize(2048)
+                                    ->helperText('Шапка и подвал; если пусто — текст ТЕТРИ.')
+                                    ->columnSpanFull(),
+                                FileUpload::make('og_image')
+                                    ->label('OG-картинка')
+                                    ->image()
+                                    ->acceptedFileTypes([
+                                        'image/png',
+                                        'image/jpeg',
+                                        'image/webp',
+                                    ])
+                                    ->disk('public')
+                                    ->directory('site/og')
+                                    ->visibility('public')
+                                    ->maxSize(5120)
+                                    ->helperText('Рекомендуемо 1200×630 для репостов.')
+                                    ->columnSpanFull(),
                                 Textarea::make('footer_about')
                                     ->label('Описание в подвале')
                                     ->rows(3)
@@ -262,6 +290,19 @@ class ManageSiteSettings extends Page
                                     ->helperText('Кнопки брони открывают попап; поле можно оставить пустым.'),
                                 TextInput::make('copyright')
                                     ->label('Копирайт'),
+                                Textarea::make('cookie_notice')
+                                    ->label('Уведомление о cookie')
+                                    ->rows(2)
+                                    ->helperText('Текст в полосе копирайта. Вставьте {privacy} — на этом месте будет ссылка с заголовком политики.')
+                                    ->columnSpanFull(),
+                                TextInput::make('privacy_title')
+                                    ->label('Заголовок политики')
+                                    ->columnSpanFull(),
+                                Textarea::make('privacy_body')
+                                    ->label('Текст политики')
+                                    ->rows(14)
+                                    ->helperText('Абзацы разделяйте пустой строкой.')
+                                    ->columnSpanFull(),
                                 TextInput::make('design_credit')
                                     ->label('Design by'),
                             ]),

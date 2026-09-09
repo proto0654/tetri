@@ -10,13 +10,28 @@
     @class([
         'z-40',
         'absolute inset-x-0 top-0' => $transparent,
-        'sticky top-0' => ! $transparent,
+        'sticky top-0 bg-cream' => ! $transparent,
     ])
 >
-    <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8" @class(['pb-4' => ! $transparent])>
-        <div class="flex items-center justify-between gap-4 rounded-full bg-cream px-4 py-2.5 shadow-sm sm:gap-6 sm:px-6">
-            <a href="{{ route('home') }}" class="font-display text-xl font-bold tracking-[0.35em] text-olive">
-                ТЕТРИ
+    <div
+        @class([
+            'px-4 sm:px-6 lg:px-8',
+            'mx-auto max-w-7xl pt-4' => $transparent,
+        ])
+    >
+        <div
+            @class([
+                'flex items-center justify-between gap-4 py-2.5 sm:gap-6',
+                'mx-auto max-w-7xl' => ! $transparent,
+                'rounded-full bg-cream px-4 sm:px-6' => $transparent,
+            ])
+        >
+            <a href="{{ route('home') }}" class="inline-flex items-center shrink-0">
+                <x-site.logo
+                    :path="$settings['logo'] ?? null"
+                    class="h-8 w-auto object-contain"
+                    text-class="font-display text-xl font-bold tracking-[0.35em] text-olive"
+                />
             </a>
 
             <nav class="hidden items-center gap-7 text-sm font-medium md:flex">
@@ -28,7 +43,7 @@
                     :label="'Банкет'"
                     :class="'bg-transparent p-0 text-sm font-medium shadow-none hover:bg-transparent '.$linkClass"
                 />
-                <a href="{{ route('home') }}#contacts" class="{{ $linkClass }}">Контакты</a>
+                <a href="#contacts" class="{{ $linkClass }}">Контакты</a>
             </nav>
 
             <div class="flex items-center gap-3">
@@ -57,7 +72,12 @@
             x-cloak
             x-show="open"
             x-transition
-            class="mt-2 rounded-3xl bg-cream px-4 py-4 shadow-sm md:hidden"
+            @class([
+                'mt-2 px-4 py-4 md:hidden',
+                'mx-auto max-w-7xl' => ! $transparent,
+                'rounded-3xl bg-cream' => $transparent,
+                'rounded-2xl border border-ink/10 bg-cream-dark' => ! $transparent,
+            ])
         >
             <nav class="flex flex-col gap-3 text-sm font-medium text-ink">
                 <a href="{{ route('home') }}#concept" @click="open = false">О нас</a>
@@ -69,7 +89,7 @@
                     class="bg-transparent p-0 text-left text-sm font-medium text-ink shadow-none hover:bg-transparent"
                     @click="open = false"
                 />
-                <a href="{{ route('home') }}#contacts" @click="open = false">Контакты</a>
+                <a href="#contacts" @click="open = false">Контакты</a>
             </nav>
         </div>
     </div>
