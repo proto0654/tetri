@@ -18,7 +18,7 @@ Kids section: kids_eyebrow + kids_title sit together in one header block spannin
 Concept section matches kids: concept_eyebrow + concept_title in one header above the grid; body is lg:grid-cols-3 with aside in col1 (1/3) and description+CTA in col2–3 (2/3).
 
 ## Home map spans cream+olive column stack
-Contacts+footer on home are one lg:grid-cols-3 block: map in col1 stretches full height of the right stack (absolute inset-y-0 + left-bleed). Map clip: rounded + overflow-hidden + isolate on the bleed wrapper only (not on the iframe). Right-only radius on lg. Col2–3 is one column split vertically: cream (title/details/route) then olive (footer-main + narrow ©/Наверх bar), both site-bleed-right. design_credit only via layout x-site.design-credit — not inside contacts. Layout skips x-site.footer on home.
+Contacts+footer on home are one lg:grid-cols-3 block: map in col1 stretches full height of the right stack (absolute inset-y-0 + left-bleed). Map clip: rounded + overflow-hidden + isolate on the bleed wrapper only (not on the iframe). Right-only radius on lg. Map column uses .site-contacts-map-olive-half (::before olive band, bottom 50%, full viewport width, z-index -1); right column is relative z-10 so cream/olive copy stays above the band. Col2–3 split vertically: cream then olive, both site-bleed-right. design_credit only via layout x-site.design-credit. Layout skips x-site.footer on home.
 
 ## Contacts: map left-bleed only, no footer right-bleed
 Contacts/footer: only the map uses .site-bleed-left past the shell. Cream + olive footer column stay inside max-w-7xl (no site-bleed-right).

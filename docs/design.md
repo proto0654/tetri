@@ -32,6 +32,7 @@ Active — tokens taken from the ТЕТРИ UI mockup.
 - Icons on site: `<x-site.icon>` (Heroicon name or custom SVG from storage)
 - Carousels (menu preview, stories): local Swiper slides + prev/next; no Alpine overflow scroll
 - Contacts map: left-bleed card; radius + overflow clip on wrapper (`isolate`), not on iframe; right-only radius on lg while stacked with cream+olive
+- Map column olive half-band: `.site-contacts-map-olive-half` (`::before` bottom 50%, `100vw`, z-index -1) so the rounded bottom-right sits on olive; contacts copy column uses `z-10`
 - `design_credit`: single full-width strip under main/footer via `x-site.design-credit`
 
 ## Admin

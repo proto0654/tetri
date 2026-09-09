@@ -52,6 +52,7 @@ Also: hero icons / kids benefits / social links use `icon` + optional `custom_ic
 ## Contacts / map
 
 - Home contacts: map col1 left-bleed stretches cream+olive height; clip with `rounded` + `overflow-hidden` + `isolate` on the bleed **wrapper** (iframe stays unrounded).
+- Map column: `.site-contacts-map-olive-half` — full-viewport olive `::before` on bottom 50% (z-index -1); right column `relative z-10` so copy stays above the band.
 - «Проложить маршрут на карте» after working hours when coords are set.
 - `design_credit`: layout `x-site.design-credit` only (not inside contacts partial).
 

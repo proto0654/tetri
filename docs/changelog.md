@@ -4,6 +4,7 @@ Back to [project context](CONTEXT.md)
 
 ## 2026-09-09
 
+- Contacts map: olive viewport half-band behind map column (`.site-contacts-map-olive-half`) and right-column `z-10` so BR radius reads on olive without covering cream/olive copy. See [design.md](design.md), [content.md](content.md), [CONTEXT.md](CONTEXT.md).
 - Yandex map coords/marker + route CTA; SiteSettings partial-save merge + fill-blanks seeders; map clip on bleed wrapper; single `design_credit` strip. See [content.md](content.md), [design.md](design.md), [setup.md](setup.md#seeding-idempotent--fill-blanks-only), [CONTEXT.md](CONTEXT.md).
 - SiteSettings `save()` merges with existing row (partial updates safe); seeder fills blank settings keys only; overwrite only via `migrate:fresh --seed`. design_credit rendered once via `x-site.design-credit`. See [setup.md](setup.md#seeding-idempotent--fill-blanks-only), [content.md](content.md), [tech.md](tech.md).
 - Synced after Swiper carousels (menu preview + stories), CMS hero overlay colors (`CssColor`), and 12 themed MAX story demos (food / kids / social; empty video placeholders). See [content.md](content.md), [design.md](design.md), [tech.md](tech.md), [CONTEXT.md](CONTEXT.md).

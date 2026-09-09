@@ -13,7 +13,7 @@
 <section id="contacts" class="overflow-x-clip">
     <x-site.shell>
         <div class="grid lg:grid-cols-3 lg:items-stretch">
-            <div class="relative min-h-[16rem] max-lg:mb-8 lg:min-h-0">
+            <div class="site-contacts-map-olive-half relative min-h-[16rem] max-lg:mb-8 lg:min-h-0">
                 <div class="site-bleed-left z-10 isolate overflow-hidden rounded-[2rem] bg-cream-dark shadow-sm max-lg:relative max-lg:min-h-[16rem] lg:absolute lg:inset-y-0 lg:left-0 lg:rounded-l-none lg:rounded-r-[2rem]">
                     @if (! empty($mapSrc))
                         <iframe
@@ -29,7 +29,7 @@
                 </div>
             </div>
 
-            <div class="flex min-w-0 flex-col lg:col-span-2">
+            <div class="relative z-10 flex min-w-0 flex-col lg:col-span-2">
                 <div class="site-bleed-right bg-cream">
                     <div class="py-16 sm:py-20 lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
                         <h2 class="font-display text-3xl font-bold text-olive sm:text-4xl lg:text-5xl">
