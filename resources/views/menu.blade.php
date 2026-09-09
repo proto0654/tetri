@@ -1,0 +1,31 @@
+@extends('layouts.site')
+
+@section('title', 'Меню — ТЕТРИ')
+
+@section('content')
+    <section class="bg-cream px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-7xl">
+            <x-site.mark
+                :text="$settings['menu_section_eyebrow'] ?? null"
+                ruled
+                class="uppercase"
+            />
+
+            <div class="mt-4 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                <h1 class="font-display text-4xl font-bold text-olive sm:text-5xl">
+                    {{ $settings['menu_section_title'] ?? 'МЕНЮ' }}
+                </h1>
+
+                <x-site.mark
+                    :text="$settings['menu_page_meta'] ?? null"
+                    :note="$settings['menu_page_meta_note'] ?? null"
+                    class="sm:items-end sm:text-right"
+                />
+            </div>
+
+            <div class="mt-10">
+                <livewire:menu-grid />
+            </div>
+        </div>
+    </section>
+@endsection

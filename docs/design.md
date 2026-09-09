@@ -8,12 +8,31 @@ Visual direction and UI constraints for the public site and admin branding.
 
 ## Status
 
-Stub — brand assets and visual system not defined yet.
+Active — tokens taken from the ТЕТРИ UI mockup.
 
-## Notes
+## Public tokens (`resources/css/app.css`)
 
-- Preserve an existing design system once introduced; avoid generic AI-default looks.
-- Admin UI starts from Filament defaults until a custom theme is requested.
+| Token | Role |
+| --- | --- |
+| `cream` / `cream-dark` | Page background |
+| `olive` / `olive-deep` | Headings / footer |
+| `plum` / `plum-dark` | Primary buttons, active pills |
+| `ink` / `muted` | Body text |
+| `font-display` Literata | Section titles / brand |
+| `font-sans` Manrope | UI / body |
+
+## Layout notes
+
+- Hero: full-bleed atmosphere image + centered brand + vertical media + amenity icons
+- Soft large radii on media (~1.5–2rem)
+- Menu pills: inactive cream-dark, active plum
+- Footer: olive-deep
+- Section accents: small ◇ lines via `<x-site.mark>` for visual balance (eyebrow / aside / meta)
+- Icons on site: `<x-site.icon>` (Heroicon name or custom SVG from storage)
+
+## Admin
+
+Filament defaults until a custom admin theme is requested. Icon selects show compact HTML SVG previews (`allowHtml`).
 
 ## Links
 

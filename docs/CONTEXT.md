@@ -4,7 +4,7 @@
 
 ## Snapshot
 
-Public website and admin panel for family cafe **Тетри**. Stack: Laravel + Filament. AI-assisted development via Laravel Boost MCP in Cursor.
+Public website and Filament admin for family cafe **Тетри**. Stack: Laravel 13 + Filament 5 + Livewire 4 + Blade/Tailwind 4. Content: categories, dishes, stories, site settings (including section accent copy and Heroicon/custom SVG icons). Local URL via Herd: `http://tetri.test`. Booking CTA opens a Livewire modal (stub submit).
 
 ## Deep links
 
@@ -14,25 +14,33 @@ Public website and admin panel for family cafe **Тетри**. Stack: Laravel + 
 | Tech stack | [tech.md](tech.md) | Laravel, Filament, frontend tooling | active |
 | Tooling | [tooling.md](tooling.md) | Cursor, Boost, MCP, skills | active |
 | Setup | [setup.md](setup.md) | Bootstrap steps already done | active |
-| Content | [content.md](content.md) | Pages and content plan | stub |
-| Design | [design.md](design.md) | Visual direction | stub |
+| Content | [content.md](content.md) | Pages and content model | active |
+| Design | [design.md](design.md) | Visual tokens from mockup | active |
 | Changelog | [changelog.md](changelog.md) | Documentation actualizations | active |
 
 ## Current decisions
 
-- Project root: `e:\laravel\tetri` (Windows / Herd PHP 8.4).
+- Project root: `e:\laravel\tetri` (Windows / Herd PHP 8.4); public app at `http://tetri.test`, admin `/admin`.
 - Docs live in `docs/`; hub is this file (`CONTEXT.md`).
 - AI agent target is **Cursor** only (`boost.json` → `cursor`).
 - Boost MCP config: `.cursor/mcp.json` → `php artisan boost:mcp`.
 - Dialogue → docs workflow is the Cursor skill **`actualize`**.
+- UI mockup is source of truth; installed package versions beat any outdated brief.
+- MVP pages: `/` + `/menu`.
+- Site copy/media: `settings.key=site` JSON via `App\Settings\SiteSettings` (no Spatie Settings).
+- Decorative section accents (◇ eyebrows / asides) are settings fields, rendered with `<x-site.mark>`.
+- Public icons: Heroicons select with SVG preview + optional custom SVG upload (`IconFieldSchema` / `HeroiconOptions`).
+- Booking: Livewire `BookingModal` via `<x-site.book-button>`; submit is a stub (alert), not a bot yet.
+- Public media URLs: relative `/storage/...` via `App\Support\PublicMedia`.
 
 ## Open questions
 
-- Public site IA (home, menu, events, contacts, booking?).
-- Filament resources and content model (menu categories, dishes, events, leads).
-- Design system / brand assets for Тетри.
-- Production hosting and domain.
+- Production hosting and domain / DB engine.
+- Wire booking stub to Telegram/MAX bot.
+- Dedicated Banquet / About pages beyond home anchors.
 
 ## Last actualized
 
+- 2026-09-09 — Accent copy fields, icon picker + custom SVG, booking modal stub; docs synced.
+- 2026-09-09 — Implemented Waves 1–4 (domain, Filament, home, MenuGrid, polish); docs updated from mockup plan.
 - 2026-09-09 — Initial hub + branches from project bootstrap dialogue.

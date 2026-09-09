@@ -1,0 +1,217 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\Category;
+use App\Models\MenuItem;
+use App\Models\Story;
+use App\Models\User;
+use App\Settings\SiteSettings;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class CafeContentSeeder extends Seeder
+{
+    /**
+     * Curated Unsplash food photos (downloaded into storage — no hotlinks in runtime).
+     *
+     * @var array<string, string>
+     */
+    private const STOCK = [
+        'zavtraki' => 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=900&h=1200&q=80',
+        'osnovnoe-menyu' => 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&h=1200&q=80',
+        'detskoe-menyu' => 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=900&h=1200&q=80',
+        'deserty' => 'https://images.unsplash.com/photo-1563805042-7684c019e1cd?auto=format&fit=crop&w=900&h=1200&q=80',
+        'kofe-i-napitki' => 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&h=1200&q=80',
+        'syrniki' => 'https://images.unsplash.com/photo-1484723091739-30a097e8f929?auto=format&fit=crop&w=1000&h=750&q=80',
+        'avokado' => 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1000&h=750&q=80',
+        'bowl' => 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1000&h=750&q=80',
+        'pasta' => 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1000&h=750&q=80',
+        'nuggets' => 'https://images.unsplash.com/photo-1562967914-608f82629710?auto=format&fit=crop&w=1000&h=750&q=80',
+        'cheesecake' => 'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=1000&h=750&q=80',
+        'cappuccino' => 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=1000&h=750&q=80',
+        'hero-bg' => 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1600&h=1000&q=80',
+        'hero-preview' => 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=1200&q=80',
+        'kids-1' => 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&h=750&q=80',
+        'kids-2' => 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1000&h=750&q=80',
+        'story-1' => 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-2' => 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-3' => 'https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-4' => 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=720&h=1280&q=80',
+        'story-5' => 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=720&h=1280&q=80',
+    ];
+
+    public function run(): void
+    {
+        User::query()->updateOrCreate(
+            ['email' => 'admin@tetri.test'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ],
+        );
+
+        $categories = [
+            ['title' => 'Завтраки', 'slug' => 'zavtraki', 'columns' => 3, 'sort_order' => 1, 'stock' => 'zavtraki'],
+            ['title' => 'Основное меню', 'slug' => 'osnovnoe-menyu', 'columns' => 3, 'sort_order' => 2, 'stock' => 'osnovnoe-menyu'],
+            ['title' => 'Детское меню', 'slug' => 'detskoe-menyu', 'columns' => 2, 'sort_order' => 3, 'stock' => 'detskoe-menyu'],
+            ['title' => 'Десерты', 'slug' => 'deserty', 'columns' => 2, 'sort_order' => 4, 'stock' => 'deserty'],
+            ['title' => 'Кофе и напитки', 'slug' => 'kofe-i-napitki', 'columns' => 2, 'sort_order' => 5, 'stock' => 'kofe-i-napitki'],
+        ];
+
+        foreach ($categories as $index => $data) {
+            $stock = $data['stock'];
+            unset($data['stock']);
+
+            $category = Category::query()->updateOrCreate(
+                ['slug' => $data['slug']],
+                [
+                    ...$data,
+                    'image' => $this->storeStockImage($stock, "categories/{$data['slug']}.jpg"),
+                    'is_active' => true,
+                ],
+            );
+
+            $this->seedMenuItems($category, $index);
+        }
+
+        $storyStocks = ['story-1', 'story-2', 'story-3', 'story-4', 'story-5'];
+
+        foreach ($storyStocks as $i => $stock) {
+            $n = $i + 1;
+            Story::query()->updateOrCreate(
+                ['title' => "Сторис {$n}"],
+                [
+                    'video_path' => $this->storePlaceholderVideo("stories/story-{$n}.mp4"),
+                    'preview_image' => $this->storeStockImage($stock, "stories/previews/story-{$n}.jpg"),
+                    'sort_order' => $n,
+                    'is_active' => true,
+                ],
+            );
+        }
+
+        app(SiteSettings::class)->save([
+            'hero_title' => 'Т Е Т Р И',
+            'hero_background_image' => $this->storeStockImage('hero-bg', 'site/hero/background.jpg'),
+            'hero_video_path' => $this->storePlaceholderVideo('site/hero/hero.mp4'),
+            'hero_video_preview' => $this->storeStockImage('hero-preview', 'site/hero/preview.jpg'),
+            'kids_eyebrow' => 'ДЛЯ ВСЕЙ СЕМЬИ',
+            'kids_images' => [
+                $this->storeStockImage('kids-1', 'site/kids/exterior.jpg'),
+                $this->storeStockImage('kids-2', 'site/kids/veranda.jpg'),
+            ],
+            'kids_description' => 'В ресторане есть просторная детская игровая комната, где дети могут играть и веселиться, пока родители спокойно отдыхают за столом.',
+            'kids_description_secondary' => 'Игровая оборудована качественной шумоизоляцией, поэтому детский смех и игры не мешают атмосфере основного зала.',
+            'kids_location_note' => 'Семейный ресторан в центре Симферополя — пр-т. Кирова, 31А',
+            'kids_benefits' => [
+                ['icon' => 'heroicon-o-puzzle-piece', 'text' => 'стильная детская игровая', 'url' => null],
+                ['icon' => 'heroicon-o-sparkles', 'text' => 'анимация', 'url' => null],
+                ['icon' => 'heroicon-o-shield-check', 'text' => 'безопасная площадка', 'url' => null],
+                ['icon' => 'heroicon-o-heart', 'text' => 'уютно для родителей', 'url' => null],
+            ],
+            'menu_section_eyebrow' => 'ОБЕДЫ, УЖИНЫ И АВТОРСКАЯ КУХНЯ.',
+            'menu_section_description' => 'От завтраков до десертов — готовим из свежих продуктов каждый день.',
+            'menu_section_cta_label' => 'СМОТРЕТЬ ВСЕ',
+            'menu_page_meta' => 'Обеды · ужины · детское меню',
+            'menu_page_meta_note' => 'Обновляем сезонно',
+            'concept_eyebrow' => 'СВОЯ КУХНЯ И ПЕКАРНЯ',
+            'concept_aside' => 'Кофе - выпечка — 10:00–23:00',
+            'concept_description' => 'Авторские блюда, свежая выпечка и кофейня под одной крышей. Приходите на бизнес-ланч, семейный ужин или тихий вечер — в Тетри всегда своя атмосфера.',
+            'stories_section_aside' => 'Новинки и атмосфера зала',
+            'stories_section_aside_note' => 'Смотрите в MAX',
+            'address' => 'пр-т. Кирова, 31А',
+            'booking_cta_url' => '#contacts',
+            'social_links' => [
+                ['icon' => 'heroicon-o-camera', 'text' => 'Instagram', 'url' => 'https://instagram.com'],
+                ['icon' => 'heroicon-o-paper-airplane', 'text' => 'Telegram', 'url' => 'https://t.me'],
+                ['icon' => 'heroicon-o-chat-bubble-left-right', 'text' => 'VK', 'url' => 'https://vk.com'],
+            ],
+            'map_embed_url' => 'https://yandex.ru/map-widget/v1/?ll=34.100000%2C44.950000&z=16',
+        ]);
+    }
+
+    protected function seedMenuItems(Category $category, int $categoryIndex): void
+    {
+        $samples = [
+            ['Сырники со сметаной', 'Творожные сырники, сметана, ягодный соус', 390, 'syrniki'],
+            ['Авокадо-тост', 'Зерновой тост, авокадо, яйцо пашот', 520, 'avokado'],
+            ['Боул с лососем', 'Рис, лосось, овощи, соус юдзу', 890, 'bowl'],
+            ['Паста с креветками', 'Лингвини, креветки, томаты черри', 790, 'pasta'],
+            ['Детские наггетсы', 'Куриные наггетсы, картофель фри', 420, 'nuggets'],
+            ['Чизкейк', 'Классический чизкейк Нью-Йорк', 450, 'cheesecake'],
+            ['Капучино', 'Эспрессо, молоко, плотная пенка', 250, 'cappuccino'],
+        ];
+
+        foreach (array_slice($samples, 0, 4 + ($categoryIndex % 3)) as $itemIndex => [$title, $description, $price, $stock]) {
+            MenuItem::query()->updateOrCreate(
+                [
+                    'category_id' => $category->id,
+                    'title' => $title,
+                ],
+                [
+                    'description' => $description,
+                    'price' => $price,
+                    'image' => $this->storeStockImage($stock, 'menu-items/'.Str::slug($title).'.jpg'),
+                    'sort_order' => $itemIndex + 1,
+                    'is_active' => true,
+                ],
+            );
+        }
+    }
+
+    protected function storeStockImage(string $stockKey, string $path): string
+    {
+        $url = self::STOCK[$stockKey] ?? null;
+
+        if ($url) {
+            try {
+                $response = Http::timeout(20)
+                    ->withHeaders(['User-Agent' => 'TetriCafeSeeder/1.0'])
+                    ->get($url);
+
+                if ($response->successful() && strlen($response->body()) > 10_000) {
+                    Storage::disk('public')->put($path, $response->body());
+
+                    return $path;
+                }
+            } catch (\Throwable) {
+                // Fall through to solid-color JPEG fallback.
+            }
+        }
+
+        Storage::disk('public')->put($path, $this->fallbackJpeg());
+
+        return $path;
+    }
+
+    protected function storePlaceholderVideo(string $path): string
+    {
+        Storage::disk('public')->put($path, '');
+
+        return $path;
+    }
+
+    /**
+     * Visible colored JPEG fallback if Unsplash is unreachable.
+     */
+    protected function fallbackJpeg(): string
+    {
+        if (function_exists('imagecreatetruecolor')) {
+            $img = imagecreatetruecolor(800, 1000);
+            $bg = imagecolorallocate($img, 92, 61, 74);
+            imagefilledrectangle($img, 0, 0, 800, 1000, $bg);
+            ob_start();
+            imagejpeg($img, null, 85);
+            $binary = ob_get_clean();
+            imagedestroy($img);
+
+            return $binary ?: '';
+        }
+
+        return base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==') ?: '';
+    }
+}
