@@ -3,13 +3,13 @@
 @endphp
 
 <div class="relative">
-    <div class="flex flex-wrap gap-3">
+    <div class="flex w-full flex-wrap gap-2 sm:gap-3 lg:flex-nowrap">
         <button
             type="button"
             wire:key="category-tab-all"
             wire:click="showAll"
             @class([
-                'rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide transition',
+                'min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-full px-3 py-2.5 text-center text-xs font-semibold tracking-wide transition sm:basis-0 sm:px-4 sm:text-sm',
                 'bg-plum text-white' => $activeCategory === null,
                 'bg-cream-dark text-ink hover:bg-plum/10' => $activeCategory !== null,
             ])
@@ -23,7 +23,7 @@
                 wire:key="category-tab-{{ $category->id }}"
                 wire:click="setCategory({{ $category->id }})"
                 @class([
-                    'rounded-full px-5 py-2.5 text-sm font-semibold tracking-wide transition',
+                    'min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-full px-3 py-2.5 text-center text-xs font-semibold tracking-wide transition sm:basis-0 sm:px-4 sm:text-sm',
                     'bg-plum text-white' => $activeCategory?->id === $category->id,
                     'bg-cream-dark text-ink hover:bg-plum/10' => $activeCategory?->id !== $category->id,
                 ])
@@ -91,7 +91,10 @@
                 @endforelse
             </div>
         @else
-            <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
+            <h2
+                id="menu-grid-heading"
+                class="scroll-mt-28 font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl"
+            >
                 @typo(mb_strtoupper($activeCategory->title))
             </h2>
 
@@ -128,7 +131,7 @@
 
             @if ($items->hasPages())
                 <div class="mt-12">
-                    {{ $items->links() }}
+                    {{ $items->links('pagination.site') }}
                 </div>
             @endif
         @endif

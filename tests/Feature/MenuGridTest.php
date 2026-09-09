@@ -121,7 +121,10 @@ class MenuGridTest extends TestCase
             ->assertDontSee('Dish13')
             ->call('gotoPage', 2)
             ->assertSee('Dish13')
-            ->assertDontSee('Dish01');
+            ->assertDontSee('Dish01')
+            ->assertSee('bg-plum', false)
+            ->assertSee('bg-olive', false)
+            ->assertDontSee('border-gray-300', false);
     }
 
     public function test_menu_cards_link_to_dish_show_page(): void

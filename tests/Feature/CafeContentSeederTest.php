@@ -32,6 +32,9 @@ class CafeContentSeederTest extends TestCase
         $menuItemCount = MenuItem::query()->count();
         $this->assertGreaterThan(0, $menuItemCount);
 
+        $mainCategory = Category::query()->where('slug', 'osnovnoe-menyu')->firstOrFail();
+        $this->assertGreaterThan(12, $mainCategory->menuItems()->count());
+
         Category::query()->where('slug', 'zavtraki')->update(['title' => 'Завтраки (edited)']);
         Story::query()->where('title', 'Завтрак дня')->update(['title' => 'Сторис edited']);
         MenuItem::query()->where('title', 'Сырники со сметаной')->firstOrFail()->update([

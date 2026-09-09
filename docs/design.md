@@ -28,6 +28,7 @@ Active — tokens taken from the ТЕТРИ UI mockup.
 - Hero overlay: CMS rgba gradient (`hero_overlay_*`) as inline `linear-gradient`, not hardcoded Tailwind stops
 - Soft large radii on media (~1.5–2rem)
 - Menu pills: inactive cream-dark, active plum; first pill «Все меню»; category mode uses up to 4 columns
+- Menu pagination: same pill language (plum active / cream-dark inactive) + olive round ←/→ like Swiper arrows; no gray Laravel default chrome
 - Footer: olive-deep; `x-site.footer` + `footer-bar` (cookie/privacy strip); home embeds footer in contacts olive column
 - Section accents: small ◇ lines via `<x-site.mark>` for visual balance (eyebrow / aside / meta)
 - Icons on site: `<x-site.icon>` (Heroicon name or custom SVG from storage)

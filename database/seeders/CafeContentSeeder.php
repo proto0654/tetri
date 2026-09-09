@@ -267,7 +267,30 @@ class CafeContentSeeder extends Seeder
             ['Капучино', 'Эспрессо, молоко, плотная пенка', 250, 'cappuccino'],
         ];
 
-        foreach (array_slice($samples, 0, 4 + ($categoryIndex % 3)) as $itemIndex => [$title, $description, $price, $stock]) {
+        // Extra main-menu dishes so /menu/osnovnoe-menyu exercises Livewire pagination (12/page).
+        if ($category->slug === 'osnovnoe-menyu') {
+            $samples = array_merge($samples, [
+                ['Стейк из лосося', 'Лосось на гриле, овощи, лимонный соус', 1290, 'bowl'],
+                ['Ризотто с грибами', 'Арборио, белые грибы, пармезан', 780, 'pasta'],
+                ['Цезарь с курицей', 'Айсберг, курица, соус цезарь, пармезан', 690, 'nuggets'],
+                ['Том ям', 'Кокосовое молоко, креветки, лемонграсс', 720, 'bowl'],
+                ['Бургер Тетри', 'Говядина, сыр, соус домашний, картофель', 850, 'avokado'],
+                ['Утиная грудка', 'Утка, вишнёвый соус, пюре', 1190, 'pasta'],
+                ['Салат с киноа', 'Киноа, овощи, авокадо, семена', 640, 'bowl'],
+                ['Брускетта ассорти', 'Три брускетты: томат, риет, грибы', 560, 'avokado'],
+                ['Лазанья болоньезе', 'Говядина, бешамель, сыр', 820, 'pasta'],
+                ['Суп дня', 'Сезонный крем-суп шефа', 390, 'bowl'],
+                ['Тартар из говядины', 'Говядина, каперсы, тост', 980, 'nuggets'],
+                ['Картофель с трюфелем', 'Молодой картофель, трюфельное масло', 480, 'pasta'],
+                ['Греческий салат', 'Томаты, огурцы, фета, оливки', 550, 'bowl'],
+            ]);
+        }
+
+        $take = $category->slug === 'osnovnoe-menyu'
+            ? count($samples)
+            : 4 + ($categoryIndex % 3);
+
+        foreach (array_slice($samples, 0, $take) as $itemIndex => [$title, $description, $price, $stock]) {
             $imagePath = 'menu-items/'.Str::slug($title).'-'.$category->slug.'.jpg';
             $legacyImagePath = 'menu-items/'.Str::slug($title).'.jpg';
 

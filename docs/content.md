@@ -34,6 +34,8 @@ Active — IA and content model settled from UI mockup.
 
 Demo **stories (MAX)**: 12 items — themes food (1–5), kids (6–9), social (10–12). Preview images from Unsplash; `video_path` is an empty placeholder `mp4` until real clips are uploaded in Filament.
 
+Demo **main menu** (`osnovnoe-menyu`): 20 dishes so `/menu/osnovnoe-menyu` pagination (12/page) is exercisable locally.
+
 ## Menu page behavior
 
 - Default `/menu`: tab «Все меню» — each active category as a block; preview count = `Category.columns` (2|3, default 3).
