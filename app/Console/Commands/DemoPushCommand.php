@@ -60,7 +60,7 @@ class DemoPushCommand extends Command
         $sshBase = ['ssh', '-i', $key, '-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes', "{$user}@{$host}"];
 
         $this->info('Uploading zip…');
-        $mkdir = Process::run([...$sshBase, "mkdir -p {$path}storage/app/demo-sync"]);
+        $mkdir = Process::timeout(120)->run([...$sshBase, "mkdir -p {$path}storage/app/demo-sync"]);
 
         if ($mkdir->failed()) {
             $this->error($mkdir->errorOutput() ?: $mkdir->output());
@@ -68,7 +68,7 @@ class DemoPushCommand extends Command
             return self::FAILURE;
         }
 
-        $scp = Process::run([
+        $scp = Process::timeout(600)->run([
             'scp', '-i', $key, '-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes',
             $zipPath,
             "{$user}@{$host}:{$remoteZip}",
@@ -81,7 +81,7 @@ class DemoPushCommand extends Command
         }
 
         $this->info('Importing on remote…');
-        $import = Process::run([
+        $import = Process::timeout(300)->run([
             ...$sshBase,
             "cd {$path} && {$php} artisan demo:import ".escapeshellarg($remoteZip)." && {$php} artisan optimize:clear",
         ]);
