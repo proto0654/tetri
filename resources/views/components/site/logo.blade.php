@@ -1,6 +1,6 @@
 @props([
     'path' => null,
-    'textClass' => 'font-display text-xl font-bold tracking-[0.35em] text-olive',
+    'textClass' => 'font-display text-xl font-normal tracking-[0.35em] text-olive',
 ])
 
 @php

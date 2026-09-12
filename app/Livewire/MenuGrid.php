@@ -16,6 +16,11 @@ class MenuGrid extends Component
 
     public ?int $activeCategoryId = null;
 
+    /**
+     * Scroll-to-heading runs on pagination page changes only — not when tabs call resetPage().
+     */
+    protected bool $shouldScrollOnPageChange = true;
+
     public function mount(?string $categorySlug = null): void
     {
         if (! filled($categorySlug)) {
@@ -34,7 +39,7 @@ class MenuGrid extends Component
 
     public function showAll(): void
     {
-        $this->resetPage();
+        $this->resetPageWithoutScroll();
         $this->activeCategoryId = null;
         $this->syncBrowserUrl(route('menu'));
     }
@@ -47,7 +52,7 @@ class MenuGrid extends Component
             return;
         }
 
-        $this->resetPage();
+        $this->resetPageWithoutScroll();
         $this->activeCategoryId = $id;
         $this->syncBrowserUrl(route('menu.category', $slug));
     }
@@ -59,6 +64,10 @@ class MenuGrid extends Component
 
     public function updatedPage(): void
     {
+        if (! $this->shouldScrollOnPageChange) {
+            return;
+        }
+
         $this->js(<<<'JS'
             document.getElementById('menu-grid-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
         JS);
@@ -114,5 +123,12 @@ class MenuGrid extends Component
     protected function syncBrowserUrl(string $url): void
     {
         $this->js('window.history.pushState({}, "", '.json_encode($url).')');
+    }
+
+    protected function resetPageWithoutScroll(?string $pageName = null): void
+    {
+        $this->shouldScrollOnPageChange = false;
+        $this->resetPage($pageName);
+        $this->shouldScrollOnPageChange = true;
     }
 }

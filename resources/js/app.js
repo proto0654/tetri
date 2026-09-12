@@ -1,6 +1,10 @@
 import Swiper from 'swiper';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css';
+import { initHeroBg } from './hero-bg';
+import { startHeroEntrance } from './hero-entrance';
+import { initHeaderEntrance } from './header-entrance';
+import { destroySectionEntrance, initSectionEntrance } from './section-entrance';
 
 const resolveSlidesOffset = (el, datasetKey) => {
     const raw = el.dataset[datasetKey];
@@ -78,7 +82,10 @@ const initSwipers = (root = document) => {
         const slidesOffsetBefore = resolveSlidesOffset(el, 'slidesOffsetBefore');
         const slidesOffsetAfter = resolveSlidesOffset(el, 'slidesOffsetAfter');
 
-        const loop = el.hasAttribute('data-loop') && el.dataset.loop !== 'false';
+        const rewind = el.hasAttribute('data-rewind') && el.dataset.rewind !== 'false';
+        // Loop + slidesOffsetBefore prepends last-slide clones into the left gutter (stories).
+        const shellOffset = el.dataset.slidesOffsetBefore === 'shell' || el.dataset.slidesOffsetAfter === 'shell';
+        const loop = el.hasAttribute('data-loop') && el.dataset.loop !== 'false' && ! rewind && ! shellOffset;
 
         if (loop) {
             ensureEnoughLoopSlides(el, spaceBetween);
@@ -91,6 +98,7 @@ const initSwipers = (root = document) => {
             slidesOffsetBefore,
             slidesOffsetAfter,
             loop,
+            rewind,
             loopAdditionalSlides: loop ? 2 : 0,
             watchOverflow: ! loop,
             navigation: {
@@ -111,10 +119,28 @@ const initSwipers = (root = document) => {
     });
 };
 
+const initSiteEntrance = () => {
+    const hasHero = Boolean(document.querySelector('[data-hero-entrance]'));
+    const header = initHeaderEntrance(document, { external: hasHero });
+
+    if (! hasHero) {
+        return;
+    }
+
+    const bg = initHeroBg(document, { autoPlay: false });
+
+    void startHeroEntrance(document, { bg, header });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     initSwipers();
+    initSiteEntrance();
+    initSectionEntrance();
 });
 
 document.addEventListener('livewire:navigated', () => {
+    destroySectionEntrance();
     initSwipers();
+    initSiteEntrance();
+    initSectionEntrance();
 });

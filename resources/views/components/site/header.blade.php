@@ -7,6 +7,9 @@
 
 <header
     x-data="{ open: false }"
+    data-header-entrance
+    data-header-variant="{{ $transparent ? 'pill' : 'bar' }}"
+    data-state="pending"
     @class([
         'z-40',
         'absolute inset-x-0 top-0' => $transparent,
@@ -20,33 +23,35 @@
         ])
     >
         <div
+            data-header-shell
             @class([
                 'flex items-center justify-between gap-4 py-2.5 sm:gap-6',
                 'mx-auto max-w-7xl' => ! $transparent,
                 'rounded-full bg-cream px-4 sm:px-6' => $transparent,
             ])
         >
-            <a href="{{ route('home') }}" class="inline-flex items-center shrink-0">
+            <a href="{{ route('home') }}" class="inline-flex items-center shrink-0" data-header-logo>
                 <x-site.logo
                     :path="$settings['logo'] ?? null"
                     class="h-8 w-auto object-contain"
-                    text-class="font-display text-xl font-bold tracking-[0.35em] text-olive"
+                    text-class="font-display text-xl font-normal tracking-[0.35em] text-olive"
                 />
             </a>
 
-            <nav class="hidden items-center gap-7 text-sm font-medium md:flex">
-                <a href="{{ route('home') }}#concept" class="{{ $linkClass }}">О нас</a>
-                <a href="{{ route('home') }}#kids" class="{{ $linkClass }}">Детская</a>
-                <a href="{{ route('menu') }}" class="{{ $linkClass }}">Меню</a>
+            <nav class="hidden items-center gap-7 text-sm font-medium md:flex" data-header-nav>
+                <a href="{{ route('home') }}#concept" class="{{ $linkClass }}" data-header-nav-item>О нас</a>
+                <a href="{{ route('home') }}#kids" class="{{ $linkClass }}" data-header-nav-item>Детская</a>
+                <a href="{{ route('menu') }}" class="{{ $linkClass }}" data-header-nav-item>Меню</a>
                 <x-site.book-button
                     source="nav-banket"
                     :label="'Банкет'"
                     :class="'bg-transparent p-0 text-sm font-medium shadow-none hover:bg-transparent '.$linkClass"
+                    data-header-nav-item
                 />
-                <a href="#contacts" class="{{ $linkClass }}">Контакты</a>
+                <a href="#contacts" class="{{ $linkClass }}" data-header-nav-item>Контакты</a>
             </nav>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3" data-header-cta>
                 <x-site.book-button
                     source="header"
                     :label="$bookingLabel"

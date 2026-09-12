@@ -12,11 +12,16 @@
     $mapTitle = filled($mapMarkerLabel) ? $mapMarkerLabel : 'Карта ТЕТРИ';
 @endphp
 
-<section id="contacts" {{ $attributes->class(['overflow-x-clip']) }}>
+<section id="contacts" data-entrance data-state="pending" {{ $attributes->class(['overflow-x-clip']) }}>
     <x-site.shell>
         <div class="grid lg:grid-cols-3 lg:items-stretch">
             <div class="site-contacts-map-olive-half relative min-h-[16rem] max-lg:mb-8 lg:min-h-0">
-                <div class="site-bleed-left z-10 isolate overflow-hidden rounded-[2rem] bg-cream-dark shadow-sm max-lg:relative max-lg:min-h-[16rem] lg:absolute lg:inset-y-0 lg:left-0 lg:rounded-l-none lg:rounded-r-[2rem]">
+                <div
+                    class="site-bleed-left z-10 isolate overflow-hidden rounded-[2rem] bg-cream-dark shadow-sm max-lg:relative max-lg:min-h-[16rem] lg:absolute lg:inset-y-0 lg:left-0 lg:rounded-l-none lg:rounded-r-[2rem]"
+                    data-entrance-media
+                    data-entrance-radius="32"
+                    style="--entrance-radius: 2rem"
+                >
                     @if (! empty($mapSrc))
                         <iframe
                             src="{{ $mapSrc }}"
@@ -34,10 +39,10 @@
             <div class="relative z-10 flex min-w-0 flex-col lg:col-span-2">
                 <div class="site-bleed-right bg-cream">
                     <div class="py-16 sm:py-20 lg:pl-10 lg:pr-[var(--site-shell-pad,2rem)]">
-                        <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
+                        <h2 class="font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl" data-entrance-title>
                             @typoBr($settings['contacts_title'] ?? 'МЫ В СИМФЕРОПОЛЕ')
                         </h2>
-                        <div class="mt-8 space-y-2 text-base text-ink">
+                        <div class="mt-8 space-y-2 text-base text-ink" data-entrance-list>
                             @if (filled($settings['address'] ?? null))
                                 <p>@typo($settings['address'])</p>
                             @endif
@@ -58,6 +63,7 @@
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="mt-6 inline-flex rounded-full bg-plum px-6 py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-plum-dark"
+                                data-entrance-cta
                             >
                                 Проложить маршрут на карте
                             </a>

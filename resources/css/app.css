@@ -8,7 +8,7 @@
 
 @theme {
     --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
-    --font-display: 'Literata', ui-serif, Georgia, serif;
+    --font-display: 'Poiret One', ui-serif, Georgia, serif;
 
     --color-cream: #ede2cf;
     --color-cream-dark: #ebe4d6;
@@ -30,6 +30,12 @@
     body {
         @apply bg-cream text-ink antialiased;
         overflow-x: clip;
+    }
+
+    /* Poiret One is single-weight; keep headings at 400 and block faux-bold. */
+    .font-display {
+        font-weight: 400;
+        font-synthesis-weight: none;
     }
 }
 
@@ -176,6 +182,23 @@
             padding-left: calc(30cqw + 2.5rem);
             text-indent: calc(-30cqw - 2.5rem);
         }
+
+        /*
+         * Entrance line masks are block boxes — inherited text-indent clips under
+         * overflow:hidden. Recreate hanging indent structurally on the masks.
+         */
+        .site-text-shift:has(> .entrance-line-mask) {
+            padding-left: 0;
+            text-indent: 0;
+        }
+
+        .site-text-shift:has(> .entrance-line-mask) > .entrance-line-mask:not(:first-child) {
+            padding-left: calc(30cqw + 2.5rem);
+        }
+
+        .site-text-shift .entrance-line {
+            text-indent: 0;
+        }
     }
 
     /*
@@ -192,5 +215,346 @@
         .site-info {
             font-size: 1.29375rem; /* 15% over text-lg (1.125rem) */
         }
+    }
+}
+
+@keyframes menu-item-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.75rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.menu-grid-block {
+    animation: menu-item-in 280ms ease-out both;
+    animation-delay: calc(var(--menu-i, 0) * 70ms);
+}
+
+.menu-grid-item {
+    animation: menu-item-in 320ms ease-out both;
+    animation-delay: min(calc(var(--menu-i, 0) * 45ms), 400ms);
+}
+
+/*
+ * Direct /menu load: hold product CSS stagger until page [data-entrance] is done
+ * so title → tabs → products read as one chain. Livewire tab/pagination morphs
+ * under data-state=done and keep immediate menu-grid-* animation (AJAX untouched).
+ */
+[data-entrance]:is([data-state='pending'], [data-state='playing']) .menu-grid-block,
+[data-entrance]:is([data-state='pending'], [data-state='playing']) .menu-grid-item {
+    animation: none;
+    opacity: 0;
+    transform: translateY(0.75rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menu-grid-block,
+    .menu-grid-item {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/*
+ * Hero background entrance: cream bands lift away top → bottom.
+ * Band geometry (tapered heights, overlap, static Y) comes from inline --top/--h.
+ * Image + overlay stay static; only opacity animates.
+ * --hero-bg-progress reserved for future scrub control.
+ */
+.hero-bg {
+    --hero-bg-progress: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Image + overlay stay static under the cover; only bands animate. */
+.hero-bg__image,
+.hero-bg__overlay {
+    z-index: 0;
+}
+
+.hero-bg__cover {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.hero-bg__band {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--top);
+    height: var(--h);
+    /* Match site cream (#ede2cf), not section olive. */
+    background-color: var(--color-cream);
+    will-change: opacity;
+}
+
+@keyframes hero-bg-band-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+[data-hero-bg][data-state='playing'] .hero-bg__band {
+    animation: hero-bg-band-out var(--dur, 0.7s) cubic-bezier(0.76, 0, 0.24, 1) forwards;
+    /* Base wave top→bottom + per-band jitter for organic stagger. */
+    animation-delay: calc(var(--i) * 38ms + var(--jitter, 0ms));
+}
+
+[data-hero-bg][data-state='done'] .hero-bg__cover {
+    visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-bg__band {
+        opacity: 0;
+        animation: none !important;
+    }
+
+    [data-hero-bg] .hero-bg__cover {
+        visibility: hidden;
+    }
+}
+
+/*
+ * Hero entrance chain: pending/done + reduced-motion finals.
+ * Progress-driven transforms applied via JS; CSS only holds initial/final states.
+ */
+[data-hero-entrance] {
+    --hero-progress: 0;
+}
+
+[data-hero-entrance][data-state='pending'] [data-hero-story],
+[data-hero-entrance][data-state='playing'] [data-hero-story] {
+    opacity: 0;
+    clip-path: inset(50% 50% 50% 50% round 50%);
+}
+
+[data-hero-entrance][data-state='done'] [data-hero-story] {
+    opacity: 1;
+    clip-path: inset(0 round 2rem);
+}
+
+/* Equal center-to-center step; middle glyph sits on viewport center (h1 left:50%). */
+.hero-title__track {
+    position: relative;
+    display: block;
+    width: 0;
+    height: 1em;
+}
+
+.hero-title__slot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translateX(calc(-50% + (var(--n, 0) * var(--hero-title-step, 1.2em))));
+}
+
+[data-hero-char] {
+    display: inline-block;
+    transform-origin: center center;
+    backface-visibility: hidden;
+}
+
+[data-hero-entrance][data-state='pending'] [data-hero-char],
+[data-hero-entrance][data-state='playing'] [data-hero-char] {
+    opacity: 0;
+    transform: perspective(420px) rotateY(90deg);
+}
+
+[data-hero-entrance][data-state='done'] [data-hero-char] {
+    opacity: 1;
+    transform: perspective(420px) rotateY(0deg);
+}
+
+[data-hero-icon] {
+    transform-origin: center center;
+}
+
+[data-hero-icon-glyph] {
+    display: inline-flex;
+    transform-origin: center center;
+}
+
+[data-hero-entrance][data-state='pending'] [data-hero-icon],
+[data-hero-entrance][data-state='playing'] [data-hero-icon] {
+    opacity: 0;
+    transform: scale(0.5);
+}
+
+[data-hero-entrance][data-state='pending'] [data-hero-icon-glyph],
+[data-hero-entrance][data-state='playing'] [data-hero-icon-glyph] {
+    opacity: 0;
+    transform: scale(0.85);
+}
+
+[data-hero-entrance][data-state='done'] [data-hero-icon],
+[data-hero-entrance][data-state='done'] [data-hero-icon-glyph] {
+    opacity: 1;
+    transform: none;
+}
+
+/* Header entrance */
+[data-header-entrance] [data-header-shell] {
+    transform-origin: center center;
+}
+
+[data-header-entrance][data-header-variant='pill'][data-state='pending'] [data-header-shell],
+[data-header-entrance][data-header-variant='pill'][data-state='playing'] [data-header-shell] {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+[data-header-entrance][data-state='pending'] [data-header-logo],
+[data-header-entrance][data-state='pending'] [data-header-nav-item],
+[data-header-entrance][data-state='pending'] [data-header-cta],
+[data-header-entrance][data-state='playing'] [data-header-logo],
+[data-header-entrance][data-state='playing'] [data-header-nav-item],
+[data-header-entrance][data-state='playing'] [data-header-cta] {
+    opacity: 0;
+}
+
+[data-header-entrance][data-state='done'] [data-header-shell],
+[data-header-entrance][data-state='done'] [data-header-logo],
+[data-header-entrance][data-state='done'] [data-header-nav-item],
+[data-header-entrance][data-state='done'] [data-header-cta] {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-hero-entrance] [data-hero-story],
+    [data-hero-entrance] [data-hero-char],
+    [data-hero-entrance] [data-hero-icon],
+    [data-hero-entrance] [data-hero-icon-glyph],
+    [data-header-entrance] [data-header-shell],
+    [data-header-entrance] [data-header-logo],
+    [data-header-entrance] [data-header-nav-item],
+    [data-header-entrance] [data-header-cta] {
+        opacity: 1 !important;
+        transform: none !important;
+        clip-path: none !important;
+    }
+
+    [data-hero-entrance] [data-hero-story] {
+        clip-path: inset(0 round 2rem) !important;
+    }
+}
+
+/*
+ * Section entrance chain: CSS holds pending/done;
+ * GSAP + SplitType drive playing (built lazily on ScrollTrigger enter).
+ */
+.entrance-line-mask {
+    overflow: hidden;
+    display: block;
+}
+
+.entrance-line {
+    display: block;
+    backface-visibility: hidden;
+}
+
+/* Layer hints only while playing — permanent will-change hurts memory. */
+[data-entrance][data-state='playing'] .entrance-line,
+[data-entrance][data-state='playing'] [data-entrance-fade],
+[data-entrance][data-state='playing'] [data-entrance-cta],
+[data-entrance][data-state='playing'] [data-entrance-list] > *,
+[data-entrance][data-state='playing'] [data-entrance-media='fade'] {
+    will-change: opacity, transform;
+}
+
+[data-entrance][data-state='playing'] [data-entrance-media]:not([data-entrance-media='fade']) {
+    will-change: clip-path, opacity;
+    contain: paint;
+}
+
+[data-entrance][data-state='done'] .entrance-line,
+[data-entrance][data-state='done'] [data-entrance-fade],
+[data-entrance][data-state='done'] [data-entrance-cta],
+[data-entrance][data-state='done'] [data-entrance-list] > *,
+[data-entrance][data-state='done'] [data-entrance-media] {
+    will-change: auto;
+    contain: none;
+}
+
+[data-entrance][data-state='pending'] [data-entrance-media]:not([data-entrance-media='fade']),
+[data-entrance][data-state='playing'] [data-entrance-media]:not([data-entrance-media='fade']) {
+    opacity: 0;
+    clip-path: inset(50% 50% 50% 50% round 50%);
+}
+
+[data-entrance][data-state='done'] [data-entrance-media]:not([data-entrance-media='fade']) {
+    opacity: 1;
+    clip-path: inset(0 round var(--entrance-radius, 2rem));
+}
+
+/* Swiper cards: opacity fade only (no clip-path morph — FPS). */
+[data-entrance][data-state='pending'] [data-entrance-media='fade'],
+[data-entrance][data-state='playing'] [data-entrance-media='fade'] {
+    opacity: 0;
+    clip-path: none;
+}
+
+[data-entrance][data-state='done'] [data-entrance-media='fade'] {
+    opacity: 1;
+    clip-path: none;
+}
+
+[data-entrance][data-state='pending'] [data-entrance-title],
+[data-entrance][data-state='pending'] [data-entrance-info] {
+    opacity: 0;
+}
+
+[data-entrance][data-state='playing'] [data-entrance-title],
+[data-entrance][data-state='playing'] [data-entrance-info],
+[data-entrance][data-state='done'] [data-entrance-title],
+[data-entrance][data-state='done'] [data-entrance-info] {
+    opacity: 1;
+}
+
+[data-entrance][data-state='pending'] [data-entrance-fade],
+[data-entrance][data-state='pending'] [data-entrance-cta],
+[data-entrance][data-state='pending'] [data-entrance-list] > *,
+[data-entrance][data-state='playing'] [data-entrance-fade],
+[data-entrance][data-state='playing'] [data-entrance-cta],
+[data-entrance][data-state='playing'] [data-entrance-list] > * {
+    opacity: 0;
+}
+
+[data-entrance][data-state='done'] [data-entrance-fade],
+[data-entrance][data-state='done'] [data-entrance-cta],
+[data-entrance][data-state='done'] [data-entrance-list] > *,
+[data-entrance][data-state='done'] .entrance-line {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-entrance] [data-entrance-media],
+    [data-entrance] [data-entrance-fade],
+    [data-entrance] [data-entrance-cta],
+    [data-entrance] [data-entrance-list] > *,
+    [data-entrance] .entrance-line {
+        opacity: 1 !important;
+        transform: none !important;
+        clip-path: none !important;
+        will-change: auto !important;
+        contain: none !important;
+    }
+
+    [data-entrance] [data-entrance-media]:not([data-entrance-media='fade']) {
+        clip-path: inset(0 round var(--entrance-radius, 2rem)) !important;
     }
 }

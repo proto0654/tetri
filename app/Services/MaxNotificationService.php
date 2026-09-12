@@ -95,15 +95,19 @@ class MaxNotificationService
     }
 
     /**
-     * Inline keyboard with call + copy actions when the phone can be dialed.
+     * Inline keyboard with clipboard action when the phone can be dialed.
      *
      * @return array{type: string, payload: array{buttons: list<list<array<string, string>>>}}|null
      */
     protected function phoneActionKeyboard(mixed $phone): ?array
     {
-        $dialable = $this->normalizePhoneForDial($phone);
+        if (! is_string($phone)) {
+            return null;
+        }
 
-        if ($dialable === null) {
+        $asEntered = trim($phone);
+
+        if ($asEntered === '' || $this->normalizePhoneForDial($asEntered) === null) {
             return null;
         }
 
@@ -112,14 +116,9 @@ class MaxNotificationService
             'payload' => [
                 'buttons' => [[
                     [
-                        'type' => 'link',
-                        'text' => 'Позвонить',
-                        'url' => 'tel:'.$dialable,
-                    ],
-                    [
                         'type' => 'clipboard',
-                        'text' => 'Скопировать',
-                        'payload' => $dialable,
+                        'text' => 'Скопировать телефон',
+                        'payload' => $asEntered,
                     ],
                 ]],
             ],
@@ -127,7 +126,7 @@ class MaxNotificationService
     }
 
     /**
-     * Normalize a display phone into +E.164-ish form for tel: / clipboard.
+     * Normalize a display phone into +E.164-ish form to validate dialability.
      */
     protected function normalizePhoneForDial(mixed $phone): ?string
     {
