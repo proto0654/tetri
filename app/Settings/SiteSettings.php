@@ -171,6 +171,7 @@ class SiteSettings
             'og_image' => null,
             'max_bot_token' => null,
             'max_chat_id' => null,
+            'block_search_indexing' => true,
         ];
     }
 

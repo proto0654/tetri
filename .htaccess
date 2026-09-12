@@ -1,0 +1,5 @@
+# Shared-hosting entry: send all requests into /public (document root may be the app folder).
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
