@@ -61,6 +61,9 @@ class ManageSiteSettings extends Page
                                 TextInput::make('hero_title')
                                     ->label('Заголовок')
                                     ->required(),
+                                TextInput::make('hero_subtitle')
+                                    ->label('Подпись')
+                                    ->helperText('На десктопе слова делятся по бокам сториса; на мобильном — под заголовком.'),
                                 FileUpload::make('hero_background_image')
                                     ->label('Фон')
                                     ->image()
@@ -232,7 +235,7 @@ class ManageSiteSettings extends Page
                                 Textarea::make('map_embed_url')
                                     ->label('URL карты (iframe src)')
                                     ->rows(2)
-                                    ->helperText('Если пусто — iframe собирается из широты, долготы и текста метки.')
+                                    ->helperText('Ручной override. Если пусто и задан YANDEX_MAPS_API_KEY — JS API; иначе iframe из координат и текста метки.')
                                     ->columnSpanFull(),
                             ]),
                         Tab::make('SEO')

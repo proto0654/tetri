@@ -44,6 +44,7 @@ class AdminQuickSettings extends Widget implements HasSchemas
      */
     private const QUICK_KEYS = [
         'hero_title',
+        'hero_subtitle',
         'hero_background_image',
         'address',
         'phones',
@@ -88,6 +89,8 @@ class AdminQuickSettings extends Widget implements HasSchemas
                         TextInput::make('hero_title')
                             ->label('Заголовок')
                             ->required(),
+                        TextInput::make('hero_subtitle')
+                            ->label('Подпись'),
                         FileUpload::make('hero_background_image')
                             ->label('Фон')
                             ->image()

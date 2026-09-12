@@ -3,17 +3,6 @@
     class="overflow-x-clip bg-cream py-16"
     data-entrance
     data-state="pending"
-    x-data="{
-        play(event) {
-            const video = event.currentTarget.querySelector('video')
-            if (! video) return
-            if (video.paused) {
-                video.play()
-            } else {
-                video.pause()
-            }
-        }
-    }"
 >
     <x-site.shell>
         <div data-swiper-root>
@@ -46,9 +35,9 @@
                                         tabindex="0"
                                         class="w-full cursor-pointer overflow-hidden rounded-[1.75rem] bg-cream-dark text-left shadow-sm select-none"
                                         data-entrance-media="fade"
-                                        @click="play($event)"
-                                        @keydown.enter.prevent="play($event)"
-                                        @keydown.space.prevent="play($event)"
+                                        data-story-open
+                                        data-story-id="{{ $story->id }}"
+                                        data-story-index="{{ $loop->index }}"
                                         aria-label="{{ $story->title ? 'Смотреть '.$story->title : 'Смотреть сторис' }}"
                                     >
                                         @php
@@ -90,3 +79,120 @@
         </div>
     </x-site.shell>
 </section>
+
+@if ($stories->isNotEmpty())
+    <div
+        id="story-viewer"
+        class="story-viewer"
+        data-story-viewer
+        hidden
+        aria-hidden="true"
+    >
+        <div class="story-viewer__scrim" data-story-viewer-scrim></div>
+
+        <div class="story-viewer__frame" data-story-viewer-frame>
+            <button
+                type="button"
+                class="story-viewer__back"
+                data-story-viewer-close
+                aria-label="Назад"
+            >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+            </button>
+
+            <div
+                class="story-viewer__stage"
+                data-story-viewer-stage
+                role="dialog"
+                aria-modal="true"
+                aria-label="Сторисы"
+            >
+                <div class="swiper story-viewer__swiper" data-story-viewer-swiper>
+                    <div class="swiper-wrapper">
+                        @foreach ($stories as $story)
+                            @php
+                                $videoUrl = \App\Support\PublicMedia::url($story->video_path);
+                                $posterUrl = \App\Support\PublicMedia::url($story->preview_image);
+                            @endphp
+                            <div
+                                class="swiper-slide story-viewer__slide"
+                                data-story-slide
+                                data-story-id="{{ $story->id }}"
+                            >
+                                @if ($videoUrl)
+                                    <video
+                                        class="story-viewer__media"
+                                        playsinline
+                                        loop
+                                        preload="none"
+                                        tabindex="-1"
+                                        draggable="false"
+                                        @if ($posterUrl) poster="{{ $posterUrl }}" @endif
+                                    >
+                                        <source data-src="{{ $videoUrl }}" type="video/mp4">
+                                    </video>
+                                @elseif ($posterUrl)
+                                    <img
+                                        src="{{ $posterUrl }}"
+                                        alt="{{ $story->title ?? 'Сторис' }}"
+                                        class="story-viewer__media"
+                                        draggable="false"
+                                    >
+                                @else
+                                    <div class="story-viewer__media story-viewer__media--empty bg-cream-dark"></div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="story-viewer__hint" data-story-viewer-hint hidden>
+                    <div class="story-viewer__hint-chevrons" aria-hidden="true">
+                        <span>↑</span>
+                        <span>↓</span>
+                    </div>
+                    <p class="story-viewer__hint-text" data-story-viewer-hint-text></p>
+                </div>
+            </div>
+
+            <div class="story-viewer__rail" data-story-viewer-rail>
+                <button
+                    type="button"
+                    class="story-viewer__close"
+                    data-story-viewer-close
+                    aria-label="Свернуть"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
+                    </svg>
+                </button>
+
+                <div class="story-viewer__nav" data-story-viewer-nav>
+                    <button
+                        type="button"
+                        class="story-viewer__nav-btn"
+                        data-story-viewer-prev
+                        aria-label="Предыдущий сторис"
+                    >
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="story-viewer__nav-btn"
+                        data-story-viewer-next
+                        aria-label="Следующий сторис"
+                    >
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endif

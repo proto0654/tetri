@@ -105,6 +105,7 @@ class SiteSettings
     {
         return [
             'hero_title' => 'Т Е Т Р И',
+            'hero_subtitle' => 'СЕМЕЙНЫЙ РЕСТОРАН',
             'hero_background_image' => null,
             'hero_video_path' => null,
             'hero_video_preview' => null,

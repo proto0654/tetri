@@ -17,6 +17,7 @@ class HomePageTest extends TestCase
     {
         app(SiteSettings::class)->save([
             'hero_title' => 'Т Е Т Р И',
+            'hero_subtitle' => 'СЕМЕЙНЫЙ РЕСТОРАН',
             'hero_overlay_from' => 'rgba(10, 20, 30, 0.5)',
             'hero_overlay_via' => 'rgba(40, 50, 60, 0.4)',
             'hero_overlay_to' => 'rgba(245, 240, 230, 0.95)',
@@ -49,6 +50,10 @@ class HomePageTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Т Е Т Р И', false);
+        $response->assertSee(Typograph::apply('СЕМЕЙНЫЙ РЕСТОРАН'), false);
+        $response->assertSee(Typograph::apply('СЕМЕЙНЫЙ'), false);
+        $response->assertSee(Typograph::apply('РЕСТОРАН'), false);
+        $response->assertSee('data-hero-subtitle', false);
         $response->assertSee('linear-gradient(to bottom, rgba(10, 20, 30, 0.5), rgba(40, 50, 60, 0.4), rgba(245, 240, 230, 0.95))', false);
         $response->assertSee(Typograph::applyWithBreaks('МЕСТО ДЛЯ СЕМЬИ'), false);
         $response->assertSee(Typograph::apply('ДЛЯ ВСЕЙ СЕМЬИ'), false);
@@ -63,6 +68,14 @@ class HomePageTest extends TestCase
         $response->assertSee(Typograph::applyWithBreaks('МЫ В СИМФЕРОПОЛЕ'), false);
         $response->assertSee(Typograph::apply('Завтраки'), false);
         $response->assertSee('СТОРИСЫ', false);
+        $response->assertSee('data-story-open', false);
+        $response->assertSee('id="story-viewer"', false);
+        $response->assertSee('data-story-viewer', false);
+        $response->assertSee('aria-label="Сторисы"', false);
+        $response->assertSee('aria-label="Назад"', false);
+        $response->assertSee('aria-label="Свернуть"', false);
+        $response->assertSee('data-story-viewer-prev', false);
+        $response->assertSee('data-story-viewer-next', false);
         $response->assertSee(route('menu'), false);
         $response->assertSee(route('menu.category', 'zavtraki'), false);
     }
@@ -83,6 +96,35 @@ class HomePageTest extends TestCase
 
     public function test_home_page_shows_yandex_route_link_when_map_coordinates_are_set(): void
     {
+        config(['services.yandex_maps.key' => 'test-yandex-maps-key']);
+
+        app(SiteSettings::class)->save([
+            'map_latitude' => '44.950000',
+            'map_longitude' => '34.100000',
+            'map_marker_label' => 'ТЕТРИ',
+            'map_embed_url' => null,
+            'logo' => 'site/logo/mark.png',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('Проложить маршрут на карте', false);
+        $response->assertSee('https://yandex.ru/maps/?rtext=', false);
+        $response->assertSee('data-yandex-map', false);
+        $response->assertSee('data-lat="44.950000"', false);
+        $response->assertSee('data-lng="34.100000"', false);
+        $response->assertSee('data-label="ТЕТРИ"', false);
+        $response->assertSee('data-logo=', false);
+        $response->assertSee('site/logo/mark.png', false);
+        $response->assertSee('data-apikey="test-yandex-maps-key"', false);
+        $response->assertDontSee('map-widget/v1', false);
+    }
+
+    public function test_home_page_falls_back_to_iframe_map_without_api_key(): void
+    {
+        config(['services.yandex_maps.key' => null]);
+
         app(SiteSettings::class)->save([
             'map_latitude' => '44.950000',
             'map_longitude' => '34.100000',
@@ -93,10 +135,26 @@ class HomePageTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertOk();
-        $response->assertSee('Проложить маршрут на карте', false);
-        $response->assertSee('https://yandex.ru/maps/?rtext=', false);
-        $response->assertSee('44.950000', false);
-        $response->assertSee('34.100000', false);
+        $response->assertSee('map-widget/v1', false);
+        $response->assertDontSee('data-yandex-map', false);
+    }
+
+    public function test_home_page_prefers_map_embed_url_over_js_map(): void
+    {
+        config(['services.yandex_maps.key' => 'test-yandex-maps-key']);
+
+        app(SiteSettings::class)->save([
+            'map_latitude' => '44.950000',
+            'map_longitude' => '34.100000',
+            'map_marker_label' => 'ТЕТРИ',
+            'map_embed_url' => 'https://yandex.ru/map-widget/v1/?um=constructor%3Acustom',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('um=constructor%3Acustom', false);
+        $response->assertDontSee('data-yandex-map', false);
     }
 
     public function test_home_page_hides_yandex_route_link_without_map_coordinates(): void

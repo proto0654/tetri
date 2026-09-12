@@ -5,6 +5,8 @@ import { initHeroBg } from './hero-bg';
 import { startHeroEntrance } from './hero-entrance';
 import { initHeaderEntrance } from './header-entrance';
 import { destroySectionEntrance, initSectionEntrance } from './section-entrance';
+import { destroyStoryViewer, initStoryViewer } from './story-viewer';
+import { initYandexMaps } from './yandex-map';
 
 const resolveSlidesOffset = (el, datasetKey) => {
     const raw = el.dataset[datasetKey];
@@ -135,13 +137,18 @@ const initSiteEntrance = () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     initSwipers();
+    initStoryViewer();
+    initYandexMaps();
     initSiteEntrance();
     initSectionEntrance();
 });
 
 document.addEventListener('livewire:navigated', () => {
     destroySectionEntrance();
+    destroyStoryViewer();
     initSwipers();
+    initStoryViewer();
+    initYandexMaps();
     initSiteEntrance();
     initSectionEntrance();
 });

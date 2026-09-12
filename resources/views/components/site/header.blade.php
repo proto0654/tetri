@@ -55,7 +55,7 @@
                 <x-site.book-button
                     source="header"
                     :label="$bookingLabel"
-                    class="rounded-full bg-plum px-5 py-2.5 text-xs font-semibold tracking-wide text-white transition hover:bg-plum-dark sm:text-sm"
+                    class="rounded-full bg-olive px-5 py-2.5 text-xs font-semibold tracking-wide text-cream transition hover:bg-olive-deep sm:text-sm"
                 />
 
                 <button

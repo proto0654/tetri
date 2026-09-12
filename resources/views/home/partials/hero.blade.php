@@ -12,6 +12,13 @@
     $overlayGradient = "linear-gradient(to bottom, {$overlayFrom}, {$overlayVia}, {$overlayTo})";
 
     $heroTitle = $settings['hero_title'] ?? 'Т Е Т Р И';
+    $heroSubtitle = trim((string) ($settings['hero_subtitle'] ?? ''));
+    $subtitleWords = $heroSubtitle !== ''
+        ? preg_split('/\s+/u', $heroSubtitle, -1, PREG_SPLIT_NO_EMPTY) ?: []
+        : [];
+    $subtitleMid = (int) ceil(count($subtitleWords) / 2);
+    $subtitleLeft = array_slice($subtitleWords, 0, $subtitleMid);
+    $subtitleRight = array_slice($subtitleWords, $subtitleMid);
 @endphp
 
 <section class="relative flex min-h-[92vh] items-center justify-center overflow-x-clip bg-olive-deep" data-hero-entrance data-state="pending">
@@ -101,24 +108,36 @@
 
     <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-4 pb-16 pt-32 text-center sm:px-6">
         <div class="relative flex w-full flex-col items-center">
-            <div
-                class="w-full max-w-xs overflow-hidden rounded-[2rem] border border-white/20 bg-black/20 shadow-2xl backdrop-blur-sm sm:max-w-sm"
-                data-hero-story
-            >
-                @if ($videoUrl)
-                    <video
-                        class="aspect-[3/4] w-full object-cover"
-                        autoplay
-                        muted
-                        loop
-                        playsinline
-                        @if ($posterUrl) poster="{{ $posterUrl }}" @endif
+            <div class="relative flex w-full items-center justify-center">
+                @if ($subtitleWords !== [])
+                    <p
+                        class="site-info pointer-events-none absolute inset-x-0 top-1/2 z-10 hidden -translate-y-1/2 justify-between !text-white drop-shadow hyphens-none lg:flex [text-align:inherit]"
+                        data-hero-subtitle
                     >
-                        <source src="{{ $videoUrl }}" type="video/mp4">
-                    </video>
-                @else
-                    <x-media :path="$settings['hero_video_preview'] ?? null" alt="ТЕТРИ" class="aspect-[3/4] w-full object-cover" />
+                        <span class="tracking-[0.35em] !text-white">@typo(implode(' ', $subtitleLeft))</span>
+                        <span class="tracking-[0.35em] !text-white">@typo(implode(' ', $subtitleRight))</span>
+                    </p>
                 @endif
+
+                <div
+                    class="relative z-0 w-full max-w-xs overflow-hidden rounded-[2rem] border border-white/20 bg-black/20 shadow-2xl backdrop-blur-sm sm:max-w-sm"
+                    data-hero-story
+                >
+                    @if ($videoUrl)
+                        <video
+                            class="aspect-[3/4] w-full object-cover"
+                            muted
+                            loop
+                            playsinline
+                            preload="metadata"
+                            @if ($posterUrl) poster="{{ $posterUrl }}" @endif
+                        >
+                            <source src="{{ $videoUrl }}" type="video/mp4">
+                        </video>
+                    @else
+                        <x-media :path="$settings['hero_video_preview'] ?? null" alt="ТЕТРИ" class="aspect-[3/4] w-full object-cover" />
+                    @endif
+                </div>
             </div>
 
             @php
@@ -149,6 +168,15 @@
                     @endforeach
                 </span>
             </h1>
+
+            @if ($subtitleWords !== [])
+                <p
+                    class="site-info pointer-events-none absolute bottom-0 left-1/2 z-10 max-w-none -translate-x-1/2 translate-y-[calc(0.35*clamp(2.75rem,11vw,7.5rem)+4.25em)] whitespace-nowrap !w-max !text-center !text-white drop-shadow hyphens-none lg:hidden"
+                    data-hero-subtitle
+                >
+                    @typo($heroSubtitle)
+                </p>
+            @endif
         </div>
     </div>
 
