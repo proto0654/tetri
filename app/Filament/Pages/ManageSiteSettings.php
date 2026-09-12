@@ -11,6 +11,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Fieldset;
@@ -230,6 +231,11 @@ class ManageSiteSettings extends Page
                             ]),
                         Tab::make('Подвал и CTA')
                             ->schema([
+                                Toggle::make('block_search_indexing')
+                                    ->label('Запретить индексацию поисковиками')
+                                    ->helperText('Включено: meta noindex и Disallow в /robots.txt. Для демо-поддомена оставляйте включённым.')
+                                    ->default(true)
+                                    ->columnSpanFull(),
                                 FileUpload::make('favicon')
                                     ->label('Favicon')
                                     ->acceptedFileTypes([

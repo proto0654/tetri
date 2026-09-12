@@ -1,0 +1,82 @@
+name: Deploy · tetri.weblaba.ru
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+run-name: Deploy — tetri.weblaba.ru (${{ github.sha }})
+
+concurrency:
+  group: tetri-production
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, xml, ctype, curl, zip, sqlite, pdo_sqlite, pdo_mysql, gd, intl
+          coverage: none
+          tools: composer:v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Load SSH deploy key
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Deploy via rsync
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          rsync -avzr --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude 'node_modules/' \
+            --exclude 'tests/' \
+            --exclude 'storage/app/public/' \
+            --exclude 'storage/app/demo-sync/' \
+            --exclude 'storage/logs/' \
+            --exclude 'storage/framework/cache/' \
+            --exclude 'storage/framework/sessions/' \
+            --exclude 'storage/framework/views/' \
+            --exclude 'database/database.sqlite' \
+            --exclude 'database/database.sqlite-*' \
+            -e "ssh -o StrictHostKeyChecking=accept-new" \
+            ./ "${DEPLOY_USER}@${DEPLOY_HOST}:${DEPLOY_PATH}"
+
+      - name: Run remote migrate and optimize
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_PHP: ${{ secrets.DEPLOY_PHP }}
+        run: |
+          set -euo pipefail
+          PHP_BIN="${DEPLOY_PHP:-/opt/php/8.4/bin/php}"
+          ssh -o StrictHostKeyChecking=accept-new \
+            "${DEPLOY_USER}@${DEPLOY_HOST}" \
+            "cd ${DEPLOY_PATH} && ${PHP_BIN} artisan migrate --force && ${PHP_BIN} artisan storage:link --force && ${PHP_BIN} artisan optimize"

@@ -4,6 +4,9 @@
     @php($settings = $settings ?? app(\App\Settings\SiteSettings::class)->all())
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @if (! empty($settings['block_search_indexing']))
+        <meta name="robots" content="noindex, nofollow">
+    @endif
     <title>@yield('title', 'ТЕТРИ — семейное кафе')</title>
     <x-site.favicon :path="$settings['favicon'] ?? null" />
     @php($ogImageUrl = \App\Support\PublicMedia::absoluteUrl($settings['og_image'] ?? null))
