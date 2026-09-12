@@ -47,7 +47,26 @@ class SiteSettingsTest extends TestCase
         $this->assertSame('Мы используем файлы cookie для улучшения работы сайта. Подробнее — в {privacy}.', $loaded->get('cookie_notice'));
         $this->assertSame('Политика конфиденциальности', $loaded->get('privacy_title'));
         $this->assertNotEmpty($loaded->get('privacy_body'));
+        $this->assertSame('ТЕТРИ — семейное кафе', $loaded->get('seo_title'));
+        $this->assertSame('ТЕТРИ — семейное кафе в Симферополе', $loaded->get('home_seo_title'));
+        $this->assertSame('ТЕТРИ', $loaded->get('seo_title_suffix'));
+        $this->assertSame('Меню', $loaded->get('menu_seo_title'));
+        $this->assertNotEmpty($loaded->get('seo_description'));
+        $this->assertNotEmpty($loaded->get('home_seo_description'));
         $this->assertInstanceOf(Setting::class, Setting::query()->where('key', SiteSettings::KEY)->first());
+    }
+
+    public function test_document_title_joins_parts_with_suffix(): void
+    {
+        $settings = [
+            'seo_title' => 'Fallback Title',
+            'seo_title_suffix' => 'ТЕТРИ',
+        ];
+
+        $this->assertSame('Fallback Title', SiteSettings::documentTitle($settings));
+        $this->assertSame('Борщ — ТЕТРИ', SiteSettings::documentTitle($settings, 'Борщ'));
+        $this->assertSame('Десерты — Меню — ТЕТРИ', SiteSettings::documentTitle($settings, 'Десерты', 'Меню'));
+        $this->assertSame('Меню — ТЕТРИ', SiteSettings::documentTitle($settings, null, 'Меню'));
     }
 
     public function test_partial_save_preserves_existing_keys(): void

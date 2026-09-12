@@ -219,6 +219,22 @@ class HomePageTest extends TestCase
         $response->assertSee('ТЕТРИ', false);
     }
 
+    public function test_home_page_renders_seo_title_and_description_from_settings(): void
+    {
+        app(SiteSettings::class)->save([
+            'home_seo_title' => 'Кастомный title главной',
+            'home_seo_description' => 'Кастомный description главной для поиска.',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('<title>Кастомный title главной</title>', false);
+        $response->assertSee('name="description"', false);
+        $response->assertSee('Кастомный description главной для поиска.', false);
+        $response->assertSee('property="og:description"', false);
+    }
+
     public function test_home_page_renders_og_image_when_set(): void
     {
         app(SiteSettings::class)->save([

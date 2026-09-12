@@ -16,20 +16,23 @@ const ENTRANCE_OFFSETS = {
     title: 0,
     fade: '-=0.35',
     list: '-=0.35',
-    media: '-=0.25',
+    /** Media/slides start after copy phase (`>` via label) — not overlapped into title/fade. */
     info: '-=0.3',
-    cta: '-=0.2',
+    /** CTA after media chain; slight overlap with last card. */
+    cta: '-=0.15',
 };
 
 /** Soft cap — clip-path morph is paint-heavy. */
 const MAX_MORPH = 3;
 const MAX_FADE_MEDIA = 8;
 const FADE_DURATION = 0.55;
+/** Swiper card fades — match readable left→right chain (stories). */
+const MEDIA_FADE_DURATION = 0.65;
 const TITLE_DURATION = 0.65;
 const MORPH_DURATION = 0.85;
 const LINE_STAGGER = 0.08;
 const ITEM_STAGGER = 0.07;
-const MEDIA_STAGGER = 0.1;
+const MEDIA_STAGGER = 0.16;
 
 /**
  * Nested [data-entrance] roots (e.g. footer inside contacts) own their own attrs.
@@ -55,6 +58,8 @@ const queryOwned = (section, selector) => Array.from(section.querySelectorAll(se
 const queryOwnedOne = (section, selector) => queryOwned(section, selector)[0] ?? null;
 
 /**
+ * Loop filler / Swiper clones — hide until section done, never snap visible mid-chain.
+ *
  * @param {HTMLElement} el
  */
 const isSwiperDuplicateMedia = (el) => {
@@ -64,11 +69,12 @@ const isSwiperDuplicateMedia = (el) => {
         return false;
     }
 
-    if (slide.classList.contains('swiper-slide-duplicate')) {
+    // Our ×2 loop-width clones (app.js). Do not use aria-hidden — Swiper may set it on originals.
+    if (slide.dataset.entranceClone === 'true') {
         return true;
     }
 
-    return slide.getAttribute('aria-hidden') === 'true';
+    return slide.classList.contains('swiper-slide-duplicate');
 };
 
 /**
@@ -125,8 +131,10 @@ const snapSkippedMedia = (section, activeFade, activeMorph) => {
         }
 
         if (isSlideMediaFade(el) || el.dataset.entranceMedia === 'fade' || isSwiperDuplicateMedia(el)) {
-            el.style.opacity = '1';
+            // Inline hide until done — CSS playing must not set opacity (fights GSAP on originals).
+            el.style.opacity = '0';
             el.style.clipPath = 'none';
+            el.style.transform = '';
             el.style.willChange = 'auto';
 
             return;
@@ -231,8 +239,14 @@ const finishSection = (section) => {
         el.style.willChange = 'auto';
 
         if (isSlideMediaFade(el) || el.dataset.entranceMedia === 'fade') {
+            // Plain style clear — gsap.clearProps can miss nodes never registered with CSSPlugin.
             el.style.opacity = '';
             el.style.clipPath = '';
+            el.style.transform = '';
+            el.style.translate = '';
+            el.style.rotate = '';
+            el.style.scale = '';
+            el.style.willChange = 'auto';
 
             return;
         }
@@ -302,7 +316,16 @@ const buildSectionTimeline = (section) => {
     }
 
     if (mediaFadeEls.length) {
-        gsap.set(mediaFadeEls, { opacity: 0, clipPath: 'none', force3D: true });
+        // Drive opacity via proxy — CSSPlugin would stamp translate(0,0) and flicker
+        // inside Swiper's transformed wrapper.
+        mediaFadeEls.forEach((el) => {
+            el.style.opacity = '0';
+            el.style.transform = '';
+            el.style.translate = '';
+            el.style.rotate = '';
+            el.style.scale = '';
+            el.style.clipPath = 'none';
+        });
     }
 
     mediaMorphEls.forEach((el) => {
@@ -310,34 +333,15 @@ const buildSectionTimeline = (section) => {
         el.style.opacity = '0';
     });
 
-    /** @type {HTMLElement[]} */
-    const clearable = [
-        ...titleLines,
-        ...fadeEls,
-        ...listItems,
-        ...ctaEls,
-        ...mediaFadeEls,
-        ...infoLineGroups.flat(),
-    ];
-
     const tl = gsap.timeline({
         paused: true,
-        defaults: { ease: 'power2.out', force3D: true },
+        defaults: { ease: 'power2.out' },
         onStart: () => {
             section.dataset.state = 'playing';
         },
         onComplete: () => {
-            section.dataset.state = 'done';
-            mediaMorphEls.forEach((el) => {
-                el.style.willChange = 'auto';
-            });
-            // Let CSS done rules own finals; drop GSAP inline props.
-            releaseInlineMotion(clearable);
-            mediaMorphEls.forEach((el) => {
-                const box = cacheMorphBox(el);
-                el.style.clipPath = morphClipFinal(box.finalRadius);
-                el.style.opacity = '';
-            });
+            // Clears fade media (incl. skipped clones) + text roles; CSS done owns finals.
+            finishSection(section);
         },
     });
 
@@ -347,6 +351,7 @@ const buildSectionTimeline = (section) => {
             opacity: 1,
             duration: TITLE_DURATION,
             stagger: LINE_STAGGER,
+            force3D: true,
         }, ENTRANCE_OFFSETS.title);
     }
 
@@ -355,6 +360,7 @@ const buildSectionTimeline = (section) => {
             opacity: 1,
             duration: FADE_DURATION,
             stagger: ITEM_STAGGER,
+            force3D: true,
         }, titleLines.length ? ENTRANCE_OFFSETS.fade : 0);
     }
 
@@ -363,24 +369,36 @@ const buildSectionTimeline = (section) => {
             opacity: 1,
             duration: FADE_DURATION,
             stagger: ITEM_STAGGER,
+            force3D: true,
         }, ENTRANCE_OFFSETS.list);
     }
 
-    if (mediaFadeEls.length) {
-        tl.to(mediaFadeEls, {
-            opacity: 1,
-            duration: FADE_DURATION,
-            stagger: MEDIA_STAGGER,
-        }, ENTRANCE_OFFSETS.media);
+    // Own phase after title/fade/list — slides must not share the copy-role `-=` overlap
+    // (menu-preview: short title + 2 fades drowned the card stagger; stories felt fine
+    // because the title phase is longer). Label + absolute offsets = stable stagger.
+    const hasMedia = mediaFadeEls.length > 0 || mediaMorphEls.length > 0;
+
+    if (hasMedia) {
+        tl.add('media', '>');
     }
+
+    mediaFadeEls.forEach((el, index) => {
+        const proxy = { o: 0 };
+
+        tl.to(proxy, {
+            o: 1,
+            duration: MEDIA_FADE_DURATION,
+            ease: 'sine.out',
+            onUpdate: () => {
+                el.style.opacity = String(proxy.o);
+            },
+        }, `media+=${index * MEDIA_STAGGER}`);
+    });
 
     mediaMorphEls.forEach((el, index) => {
         const proxy = { t: 0 };
         /** @type {{ width: number, height: number, finalRadius: number } | null} */
         let box = null;
-        const position = index === 0
-            ? (mediaFadeEls.length ? `-=${FADE_DURATION - MEDIA_STAGGER}` : ENTRANCE_OFFSETS.media)
-            : `-=${MORPH_DURATION - MEDIA_STAGGER}`;
 
         tl.to(proxy, {
             t: 1,
@@ -392,7 +410,7 @@ const buildSectionTimeline = (section) => {
             },
             onUpdate: () => applyMorphClip(el, proxy.t, box ?? cacheMorphBox(el)),
             onComplete: () => setMorphFinal(el, box ?? cacheMorphBox(el)),
-        }, position);
+        }, `media+=${index * MEDIA_STAGGER}`);
     });
 
     infoLineGroups.forEach((lines, index) => {

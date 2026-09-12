@@ -1,6 +1,7 @@
 @extends('layouts.site')
 
-@section('title', ($category?->title ? $category->title.' — ' : '').'Меню — ТЕТРИ')
+@section('title', \App\Settings\SiteSettings::documentTitle($settings, $category?->title, $settings['menu_seo_title'] ?? 'Меню'))
+
 
 @section('content')
     <section class="bg-cream px-4 pb-24 pt-10 sm:px-6 lg:px-8" data-entrance data-state="pending">

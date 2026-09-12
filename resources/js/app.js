@@ -62,6 +62,7 @@ const ensureEnoughLoopSlides = (el, spaceBetween) => {
     slides.forEach((slide) => {
         const clone = slide.cloneNode(true);
         clone.setAttribute('aria-hidden', 'true');
+        clone.dataset.entranceClone = 'true';
         clone.querySelectorAll('a, button, [tabindex]').forEach((node) => {
             node.setAttribute('tabindex', '-1');
         });

@@ -11,6 +11,10 @@ class BookingModal extends Component
 {
     public bool $show = false;
 
+    public bool $sent = false;
+
+    public bool $failed = false;
+
     public string $name = '';
 
     public string $phone = '';
@@ -75,6 +79,8 @@ class BookingModal extends Component
     public function open(string $source = 'site'): void
     {
         $this->resetValidation();
+        $this->sent = false;
+        $this->failed = false;
         $this->source = $source !== '' ? $source : 'site';
         $this->show = true;
     }
@@ -82,10 +88,20 @@ class BookingModal extends Component
     public function close(): void
     {
         $this->show = false;
+        $this->sent = false;
+        $this->failed = false;
+    }
+
+    public function retry(): void
+    {
+        $this->resetValidation();
+        $this->failed = false;
     }
 
     public function submit(MaxNotificationService $max): void
     {
+        $this->failed = false;
+
         $data = $this->validate();
 
         $payload = [
@@ -98,13 +114,13 @@ class BookingModal extends Component
         ];
 
         if (! $max->sendFormNotification($payload)) {
-            $this->addError('form', 'Не удалось отправить заявку. Попробуйте позже или позвоните нам.');
+            $this->failed = true;
 
             return;
         }
 
         $this->reset(['name', 'phone', 'date', 'guests', 'comment', 'source']);
-        $this->show = false;
+        $this->sent = true;
     }
 
     public function render(): View

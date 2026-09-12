@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\Category;
+use App\Models\Story;
 use App\Settings\SiteSettings;
 use App\Support\IconFieldSchema;
 use BackedEnum;
@@ -19,9 +21,13 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Pboivin\FilamentPeek\Pages\Actions\PreviewAction;
+use Pboivin\FilamentPeek\Pages\Concerns\HasPreviewModal;
 
 class ManageSiteSettings extends Page
 {
+    use HasPreviewModal;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
     protected static ?string $navigationLabel = 'Настройки сайта';
@@ -229,13 +235,59 @@ class ManageSiteSettings extends Page
                                     ->helperText('Если пусто — iframe собирается из широты, долготы и текста метки.')
                                     ->columnSpanFull(),
                             ]),
-                        Tab::make('Подвал и CTA')
+                        Tab::make('SEO')
                             ->schema([
                                 Toggle::make('block_search_indexing')
                                     ->label('Запретить индексацию поисковиками')
                                     ->helperText('Включено: meta noindex и Disallow в /robots.txt. Для демо-поддомена оставляйте включённым.')
                                     ->default(true)
                                     ->columnSpanFull(),
+                                TextInput::make('seo_title')
+                                    ->label('Title по умолчанию')
+                                    ->required()
+                                    ->helperText('Fallback для страниц без своего title; также og:title по умолчанию.')
+                                    ->columnSpanFull(),
+                                Textarea::make('seo_description')
+                                    ->label('Description по умолчанию')
+                                    ->rows(3)
+                                    ->helperText('meta description и og:description, если у страницы нет своего.')
+                                    ->columnSpanFull(),
+                                TextInput::make('seo_title_suffix')
+                                    ->label('Суффикс title («— …»)')
+                                    ->required()
+                                    ->helperText('Хвост для меню, блюда, политики: «Название — {суффикс}».')
+                                    ->columnSpanFull(),
+                                TextInput::make('home_seo_title')
+                                    ->label('Главная — title')
+                                    ->required()
+                                    ->columnSpanFull(),
+                                Textarea::make('home_seo_description')
+                                    ->label('Главная — description')
+                                    ->rows(3)
+                                    ->helperText('Пусто → подставится общий description.')
+                                    ->columnSpanFull(),
+                                TextInput::make('menu_seo_title')
+                                    ->label('Меню — сегмент title')
+                                    ->required()
+                                    ->helperText('Собирается как «Категория — {сегмент} — {суффикс}» или «{сегмент} — {суффикс}».')
+                                    ->columnSpanFull(),
+                                FileUpload::make('og_image')
+                                    ->label('OG-картинка')
+                                    ->image()
+                                    ->acceptedFileTypes([
+                                        'image/png',
+                                        'image/jpeg',
+                                        'image/webp',
+                                    ])
+                                    ->disk('public')
+                                    ->directory('site/og')
+                                    ->visibility('public')
+                                    ->maxSize(5120)
+                                    ->helperText('Рекомендуемо 1200×630 для репостов.')
+                                    ->columnSpanFull(),
+                            ]),
+                        Tab::make('Подвал и CTA')
+                            ->schema([
                                 FileUpload::make('favicon')
                                     ->label('Favicon')
                                     ->acceptedFileTypes([
@@ -265,20 +317,6 @@ class ManageSiteSettings extends Page
                                     ->visibility('public')
                                     ->maxSize(2048)
                                     ->helperText('Шапка и подвал; если пусто — текст ТЕТРИ.')
-                                    ->columnSpanFull(),
-                                FileUpload::make('og_image')
-                                    ->label('OG-картинка')
-                                    ->image()
-                                    ->acceptedFileTypes([
-                                        'image/png',
-                                        'image/jpeg',
-                                        'image/webp',
-                                    ])
-                                    ->disk('public')
-                                    ->directory('site/og')
-                                    ->visibility('public')
-                                    ->maxSize(5120)
-                                    ->helperText('Рекомендуемо 1200×630 для репостов.')
                                     ->columnSpanFull(),
                                 Textarea::make('footer_about')
                                     ->label('Описание в подвале')
@@ -348,9 +386,43 @@ class ManageSiteSettings extends Page
     protected function getHeaderActions(): array
     {
         return [
+            PreviewAction::make(),
             Action::make('save')
                 ->label('Сохранить')
                 ->action('save'),
+        ];
+    }
+
+    protected function getPreviewModalView(): ?string
+    {
+        return 'home';
+    }
+
+    protected function getPreviewModalDataRecordKey(): string
+    {
+        return 'settings';
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function mutatePreviewModalData(array $data): array
+    {
+        $formData = $this->data ?? [];
+        $merged = array_replace_recursive(app(SiteSettings::class)->all(), $formData);
+
+        foreach (SiteSettings::LIST_KEYS as $listKey) {
+            if (array_key_exists($listKey, $formData)) {
+                $merged[$listKey] = $formData[$listKey];
+            }
+        }
+
+        return [
+            'settings' => $merged,
+            'categories' => Category::query()->active()->ordered()->get(),
+            'stories' => Story::query()->active()->ordered()->get(),
+            'isPreview' => true,
         ];
     }
 }

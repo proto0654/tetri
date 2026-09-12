@@ -1,6 +1,7 @@
 @extends('layouts.site')
 
-@section('title', ($settings['privacy_title'] ?? 'Политика конфиденциальности').' — ТЕТРИ')
+@section('title', \App\Settings\SiteSettings::documentTitle($settings, $settings['privacy_title'] ?? 'Политика конфиденциальности'))
+
 
 @section('content')
     @php

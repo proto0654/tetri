@@ -2,17 +2,26 @@
 <html lang="ru">
 <head>
     @php($settings = $settings ?? app(\App\Settings\SiteSettings::class)->all())
+    @php($defaultTitle = $settings['seo_title'] ?? 'ТЕТРИ — семейное кафе')
+    @php($defaultDescription = $settings['seo_description'] ?? '')
+    @php($pageDescription = trim($__env->yieldContent('meta_description', $defaultDescription)))
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @if (! empty($settings['block_search_indexing']))
         <meta name="robots" content="noindex, nofollow">
     @endif
-    <title>@yield('title', 'ТЕТРИ — семейное кафе')</title>
+    <title>@yield('title', $defaultTitle)</title>
+    @if (filled($pageDescription))
+        <meta name="description" content="{{ $pageDescription }}">
+    @endif
     <x-site.favicon :path="$settings['favicon'] ?? null" />
     @php($ogImageUrl = \App\Support\PublicMedia::absoluteUrl($settings['og_image'] ?? null))
     <meta property="og:type" content="website">
-    <meta property="og:title" content="@yield('title', 'ТЕТРИ — семейное кафе')">
+    <meta property="og:title" content="@yield('title', $defaultTitle)">
     <meta property="og:url" content="{{ url()->current() }}">
+    @if (filled($pageDescription))
+        <meta property="og:description" content="{{ $pageDescription }}">
+    @endif
     @if (filled($ogImageUrl))
         <meta property="og:image" content="{{ $ogImageUrl }}">
         <meta name="twitter:card" content="summary_large_image">
