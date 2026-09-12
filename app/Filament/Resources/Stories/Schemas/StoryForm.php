@@ -22,15 +22,15 @@ class StoryForm
                     ->disk('public')
                     ->directory('stories')
                     ->visibility('public')
-                    ->maxSize(30720)
-                    ->required(),
+                    ->maxSize(30720),
                 FileUpload::make('preview_image')
                     ->label('Превью')
                     ->image()
                     ->disk('public')
                     ->directory('stories/previews')
                     ->visibility('public')
-                    ->maxSize(5120),
+                    ->maxSize(5120)
+                    ->requiredWithout('video_path'),
                 TextInput::make('sort_order')
                     ->label('Порядок')
                     ->numeric()
