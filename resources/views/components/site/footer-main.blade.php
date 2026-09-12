@@ -2,10 +2,10 @@
 
 <div {{ $attributes->class(['grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8']) }}>
     <div>
-        <p class="text-xs uppercase tracking-wide text-cream/70">
+        <p class="text-xs uppercase tracking-wide text-cream/70" data-entrance-fade>
             <span aria-hidden="true">◇</span> НАВИГАЦИЯ
         </p>
-        <nav class="mt-5 flex flex-col gap-2 text-sm text-cream/85">
+        <nav class="mt-5 flex flex-col gap-2 text-sm text-cream/85" data-entrance-list>
             <a href="{{ route('home') }}#concept" class="hover:text-cream">О нас</a>
             <a href="{{ route('menu') }}" class="hover:text-cream">Меню</a>
             <a href="{{ route('home') }}#kids" class="hover:text-cream">Детская</a>
@@ -19,10 +19,10 @@
     </div>
 
     <div>
-        <p class="text-xs uppercase tracking-wide text-cream/70">
+        <p class="text-xs uppercase tracking-wide text-cream/70" data-entrance-fade>
             <span aria-hidden="true">◇</span> МЫ В СЕТИ
         </p>
-        <div class="mt-5 flex flex-wrap gap-5">
+        <div class="mt-5 flex flex-wrap gap-5" data-entrance-list>
             @foreach ($settings['social_links'] ?? [] as $link)
                 @php
                     $icon = $link['icon']
@@ -52,12 +52,14 @@
     </div>
 
     <div class="sm:col-span-2 lg:col-span-1">
-        <x-site.logo
-            :path="$settings['logo'] ?? null"
-            class="h-10 w-auto object-contain sm:h-12"
-            text-class="font-display text-3xl font-bold tracking-[0.2em]"
-        />
-        <p class="mt-4 max-w-sm text-sm leading-relaxed text-cream/85">
+        <div data-entrance-fade>
+            <x-site.logo
+                :path="$settings['logo'] ?? null"
+                class="h-10 w-auto object-contain sm:h-12"
+                text-class="font-display text-3xl font-normal tracking-[0.2em]"
+            />
+        </div>
+        <p class="mt-4 max-w-sm text-sm leading-relaxed text-cream/85" data-entrance-fade>
             @typo($settings['footer_about'] ?? '')
         </p>
     </div>

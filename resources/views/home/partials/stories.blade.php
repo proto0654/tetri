@@ -1,6 +1,8 @@
 <section
     id="stories"
     class="overflow-x-clip bg-cream py-16"
+    data-entrance
+    data-state="pending"
     x-data="{
         play(event) {
             const video = event.currentTarget.querySelector('video')
@@ -16,7 +18,7 @@
     <x-site.shell>
         <div data-swiper-root>
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
+                <h2 class="font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl" data-entrance-title>
                     @typoBr($settings['stories_section_title'] ?? 'СТОРИСЫ из MAX')
                 </h2>
 
@@ -24,6 +26,7 @@
                     :text="$settings['stories_section_aside'] ?? null"
                     :note="$settings['stories_section_aside_note'] ?? null"
                     class="max-w-xs sm:items-end sm:text-right"
+                    data-entrance-fade
                 />
             </div>
 
@@ -31,7 +34,6 @@
                 <div
                     class="swiper"
                     data-swiper
-                    data-loop
                     data-space-between="16"
                     data-slides-offset-before="shell"
                 >
@@ -43,6 +45,7 @@
                                         role="button"
                                         tabindex="0"
                                         class="w-full cursor-pointer overflow-hidden rounded-[1.75rem] bg-cream-dark text-left shadow-sm select-none"
+                                        data-entrance-media="fade"
                                         @click="play($event)"
                                         @keydown.enter.prevent="play($event)"
                                         @keydown.space.prevent="play($event)"
@@ -76,7 +79,7 @@
                 </div>
             </div>
 
-            <div class="mt-4 flex gap-3">
+            <div class="mt-4 flex gap-3" data-entrance-cta>
                 <button type="button" data-swiper-prev class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-olive text-cream transition hover:bg-olive-deep" aria-label="Назад">
                     ←
                 </button>

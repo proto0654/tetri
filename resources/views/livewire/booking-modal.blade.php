@@ -18,7 +18,7 @@
         >
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <h2 id="booking-modal-title" class="font-display text-2xl font-bold text-olive">
+                    <h2 id="booking-modal-title" class="font-display text-2xl font-normal text-olive">
                         Забронировать стол
                     </h2>
                     <p class="mt-1 text-sm text-muted">Оставьте контакты — мы перезвоним.</p>

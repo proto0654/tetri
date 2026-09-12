@@ -127,6 +127,54 @@ class MenuGridTest extends TestCase
             ->assertDontSee('border-gray-300', false);
     }
 
+    public function test_pagination_scrolls_to_heading_but_category_tabs_do_not(): void
+    {
+        $breakfast = Category::factory()->create([
+            'title' => 'Завтраки',
+            'slug' => 'zavtraki',
+            'is_active' => true,
+        ]);
+
+        $desserts = Category::factory()->create([
+            'title' => 'Десерты',
+            'slug' => 'deserty',
+            'is_active' => true,
+        ]);
+
+        MenuItem::factory()->count(13)->create([
+            'category_id' => $breakfast->id,
+            'is_active' => true,
+        ]);
+
+        MenuItem::factory()->create([
+            'category_id' => $desserts->id,
+            'title' => 'Чизкейк',
+            'is_active' => true,
+        ]);
+
+        $scrollJs = <<<'JS'
+            document.getElementById('menu-grid-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        JS;
+
+        $component = Livewire::test(MenuGrid::class, ['categorySlug' => 'zavtraki'])
+            ->call('gotoPage', 2)
+            ->assertJs($scrollJs);
+
+        $component
+            ->call('setCategory', $desserts->id)
+            ->assertSet('activeCategoryId', $desserts->id)
+            ->assertJs('window.history.pushState({}, "", '.json_encode(route('menu.category', 'deserty')).')');
+
+        $evaluatedJs = $component->effects['xjs'] ?? [];
+
+        $this->assertFalse(
+            collect($evaluatedJs)->contains(
+                fn (array $item): bool => str_contains($item['expression'] ?? '', 'scrollIntoView')
+            ),
+            'Category tab changes must not scroll to the menu heading.'
+        );
+    }
+
     public function test_menu_cards_link_to_dish_show_page(): void
     {
         $category = Category::factory()->create([

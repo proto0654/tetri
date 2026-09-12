@@ -50,16 +50,11 @@ class MaxNotificationServiceTest extends TestCase
                     'Источник: kids',
                 ])
                 && ($request['attachments'][0]['type'] ?? null) === 'inline_keyboard'
-                && ($request['attachments'][0]['payload']['buttons'][0][0] ?? null) === [
-                    'type' => 'link',
-                    'text' => 'Позвонить',
-                    'url' => 'tel:+79780000000',
-                ]
-                && ($request['attachments'][0]['payload']['buttons'][0][1] ?? null) === [
+                && ($request['attachments'][0]['payload']['buttons'][0] ?? null) === [[
                     'type' => 'clipboard',
-                    'text' => 'Скопировать',
-                    'payload' => '+79780000000',
-                ];
+                    'text' => 'Скопировать телефон',
+                    'payload' => '+7 978 000-00-00',
+                ]];
         });
     }
 
@@ -92,7 +87,7 @@ class MaxNotificationServiceTest extends TestCase
         });
     }
 
-    public function test_normalizes_russian_8_prefix_for_call_button(): void
+    public function test_clipboard_keeps_phone_as_entered_while_normalizing_8_prefix_for_validation(): void
     {
         Http::preventStrayRequests();
         Http::fake([
@@ -116,10 +111,10 @@ class MaxNotificationServiceTest extends TestCase
         $this->assertTrue($sent);
 
         Http::assertSent(function (Request $request): bool {
-            $buttons = $request['attachments'][0]['payload']['buttons'][0] ?? null;
+            $button = $request['attachments'][0]['payload']['buttons'][0][0] ?? null;
 
-            return ($buttons[0]['url'] ?? null) === 'tel:+79780000000'
-                && ($buttons[1]['payload'] ?? null) === '+79780000000';
+            return ($button['type'] ?? null) === 'clipboard'
+                && ($button['payload'] ?? null) === '8 (978) 000-00-00';
         });
     }
 

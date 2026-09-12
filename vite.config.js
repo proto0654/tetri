@@ -9,8 +9,12 @@ export default defineConfig({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                bunny('Poiret One', {
+                    alias: 'display',
+                    weights: [400],
+                    subsets: ['latin', 'cyrillic'],
+                    fallbacks: ['ui-serif', 'Georgia', 'serif'],
+                    optimizedFallbacks: false,
                 }),
             ],
         }),

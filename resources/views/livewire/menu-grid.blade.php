@@ -1,15 +1,19 @@
 @php
     $categoryGridClass = 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4';
+    $menuPanePage = $items instanceof \Illuminate\Contracts\Pagination\Paginator
+        ? $items->currentPage()
+        : 1;
+    $tabClass = 'min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-full px-3 py-2.5 text-center text-xs font-semibold tracking-wide transition data-loading:pointer-events-none data-loading:opacity-60 sm:basis-0 sm:px-4 sm:text-sm';
 @endphp
 
 <div class="relative">
-    <div class="flex w-full flex-wrap gap-2 sm:gap-3 lg:flex-nowrap">
+    <div class="flex w-full flex-wrap gap-2 sm:gap-3 lg:flex-nowrap" data-entrance-fade>
         <button
             type="button"
             wire:key="category-tab-all"
             wire:click="showAll"
             @class([
-                'min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-full px-3 py-2.5 text-center text-xs font-semibold tracking-wide transition sm:basis-0 sm:px-4 sm:text-sm',
+                $tabClass,
                 'bg-plum text-white' => $activeCategory === null,
                 'bg-cream-dark text-ink hover:bg-plum/10' => $activeCategory !== null,
             ])
@@ -23,7 +27,7 @@
                 wire:key="category-tab-{{ $category->id }}"
                 wire:click="setCategory({{ $category->id }})"
                 @class([
-                    'min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-full px-3 py-2.5 text-center text-xs font-semibold tracking-wide transition sm:basis-0 sm:px-4 sm:text-sm',
+                    $tabClass,
                     'bg-plum text-white' => $activeCategory?->id === $category->id,
                     'bg-cream-dark text-ink hover:bg-plum/10' => $activeCategory?->id !== $category->id,
                 ])
@@ -34,9 +38,8 @@
     </div>
 
     <div
-        class="mt-12 transition"
-        wire:loading.class="opacity-40 blur-[1px]"
-        wire:target="setCategory, showAll, gotoPage, nextPage, previousPage"
+        class="mt-12"
+        wire:key="menu-pane-{{ $activeCategoryId ?? 'all' }}-{{ $menuPanePage }}"
     >
         @if ($activeCategory === null)
             <div class="space-y-16">
@@ -48,10 +51,15 @@
                             2 => 'grid grid-cols-1 gap-8 md:grid-cols-2',
                             default => 'grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3',
                         };
+                        $blockItemOffset = $loop->index * max($previewCount, 1);
                     @endphp
 
-                    <section wire:key="menu-block-{{ $category->id }}">
-                        <h2 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
+                    <section
+                        wire:key="menu-block-{{ $category->id }}"
+                        class="menu-grid-block"
+                        style="--menu-i: {{ $loop->index }}"
+                    >
+                        <h2 class="font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl">
                             @typo(mb_strtoupper($category->title))
                         </h2>
 
@@ -60,7 +68,8 @@
                                 <a
                                     wire:key="menu-item-{{ $item->id }}"
                                     href="{{ route('menu.show', [$category, $item]) }}"
-                                    class="group block"
+                                    class="menu-grid-item group block"
+                                    style="--menu-i: {{ $blockItemOffset + $loop->index }}"
                                 >
                                     <article>
                                         <div class="overflow-hidden rounded-[1.5rem] bg-cream-dark">
@@ -93,7 +102,7 @@
         @else
             <h2
                 id="menu-grid-heading"
-                class="scroll-mt-28 font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl"
+                class="scroll-mt-28 font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl"
             >
                 @typo(mb_strtoupper($activeCategory->title))
             </h2>
@@ -103,7 +112,8 @@
                     <a
                         wire:key="menu-item-{{ $item->id }}"
                         href="{{ route('menu.show', [$activeCategory, $item]) }}"
-                        class="group block"
+                        class="menu-grid-item group block"
+                        style="--menu-i: {{ $loop->index }}"
                     >
                         <article>
                             <div class="overflow-hidden rounded-[1.5rem] bg-cream-dark">

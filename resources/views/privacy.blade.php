@@ -12,7 +12,7 @@
 
     <section class="bg-cream px-4 pb-16 pt-10 sm:px-6 lg:px-8">
         <div class="mx-auto max-w-7xl">
-            <h1 class="font-display text-4xl font-bold text-olive sm:text-5xl lg:text-6xl">
+            <h1 class="font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl">
                 @typoBr($settings['privacy_title'] ?? 'Политика конфиденциальности')
             </h1>
 
