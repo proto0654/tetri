@@ -466,14 +466,16 @@
     backface-visibility: hidden;
 }
 
-/* Layer hints only while playing — permanent will-change hurts memory. */
+/* Layer hints only while playing — permanent will-change hurts memory.
+ * Fade media: opacity only (no transform) — force3D inside Swiper track flickers. */
 [data-entrance][data-state='playing'] .entrance-line,
 [data-entrance][data-state='playing'] [data-entrance-fade],
 [data-entrance][data-state='playing'] [data-entrance-cta],
-[data-entrance][data-state='playing'] [data-entrance-list] > *,
-[data-entrance][data-state='playing'] [data-entrance-media='fade'] {
+[data-entrance][data-state='playing'] [data-entrance-list] > * {
     will-change: opacity, transform;
 }
+
+/* No will-change on Swiper fade cards — layer promotion flickers on the track. */
 
 [data-entrance][data-state='playing'] [data-entrance-media]:not([data-entrance-media='fade']) {
     will-change: clip-path, opacity;
@@ -500,9 +502,9 @@
     clip-path: inset(0 round var(--entrance-radius, 2rem));
 }
 
-/* Swiper cards: opacity fade only (no clip-path morph — FPS). */
-[data-entrance][data-state='pending'] [data-entrance-media='fade'],
-[data-entrance][data-state='playing'] [data-entrance-media='fade'] {
+/* Swiper cards: FOUC on pending only. During playing GSAP owns originals;
+ * skipped clones stay at inline opacity:0 from snapSkippedMedia. */
+[data-entrance][data-state='pending'] [data-entrance-media='fade'] {
     opacity: 0;
     clip-path: none;
 }
@@ -524,12 +526,10 @@
     opacity: 1;
 }
 
+/* FOUC hide on pending only — GSAP owns opacity while playing (avoids CSS/inline fight). */
 [data-entrance][data-state='pending'] [data-entrance-fade],
 [data-entrance][data-state='pending'] [data-entrance-cta],
-[data-entrance][data-state='pending'] [data-entrance-list] > *,
-[data-entrance][data-state='playing'] [data-entrance-fade],
-[data-entrance][data-state='playing'] [data-entrance-cta],
-[data-entrance][data-state='playing'] [data-entrance-list] > * {
+[data-entrance][data-state='pending'] [data-entrance-list] > * {
     opacity: 0;
 }
 

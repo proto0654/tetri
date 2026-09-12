@@ -1,6 +1,7 @@
 @extends('layouts.site')
 
-@section('title', $item->title.' — ТЕТРИ')
+@section('title', \App\Settings\SiteSettings::documentTitle($settings, $item->title))
+
 
 @section('content')
     <section class="bg-cream px-4 pt-10 sm:px-6 lg:px-8" data-entrance data-state="pending">

@@ -98,7 +98,7 @@ class BookingModalTest extends TestCase
         ];
     }
 
-    public function test_submit_sends_max_notification_and_closes(): void
+    public function test_submit_sends_max_notification_and_shows_thanks(): void
     {
         Http::preventStrayRequests();
         Http::fake([
@@ -114,8 +114,13 @@ class BookingModalTest extends TestCase
             ->set('comment', 'Окно')
             ->call('submit')
             ->assertHasNoErrors()
-            ->assertSet('show', false)
-            ->assertSet('name', '');
+            ->assertSet('show', true)
+            ->assertSet('sent', true)
+            ->assertSet('failed', false)
+            ->assertSet('name', '')
+            ->assertSee('Спасибо за обращение!')
+            ->assertSee('Мы скоро свяжемся с вами, чтобы подтвердить бронь.')
+            ->assertSee('Бронь считается подтверждённой после связи с менеджером.');
 
         Http::assertSent(function (Request $request): bool {
             return str_contains($request->url(), 'chat_id=12345')
@@ -140,10 +145,11 @@ class BookingModalTest extends TestCase
             ->set('comment', '')
             ->call('submit')
             ->assertHasNoErrors()
-            ->assertSet('show', false);
+            ->assertSet('show', true)
+            ->assertSet('sent', true);
     }
 
-    public function test_submit_keeps_modal_open_when_max_api_fails(): void
+    public function test_submit_shows_error_state_when_max_api_fails(): void
     {
         Http::preventStrayRequests();
         Http::fake([
@@ -157,9 +163,37 @@ class BookingModalTest extends TestCase
             ->set('date', '2026-09-20')
             ->set('guests', 2)
             ->call('submit')
-            ->assertHasErrors(['form'])
-            ->assertSee('Не удалось отправить заявку')
             ->assertSet('show', true)
+            ->assertSet('sent', false)
+            ->assertSet('failed', true)
+            ->assertSet('name', 'Анна')
+            ->assertSee('Не удалось отправить')
+            ->assertSee('Попробовать снова')
+            ->call('retry')
+            ->assertSet('failed', false)
+            ->assertSee('Забронировать стол')
             ->assertSet('name', 'Анна');
+    }
+
+    public function test_reopening_after_success_shows_form_again(): void
+    {
+        Http::preventStrayRequests();
+        Http::fake([
+            'platform-api2.max.ru/*' => Http::response(['ok' => true], 200),
+        ]);
+
+        Livewire::test(BookingModal::class)
+            ->dispatch('booking-open')
+            ->set('name', 'Анна')
+            ->set('phone', '+7 978 000-00-00')
+            ->set('date', '2026-09-20')
+            ->set('guests', 2)
+            ->call('submit')
+            ->assertSet('sent', true)
+            ->dispatch('booking-open', source: 'header')
+            ->assertSet('sent', false)
+            ->assertSet('failed', false)
+            ->assertSet('show', true)
+            ->assertSee('Забронировать стол');
     }
 }

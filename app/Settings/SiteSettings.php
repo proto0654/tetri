@@ -169,10 +169,38 @@ class SiteSettings
             'favicon' => null,
             'logo' => null,
             'og_image' => null,
+            'seo_title' => 'ТЕТРИ — семейное кафе',
+            'seo_description' => 'Семейное кафе ТЕТРИ в Симферополе — место, где хорошо и детям, и родителям. Меню, детская игровая, бронирование стола.',
+            'seo_title_suffix' => 'ТЕТРИ',
+            'home_seo_title' => 'ТЕТРИ — семейное кафе в Симферополе',
+            'home_seo_description' => 'Семейное кафе ТЕТРИ в Симферополе: детская игровая, авторское меню и уютный зал. Забронируйте стол онлайн.',
+            'menu_seo_title' => 'Меню',
             'max_bot_token' => null,
             'max_chat_id' => null,
             'block_search_indexing' => true,
         ];
+    }
+
+    /**
+     * Build a document title: "Part — Part — {seo_title_suffix}".
+     * Empty parts are skipped. With no parts, returns seo_title.
+     *
+     * @param  array<string, mixed>  $settings
+     */
+    public static function documentTitle(array $settings, ?string ...$parts): string
+    {
+        $segments = array_values(array_filter(
+            $parts,
+            static fn (?string $part): bool => filled($part),
+        ));
+
+        if ($segments === []) {
+            return (string) ($settings['seo_title'] ?? 'ТЕТРИ — семейное кафе');
+        }
+
+        $suffix = (string) ($settings['seo_title_suffix'] ?? 'ТЕТРИ');
+
+        return implode(' — ', [...$segments, $suffix]);
     }
 
     protected static function cacheKey(): string

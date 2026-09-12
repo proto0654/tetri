@@ -1,6 +1,12 @@
 <?php
 
+use App\Models\Category;
+use App\Models\MenuItem;
+use App\Models\Story;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Pboivin\FilamentPeek\CachedPreview;
 
 return [
 
@@ -131,6 +137,13 @@ return [
     |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => [
+        CachedPreview::class,
+        Category::class,
+        MenuItem::class,
+        Story::class,
+        EloquentCollection::class,
+        Collection::class,
+    ],
 
 ];
