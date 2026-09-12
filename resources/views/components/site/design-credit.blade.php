@@ -3,7 +3,7 @@
 @php
     $designCredit = filled($settings['design_credit'] ?? null)
         ? $settings['design_credit']
-        : 'Разработка сайта winbaba.ru';
+        : 'Разработка сайта weblaba.ru';
 
     preg_match('/https?:\/\/[^\s]+|(?:[a-z0-9-]+\.)+[a-z]{2,}/iu', $designCredit, $designCreditMatch);
     $designCreditHref = $designCreditMatch[0] ?? null;
