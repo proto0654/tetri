@@ -102,7 +102,8 @@
         @else
             <h2
                 id="menu-grid-heading"
-                class="scroll-mt-28 font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl"
+                class="menu-grid-heading scroll-mt-28 font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl"
+                style="--menu-i: 0"
             >
                 @typo(mb_strtoupper($activeCategory->title))
             </h2>

@@ -125,7 +125,7 @@ class BookingModalTest extends TestCase
         Http::assertSent(function (Request $request): bool {
             return str_contains($request->url(), 'chat_id=12345')
                 && str_contains((string) $request['text'], 'Анна')
-                && str_contains((string) $request['text'], 'Источник: kids');
+                && str_contains((string) $request['text'], 'Источник: Раздел «Детская»');
         });
     }
 

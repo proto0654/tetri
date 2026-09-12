@@ -47,7 +47,7 @@ class MaxNotificationServiceTest extends TestCase
                     'Дата: 2026-09-20',
                     'Гостей: 4',
                     'Комментарий: Окно',
-                    'Источник: kids',
+                    'Источник: Раздел «Детская»',
                 ])
                 && ($request['attachments'][0]['type'] ?? null) === 'inline_keyboard'
                 && ($request['attachments'][0]['payload']['buttons'][0] ?? null) === [[

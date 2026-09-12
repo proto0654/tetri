@@ -1,13 +1,22 @@
 @props(['settings'])
 
 @php
+    use App\Support\PublicMedia;
+
     $mapLatitude = $settings['map_latitude'] ?? null;
     $mapLongitude = $settings['map_longitude'] ?? null;
     $mapMarkerLabel = $settings['map_marker_label'] ?? null;
     $mapEmbedUrl = $settings['map_embed_url'] ?? null;
+    $mapLogoUrl = PublicMedia::url($settings['logo'] ?? null);
+    $yandexMapsKey = filled(config('services.yandex_maps.key'))
+        ? (string) config('services.yandex_maps.key')
+        : null;
+    $useJsMap = filled($yandexMapsKey)
+        && blank($mapEmbedUrl)
+        && \App\Support\YandexMap::hasCoordinates($mapLatitude, $mapLongitude);
     $mapSrc = filled($mapEmbedUrl)
         ? $mapEmbedUrl
-        : \App\Support\YandexMap::widgetUrl($mapLatitude, $mapLongitude, $mapMarkerLabel);
+        : ($useJsMap ? null : \App\Support\YandexMap::widgetUrl($mapLatitude, $mapLongitude, $mapMarkerLabel));
     $mapRouteUrl = \App\Support\YandexMap::routeUrl($mapLatitude, $mapLongitude);
     $mapTitle = filled($mapMarkerLabel) ? $mapMarkerLabel : 'Карта ТЕТРИ';
 @endphp
@@ -22,7 +31,19 @@
                     data-entrance-radius="32"
                     style="--entrance-radius: 2rem"
                 >
-                    @if (! empty($mapSrc))
+                    @if ($useJsMap)
+                        <div
+                            class="site-yandex-map absolute inset-0 h-full w-full max-lg:min-h-[16rem]"
+                            data-yandex-map
+                            data-lat="{{ $mapLatitude }}"
+                            data-lng="{{ $mapLongitude }}"
+                            data-label="{{ $mapMarkerLabel }}"
+                            @if (filled($mapLogoUrl)) data-logo="{{ $mapLogoUrl }}" @endif
+                            data-apikey="{{ $yandexMapsKey }}"
+                            role="img"
+                            aria-label="{{ $mapTitle }}"
+                        ></div>
+                    @elseif (! empty($mapSrc))
                         <iframe
                             src="{{ $mapSrc }}"
                             class="absolute inset-0 h-full w-full border-0 max-lg:min-h-[16rem]"

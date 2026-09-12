@@ -164,6 +164,7 @@ class CafeContentSeeder extends Seeder
         /** @var array<string, mixed|\Closure(): mixed> $candidates */
         $candidates = [
             'hero_title' => 'Т Е Т Р И',
+            'hero_subtitle' => 'СЕМЕЙНЫЙ РЕСТОРАН',
             'hero_background_image' => fn (): string => $this->storeStockImage('hero-bg', 'site/hero/background.jpg'),
             'hero_video_path' => fn (): string => $this->storePlaceholderVideo('site/hero/hero.mp4'),
             'hero_video_preview' => fn (): string => $this->storeStockImage('hero-preview', 'site/hero/preview.jpg'),

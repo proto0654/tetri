@@ -90,8 +90,29 @@ class MaxNotificationService
             'Дата: '.($formData['date'] ?? '—'),
             'Гостей: '.($formData['guests'] ?? '—'),
             'Комментарий: '.($comment !== '' ? $comment : '—'),
-            'Источник: '.($formData['source'] ?? '—'),
+            'Источник: '.$this->sourceLabel($formData['source'] ?? null),
         ]);
+    }
+
+    /**
+     * Human-readable Russian label for booking CTA source slugs.
+     */
+    protected function sourceLabel(mixed $source): string
+    {
+        if (! is_string($source) || $source === '') {
+            return 'Сайт';
+        }
+
+        return match ($source) {
+            'header' => 'Шапка сайта',
+            'nav-banket', 'nav-banket-mobile' => 'Меню «Банкет»',
+            'footer-banket' => 'Подвал «Банкет»',
+            'kids' => 'Раздел «Детская»',
+            'concept' => 'Раздел «О нас»',
+            'dish-detail' => 'Страница блюда',
+            'site' => 'Сайт',
+            default => $source,
+        };
     }
 
     /**

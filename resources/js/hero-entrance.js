@@ -3,25 +3,36 @@ import {
     easeOutCubic,
     mapRange,
     prefersReducedMotion,
-    centerOutOrder,
 } from './motion-utils';
 
 /**
  * Global progress windows. Overlap neighbors lightly — do not stack starts.
- * Wall-clock (linear master, ~1600ms): bg 0 → header ~130ms → story ~350ms →
- * title ~780ms → icons ~1150ms → settle 1600ms.
+ * Wall-clock (linear master, ~2100ms): bg 0 → header ~130ms → story ~380ms →
+ * title ~840ms → icons ~1220ms → subtitle ~1510ms → settle 2100ms.
  *
  * @type {Record<string, [number, number]>}
  */
 export const HERO_RANGES = {
-    background: [0.0, 0.5],
-    header: [0.08, 0.36],
-    story: [0.22, 0.58],
-    title: [0.48, 0.78],
-    icons: [0.72, 1.0],
+    background: [0.0, 0.42],
+    header: [0.06, 0.3],
+    story: [0.18, 0.48],
+    title: [0.4, 0.65],
+    icons: [0.58, 0.78],
+    subtitle: [0.72, 1.0],
 };
 
-const DURATION_MS = 1600;
+const DURATION_MS = 2100;
+const TITLE_ICON_START_VH = 0.2;
+/** Story mask hold: start collapse later than title/icons (smaller vh → later). */
+const STORY_MASK_START_VH = 0.08;
+/** Icons fully gone once their top reaches mid-viewport. */
+const ICONS_SCROLL_END_VH = 0.5;
+/** Subtitle scroll: fully gone at 20vh (desktop) / 50vh (mobile), fade from rest. */
+const SUBTITLE_DESKTOP_START_VH = 0.2;
+const SUBTITLE_MOBILE_END_VH = 0.5;
+const LG_QUERY = '(min-width: 1024px)';
+const SCROLL_TOP_SNAP_PX = 1;
+const FULL_LOCAL = 0.999;
 
 /**
  * @param {number} t
@@ -78,6 +89,34 @@ const staggerT = (rank, count, spread = 0.55) => {
 const windowed = (local, start, window) => mapRange(local, start, start + window);
 
 /**
+ * @param {HTMLElement} frame
+ * @param {number} local
+ */
+const syncStoryVideo = (frame, local) => {
+    const video = frame.querySelector('video');
+
+    if (! video) {
+        return;
+    }
+
+    if (local >= FULL_LOCAL) {
+        if (video.paused) {
+            const playResult = video.play();
+
+            if (playResult?.catch) {
+                playResult.catch(() => {});
+            }
+        }
+
+        return;
+    }
+
+    if (! video.paused) {
+        video.pause();
+    }
+};
+
+/**
  * @param {HTMLElement} root
  * @param {number} local
  */
@@ -91,13 +130,15 @@ const applyStory = (root, local) => {
     if (local <= 0) {
         frame.style.clipPath = 'inset(50% 50% 50% 50% round 50%)';
         frame.style.opacity = '0';
+        syncStoryVideo(frame, 0);
 
         return;
     }
 
-    if (local >= 1) {
+    if (local >= FULL_LOCAL) {
         frame.style.clipPath = 'inset(0 round 2rem)';
         frame.style.opacity = '1';
+        syncStoryVideo(frame, 1);
 
         return;
     }
@@ -153,9 +194,12 @@ const applyStory = (root, local) => {
 
     frame.style.clipPath = `inset(${insetY}px ${insetX}px ${insetY}px ${insetX}px round ${radius}px)`;
     frame.style.opacity = String(opacity);
+    syncStoryVideo(frame, local);
 };
 
 /**
+ * Left-to-right glyph flip.
+ *
  * @param {HTMLElement} root
  * @param {number} local
  */
@@ -166,14 +210,11 @@ const applyTitle = (root, local) => {
         return;
     }
 
-    const order = centerOutOrder(chars.length);
-    // Each glyph flips in a short window; later ranks wait — readable center-out chain.
     const charWindow = 0.28;
     const spread = Math.min(0.7, 1 - charWindow);
 
     chars.forEach((char, index) => {
-        const rank = order.indexOf(index);
-        const start = staggerT(rank < 0 ? index : rank, chars.length, spread);
+        const start = staggerT(index, chars.length, spread);
         const t = windowed(local, start, charWindow);
         const eased = easeOutCubic(t);
 
@@ -183,18 +224,21 @@ const applyTitle = (root, local) => {
 };
 
 /**
+ * Load: per-bullet stagger chain. Scroll scrub: all icons move together.
+ *
  * @param {HTMLElement} root
  * @param {number} local
+ * @param {{ together?: boolean }} [options]
  */
-const applyIcons = (root, local) => {
+const applyIcons = (root, local, options = {}) => {
+    const { together = false } = options;
     const icons = Array.from(root.querySelectorAll('[data-hero-icon]'));
-
     const iconWindow = 0.4;
-    const spread = Math.min(0.55, 1 - iconWindow);
+    const spread = together ? 0 : Math.min(0.55, 1 - iconWindow);
 
     icons.forEach((icon, index) => {
-        const start = staggerT(index, Math.max(icons.length, 1), spread);
-        const t = windowed(local, start, iconWindow);
+        const start = together ? 0 : staggerT(index, Math.max(icons.length, 1), spread);
+        const t = together ? clamp(local) : windowed(local, start, iconWindow);
         const scale = sampleStops(t, [
             [0, 0.5],
             [0.65, 1.05],
@@ -212,7 +256,6 @@ const applyIcons = (root, local) => {
         const glyph = icon.querySelector('[data-hero-icon-glyph]');
 
         if (glyph) {
-            // Glyph after the circle has mostly landed.
             const glyphT = mapRange(t, 0.55, 1);
 
             glyph.style.opacity = String(easeOutCubic(glyphT));
@@ -222,30 +265,129 @@ const applyIcons = (root, local) => {
 };
 
 /**
+ * Long opacity-only fade for desktop + mobile subtitle nodes.
+ *
+ * @param {HTMLElement} root
+ * @param {number} local
+ */
+const applySubtitle = (root, local) => {
+    const nodes = Array.from(root.querySelectorAll('[data-hero-subtitle]'));
+
+    if (nodes.length === 0) {
+        return;
+    }
+
+    const opacity = easeOutCubic(clamp(local));
+
+    nodes.forEach((node) => {
+        node.style.opacity = String(opacity);
+    });
+};
+
+/**
+ * @typedef {{
+ *   background: number,
+ *   story: number,
+ *   title: number,
+ *   icons: number,
+ *   subtitle: number,
+ *   header?: number,
+ * }} HeroLocals
+ */
+
+/**
  * @param {HTMLElement} root
  * @param {{ setProgress: (n: number) => void, finish: () => void } | null} header
- * @param {{ play: () => void, finish: () => void } | null} bg
- * @param {number} progress
+ * @param {{ setProgress?: (n: number, opts?: { scrollScrub?: boolean }) => void, play?: () => void, finish: () => void } | null} bg
+ * @param {HeroLocals} locals
+ * @param {{ driveHeader?: boolean, scrollScrub?: boolean }} [options]
  */
-const applyAll = (root, header, bg, progress) => {
+const applyLocals = (root, header, bg, locals, options = {}) => {
+    const { driveHeader = true, scrollScrub = false } = options;
+    const background = clamp(locals.background);
+    const story = clamp(locals.story);
+    const title = clamp(locals.title);
+    const icons = clamp(locals.icons);
+    const subtitle = clamp(locals.subtitle);
+
+    root.style.setProperty(
+        '--hero-progress',
+        String(Math.min(background, story, title, icons, subtitle)),
+    );
+
+    if (bg?.setProgress) {
+        bg.setProgress(background, { scrollScrub });
+    }
+
+    if (driveHeader && header) {
+        header.setProgress(clamp(locals.header ?? 1));
+    }
+
+    applyStory(root, story);
+    applyTitle(root, title);
+    applyIcons(root, icons, { together: scrollScrub });
+    applySubtitle(root, subtitle);
+};
+
+/**
+ * @param {number} progress
+ * @returns {HeroLocals}
+ */
+const localsFromMaster = (progress) => {
     const p = clamp(progress);
 
-    root.style.setProperty('--hero-progress', String(p));
-
-    const [bgStart] = HERO_RANGES.background;
-
-    if (bg && p > bgStart) {
-        bg.play();
-    }
-
-    if (header) {
-        header.setProgress(mapRange(p, ...HERO_RANGES.header));
-    }
-
-    applyStory(root, mapRange(p, ...HERO_RANGES.story));
-    applyTitle(root, mapRange(p, ...HERO_RANGES.title));
-    applyIcons(root, mapRange(p, ...HERO_RANGES.icons));
+    return {
+        background: mapRange(p, ...HERO_RANGES.background),
+        header: mapRange(p, ...HERO_RANGES.header),
+        story: mapRange(p, ...HERO_RANGES.story),
+        title: mapRange(p, ...HERO_RANGES.title),
+        icons: mapRange(p, ...HERO_RANGES.icons),
+        subtitle: mapRange(p, ...HERO_RANGES.subtitle),
+    };
 };
+
+/**
+ * @param {HTMLElement | null} el
+ * @returns {number}
+ */
+const elementTop = (el) => {
+    if (! el) {
+        return Number.POSITIVE_INFINITY;
+    }
+
+    return el.getBoundingClientRect().top;
+};
+
+/**
+ * @param {HTMLElement | null} el
+ * @returns {number}
+ */
+const elementCenterY = (el) => {
+    if (! el) {
+        return 0;
+    }
+
+    const rect = el.getBoundingClientRect();
+
+    return rect.top + rect.height / 2;
+};
+
+/**
+ * Title: full while top is below the 20vh line; collapse by the time top hits 0.
+ *
+ * @param {number} top
+ * @returns {number}
+ */
+const delayedScrollLocal = (top) => {
+    const startY = window.innerHeight * TITLE_ICON_START_VH;
+
+    return mapRange(top, 0, startY);
+};
+
+/**
+ * @returns {boolean}
+ */
+const isDesktopViewport = () => window.matchMedia(LG_QUERY).matches;
 
 /**
  * @param {ParentNode} [root=document]
@@ -263,20 +405,224 @@ export const initHeroEntrance = (root = document) => {
     /** @type {number | null} */
     let raf = null;
     let playing = false;
-    /** @type {{ play: () => void, finish: () => void, whenReady?: () => Promise<void> } | null} */
+    let scrubbing = false;
+    /** @type {{ setProgress?: (n: number) => void, play?: () => void, finish: () => void, whenReady?: () => Promise<void> } | null} */
     let bg = null;
     /** @type {{ setProgress: (n: number) => void, finish: () => void } | null} */
     let header = null;
+    /** @type {number | null} */
+    let scrollRaf = null;
+    let scrollDriverEnabled = false;
+
+    const storyEl = () => el.querySelector('[data-hero-story]');
+    const titleEl = () => el.querySelector('[data-hero-title]');
+    const iconsEl = () => el.querySelector('[data-hero-icons]');
+    const subtitleEl = () => {
+        const nodes = Array.from(el.querySelectorAll('[data-hero-subtitle]'));
+
+        return nodes.find((node) => node.offsetParent !== null) ?? nodes[0] ?? null;
+    };
+
+    /**
+     * Bg: 1 at page top; 0 when story center hits the viewport top.
+     * Rest position derived from document geometry so resize/scroll stay in sync.
+     *
+     * @returns {number}
+     */
+    const storyScrollLocal = () => {
+        const frame = storyEl();
+
+        if (! frame) {
+            return 1;
+        }
+
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+
+        if (scrollY <= SCROLL_TOP_SNAP_PX) {
+            return 1;
+        }
+
+        const centerY = elementCenterY(frame);
+        const restCenterY = Math.max(centerY + scrollY, 1);
+
+        return mapRange(centerY, 0, restCenterY);
+    };
+
+    /**
+     * Story mask: hold full until top crosses STORY_MASK_START_VH,
+     * then collapse to 0 when center hits the viewport top — shorter window.
+     *
+     * @returns {number}
+     */
+    const storyMaskScrollLocal = () => {
+        const frame = storyEl();
+
+        if (! frame) {
+            return 1;
+        }
+
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+
+        if (scrollY <= SCROLL_TOP_SNAP_PX) {
+            return 1;
+        }
+
+        const rect = frame.getBoundingClientRect();
+        const centerY = rect.top + rect.height / 2;
+        const holdCenterY = window.innerHeight * STORY_MASK_START_VH + rect.height / 2;
+
+        return mapRange(centerY, 0, Math.max(holdCenterY, 1));
+    };
+
+    /**
+     * Icons: 1 at page top; 0 when icons top hits mid-viewport (earlier exit).
+     *
+     * @returns {number}
+     */
+    const iconsScrollLocal = () => {
+        const frame = iconsEl();
+
+        if (! frame) {
+            return 1;
+        }
+
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+
+        if (scrollY <= SCROLL_TOP_SNAP_PX) {
+            return 1;
+        }
+
+        const top = elementTop(frame);
+        const restTop = Math.max(top + scrollY, 1);
+        const endY = window.innerHeight * ICONS_SCROLL_END_VH;
+
+        return mapRange(top, endY, restTop);
+    };
+
+    /**
+     * Subtitle: desktop fully gone at 20vh; mobile fully gone at mid-viewport.
+     * Fade from rest position → endY (not only the last strip to y=0).
+     *
+     * @returns {number}
+     */
+    const subtitleScrollLocal = () => {
+        const node = subtitleEl();
+
+        if (! node) {
+            return 1;
+        }
+
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+
+        if (scrollY <= SCROLL_TOP_SNAP_PX) {
+            return 1;
+        }
+
+        const top = elementTop(node);
+        const endY = window.innerHeight * (
+            isDesktopViewport() ? SUBTITLE_DESKTOP_START_VH : SUBTITLE_MOBILE_END_VH
+        );
+        const restTop = Math.max(top + scrollY, endY + 1);
+
+        return mapRange(top, endY, restTop);
+    };
+
+    /**
+     * @param {HeroLocals} locals
+     * @param {{ driveHeader?: boolean, scrollScrub?: boolean }} [options]
+     */
+    const paint = (locals, options = {}) => {
+        applyLocals(el, header, bg, locals, options);
+
+        const minLocal = Math.min(
+            locals.background,
+            locals.story,
+            locals.title,
+            locals.icons,
+            locals.subtitle,
+        );
+
+        if (minLocal >= 1) {
+            el.dataset.state = 'done';
+        } else if (minLocal > 0 || scrubbing || playing) {
+            el.dataset.state = 'playing';
+        } else {
+            el.dataset.state = 'pending';
+        }
+    };
+
+    const localsFromScroll = () => {
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+
+        if (scrollY <= SCROLL_TOP_SNAP_PX) {
+            return {
+                background: 1,
+                story: 1,
+                title: 1,
+                icons: 1,
+                subtitle: 1,
+            };
+        }
+
+        return {
+            background: storyScrollLocal(),
+            story: storyMaskScrollLocal(),
+            title: delayedScrollLocal(elementTop(titleEl())),
+            icons: iconsScrollLocal(),
+            subtitle: subtitleScrollLocal(),
+        };
+    };
+
+    const applyScroll = () => {
+        scrubbing = true;
+        playing = false;
+        paint(localsFromScroll(), { driveHeader: false, scrollScrub: true });
+    };
+
+    const onScroll = () => {
+        if (prefersReducedMotion()) {
+            return;
+        }
+
+        if (playing && raf !== null) {
+            cancelAnimationFrame(raf);
+            raf = null;
+            playing = false;
+            header?.finish();
+        }
+
+        if (scrollRaf !== null) {
+            return;
+        }
+
+        scrollRaf = requestAnimationFrame(() => {
+            scrollRaf = null;
+            applyScroll();
+        });
+    };
+
+    const onResize = () => {
+        if (scrubbing || progress >= 1) {
+            applyScroll();
+        }
+    };
+
+    const enableScrollDriver = () => {
+        if (scrollDriverEnabled) {
+            return;
+        }
+
+        scrollDriverEnabled = true;
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onResize);
+    };
 
     const setProgress = (next) => {
         progress = clamp(next);
-        applyAll(el, header, bg, progress);
+        paint(localsFromMaster(progress), { driveHeader: true });
 
         if (progress >= 1) {
-            el.dataset.state = 'done';
             playing = false;
-        } else if (progress > 0) {
-            el.dataset.state = 'playing';
         }
     };
 
@@ -287,10 +633,23 @@ export const initHeroEntrance = (root = document) => {
         }
 
         playing = false;
-        setProgress(1);
+        progress = 1;
+        paint({
+            background: 1,
+            header: 1,
+            story: 1,
+            title: 1,
+            icons: 1,
+            subtitle: 1,
+        }, { driveHeader: true });
         bg?.finish();
         header?.finish();
         el.dataset.state = 'done';
+        enableScrollDriver();
+
+        if ((window.scrollY || 0) > 0) {
+            applyScroll();
+        }
     };
 
     const api = {
@@ -298,7 +657,7 @@ export const initHeroEntrance = (root = document) => {
         finish,
         getProgress: () => progress,
         /**
-         * @param {{ play: () => void, finish: () => void, whenReady?: () => Promise<void> } | null} nextBg
+         * @param {{ setProgress?: (n: number) => void, play?: () => void, finish: () => void, whenReady?: () => Promise<void> } | null} nextBg
          * @param {{ setProgress: (n: number) => void, finish: () => void } | null} nextHeader
          */
         bind(nextBg, nextHeader) {
@@ -312,11 +671,24 @@ export const initHeroEntrance = (root = document) => {
                 return;
             }
 
-            if (playing || progress >= 1) {
+            if (playing || (progress >= 1 && ! scrubbing)) {
+                if (progress >= 1) {
+                    enableScrollDriver();
+                }
+
+                return;
+            }
+
+            if ((window.scrollY || 0) > 2) {
+                header?.finish();
+                enableScrollDriver();
+                applyScroll();
+
                 return;
             }
 
             playing = true;
+            scrubbing = false;
             el.dataset.state = 'playing';
             const start = performance.now();
 
@@ -331,8 +703,9 @@ export const initHeroEntrance = (root = document) => {
                 } else {
                     raf = null;
                     playing = false;
-                    el.dataset.state = 'done';
                     header?.finish();
+                    el.dataset.state = 'done';
+                    enableScrollDriver();
                 }
             };
 
@@ -348,7 +721,7 @@ export const initHeroEntrance = (root = document) => {
 /**
  * @param {ParentNode} [root=document]
  * @param {{
- *   bg?: { play: () => void, finish: () => void, whenReady?: () => Promise<void> } | null,
+ *   bg?: { setProgress?: (n: number) => void, play?: () => void, finish: () => void, whenReady?: () => Promise<void> } | null,
  *   header?: { setProgress: (n: number) => void, finish: () => void } | null,
  * }} [deps]
  */
