@@ -56,7 +56,9 @@ class DemoPushCommand extends Command
             return self::FAILURE;
         }
 
-        $remoteZip = rtrim($path, '/').'/storage/app/demo-sync/demo-content.zip';
+        $remoteZipScp = $path.'storage/app/demo-sync/demo-content.zip';
+        // After `cd $path`, artisan must get an app-relative (or absolute) zip path — not DEPLOY_PATH-prefixed.
+        $remoteZipImport = 'storage/app/demo-sync/demo-content.zip';
         $sshBase = ['ssh', '-i', $key, '-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes', "{$user}@{$host}"];
 
         $this->info('Uploading zip…');
@@ -71,7 +73,7 @@ class DemoPushCommand extends Command
         $scp = Process::timeout(600)->run([
             'scp', '-i', $key, '-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes',
             $zipPath,
-            "{$user}@{$host}:{$remoteZip}",
+            "{$user}@{$host}:{$remoteZipScp}",
         ]);
 
         if ($scp->failed()) {
@@ -83,7 +85,7 @@ class DemoPushCommand extends Command
         $this->info('Importing on remote…');
         $import = Process::timeout(300)->run([
             ...$sshBase,
-            "cd {$path} && {$php} artisan demo:import ".escapeshellarg($remoteZip)." && {$php} artisan optimize:clear",
+            "cd {$path} && {$php} artisan demo:import ".escapeshellarg($remoteZipImport)." && {$php} artisan optimize:clear",
         ]);
 
         if ($import->failed()) {
