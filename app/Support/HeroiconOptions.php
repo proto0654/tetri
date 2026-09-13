@@ -163,8 +163,8 @@ class HeroiconOptions
             $attrs = $matches[1];
             $attrs = preg_replace('/\s(width|height)=("[^"]*"|\'[^\']*\')/i', '', $attrs) ?? $attrs;
 
-            if (preg_match('/\sclass=("/i', $attrs)) {
-                $attrs = preg_replace('/\sclass=("|\')/i', ' class=$1'.e($class).' ', $attrs, 1) ?? $attrs;
+            if (preg_match('/\sclass=(["\'])/i', $attrs)) {
+                $attrs = preg_replace('/\sclass=(["\'])/i', ' class=$1'.e($class).' ', $attrs, 1) ?? $attrs;
             } else {
                 $attrs .= ' class="'.e($class).'"';
             }
