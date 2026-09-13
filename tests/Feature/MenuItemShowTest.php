@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\MenuGrid;
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Settings\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -206,5 +207,68 @@ class MenuItemShowTest extends TestCase
             ->assertSet('activeCategoryId', $desserts->id)
             ->assertSee('Чизкейк')
             ->assertDontSee('Сырники');
+    }
+
+    public function test_dish_page_uses_item_image_for_og_and_description_for_meta(): void
+    {
+        $category = Category::factory()->create([
+            'slug' => 'zavtraki',
+            'is_active' => true,
+        ]);
+
+        $item = MenuItem::factory()->create([
+            'category_id' => $category->id,
+            'title' => 'Сырники',
+            'slug' => 'syrniki',
+            'description' => 'Творожные сырники со сметаной',
+            'image' => 'menu-items/syrniki.jpg',
+            'is_active' => true,
+        ]);
+
+        app(SiteSettings::class)->save([
+            'og_image' => 'site/og/share.jpg',
+            'menu_og_image' => 'site/og/menu.jpg',
+            'seo_description' => 'Общий description сайта',
+        ]);
+
+        $response = $this->get(route('menu.show', [$category, $item]));
+
+        $response->assertOk();
+        $response->assertSee('property="og:image"', false);
+        $response->assertSee('/storage/menu-items/syrniki.jpg', false);
+        $response->assertDontSee('/storage/site/og/menu.jpg', false);
+        $response->assertDontSee('/storage/site/og/share.jpg', false);
+        $response->assertSee('name="description"', false);
+        $response->assertSee('Творожные сырники со сметаной', false);
+        $response->assertSee('property="og:description"', false);
+    }
+
+    public function test_dish_page_falls_back_to_menu_og_image_when_item_has_no_image(): void
+    {
+        $category = Category::factory()->create([
+            'slug' => 'zavtraki',
+            'is_active' => true,
+        ]);
+
+        $item = MenuItem::factory()->create([
+            'category_id' => $category->id,
+            'slug' => 'syrniki',
+            'image' => null,
+            'description' => null,
+            'is_active' => true,
+        ]);
+
+        app(SiteSettings::class)->save([
+            'og_image' => 'site/og/share.jpg',
+            'menu_og_image' => 'site/og/menu.jpg',
+            'seo_description' => 'Общий description сайта',
+        ]);
+
+        $response = $this->get(route('menu.show', [$category, $item]));
+
+        $response->assertOk();
+        $response->assertSee('/storage/site/og/menu.jpg', false);
+        $response->assertDontSee('/storage/site/og/share.jpg', false);
+        $response->assertSee('Общий description сайта', false);
     }
 }

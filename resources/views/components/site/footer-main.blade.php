@@ -6,15 +6,9 @@
             <span aria-hidden="true">◇</span> НАВИГАЦИЯ
         </p>
         <nav class="mt-5 flex flex-col gap-2 text-sm text-cream/85" data-entrance-list>
-            <a href="{{ route('home') }}#concept" class="hover:text-cream">О нас</a>
-            <a href="{{ route('menu') }}" class="hover:text-cream">Меню</a>
-            <a href="{{ route('home') }}#kids" class="hover:text-cream">Детская</a>
-            <x-site.book-button
-                source="footer-banket"
-                :label="'Банкет'"
-                class="bg-transparent p-0 text-left text-sm text-cream/85 shadow-none hover:bg-transparent hover:text-cream"
-            />
-            <a href="#contacts" class="hover:text-cream">Контакты</a>
+            @foreach ($settings['nav_links'] ?? [] as $item)
+                <x-site.nav-item :item="$item" variant="footer" />
+            @endforeach
         </nav>
     </div>
 

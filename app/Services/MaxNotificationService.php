@@ -111,8 +111,22 @@ class MaxNotificationService
             'concept' => 'Раздел «О нас»',
             'dish-detail' => 'Страница блюда',
             'site' => 'Сайт',
-            default => $source,
+            default => $this->navSourceLabel($source),
         };
+    }
+
+    protected function navSourceLabel(string $source): string
+    {
+        if (preg_match('/^nav-(.+)-mobile$/', $source, $matches) === 1
+            || preg_match('/^nav-(.+)$/', $source, $matches) === 1) {
+            return 'Меню «'.ucfirst($matches[1]).'»';
+        }
+
+        if (preg_match('/^footer-(.+)$/', $source, $matches) === 1) {
+            return 'Подвал «'.ucfirst($matches[1]).'»';
+        }
+
+        return $source;
     }
 
     /**

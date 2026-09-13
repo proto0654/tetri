@@ -33,6 +33,13 @@ class HomePageTest extends TestCase
             'stories_section_aside_note' => 'Смотрите в MAX',
             'contacts_title' => 'МЫ В СИМФЕРОПОЛЕ',
             'address' => 'ул. Севастопольская',
+            'nav_links' => [
+                ['label' => 'О нас', 'type' => 'link', 'url' => '/#concept'],
+                ['label' => 'Детская', 'type' => 'link', 'url' => '/#kids'],
+                ['label' => 'Меню', 'type' => 'link', 'url' => '/menu'],
+                ['label' => 'Банкет', 'type' => 'booking', 'booking_source' => 'banket'],
+                ['label' => 'Контакты', 'type' => 'link', 'url' => '#contacts'],
+            ],
         ]);
 
         Category::factory()->create([
@@ -78,6 +85,31 @@ class HomePageTest extends TestCase
         $response->assertSee('data-story-viewer-next', false);
         $response->assertSee(route('menu'), false);
         $response->assertSee(route('menu.category', 'zavtraki'), false);
+        $response->assertSee('О нас', false);
+        $response->assertSee('Детская', false);
+        $response->assertSee('Банкет', false);
+        $response->assertSee('/#concept', false);
+        $response->assertSee('nav-banket', false);
+    }
+
+    public function test_home_page_renders_custom_nav_links_from_settings(): void
+    {
+        app(SiteSettings::class)->save([
+            'nav_links' => [
+                ['label' => 'Галерея', 'type' => 'link', 'url' => '/#stories'],
+                ['label' => 'Зал', 'type' => 'booking', 'booking_source' => 'hall'],
+            ],
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('Галерея', false);
+        $response->assertSee('/#stories', false);
+        $response->assertSee('Зал', false);
+        $response->assertSee('nav-hall', false);
+        $response->assertSee('footer-hall', false);
+        $response->assertDontSee('О нас', false);
     }
 
     public function test_home_page_renders_line_breaks_in_section_titles(): void

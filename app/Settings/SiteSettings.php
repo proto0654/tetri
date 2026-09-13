@@ -12,7 +12,7 @@ class SiteSettings
     /**
      * @var list<string>
      */
-    public const LIST_KEYS = ['hero_icons', 'kids_benefits', 'kids_images', 'phones', 'social_links'];
+    public const LIST_KEYS = ['hero_icons', 'kids_benefits', 'kids_images', 'nav_links', 'phones', 'social_links'];
 
     /**
      * @return array<string, mixed>
@@ -26,7 +26,15 @@ class SiteSettings
             return is_array($value) ? $value : [];
         });
 
-        return array_replace_recursive(self::defaults(), $stored);
+        $merged = array_replace_recursive(self::defaults(), $stored);
+
+        foreach (self::LIST_KEYS as $listKey) {
+            if (array_key_exists($listKey, $stored)) {
+                $merged[$listKey] = $stored[$listKey];
+            }
+        }
+
+        return $merged;
     }
 
     public function get(string $key, mixed $default = null): mixed
@@ -117,7 +125,15 @@ class SiteSettings
                 ['icon' => 'heroicon-o-beaker', 'url' => '#menu-preview'],
                 ['icon' => 'heroicon-o-truck', 'url' => '#contacts'],
             ],
+            'nav_links' => [
+                ['label' => 'О нас', 'type' => 'link', 'url' => '/#concept'],
+                ['label' => 'Детская', 'type' => 'link', 'url' => '/#kids'],
+                ['label' => 'Меню', 'type' => 'link', 'url' => '/menu'],
+                ['label' => 'Банкет', 'type' => 'booking', 'booking_source' => 'banket'],
+                ['label' => 'Контакты', 'type' => 'link', 'url' => '#contacts'],
+            ],
             'kids_eyebrow' => 'ДЛЯ ВСЕЙ СЕМЬИ',
+
             'kids_title' => 'МЕСТО, ГДЕ ХОРОШО И ДЕТЯМ, И РОДИТЕЛЯМ',
             'kids_benefits' => [
                 ['icon' => 'heroicon-o-puzzle-piece', 'text' => 'стильная детская игровая', 'url' => null],
@@ -170,12 +186,14 @@ class SiteSettings
             'favicon' => null,
             'logo' => null,
             'og_image' => null,
+            'menu_og_image' => null,
             'seo_title' => 'ТЕТРИ — семейное кафе',
             'seo_description' => 'Семейное кафе ТЕТРИ в Симферополе — место, где хорошо и детям, и родителям. Меню, детская игровая, бронирование стола.',
             'seo_title_suffix' => 'ТЕТРИ',
             'home_seo_title' => 'ТЕТРИ — семейное кафе в Симферополе',
             'home_seo_description' => 'Семейное кафе ТЕТРИ в Симферополе: детская игровая, авторское меню и уютный зал. Забронируйте стол онлайн.',
             'menu_seo_title' => 'Меню',
+            'menu_seo_description' => 'Меню семейного кафе ТЕТРИ в Симферополе: завтраки, обеды, ужины и детское меню. Смотрите блюда и бронируйте стол онлайн.',
             'max_bot_token' => null,
             'max_chat_id' => null,
             'block_search_indexing' => true,

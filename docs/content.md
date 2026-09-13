@@ -20,7 +20,7 @@ Active — IA and content model settled from UI mockup.
 | `/menu/{category}/{item}` Dish detail + related from same category | `MenuItemController` + `MenuItem` |
 | `/privacy` Privacy policy page | `PrivacyController` + SiteSettings |
 | `/robots.txt` Crawl policy | `RobotsController` + `block_search_indexing` |
-| Nav «О нас» → `#concept`, «Детская» → `#kids`, «Банкет» / booking CTAs → `BookingModal` | Settings + Livewire |
+| Header / footer «НАВИГАЦИЯ» | `SiteSettings.nav_links` via `<x-site.nav-item>` (link \| booking) |
 
 ## Domain models
 
@@ -73,8 +73,9 @@ Decorative ◇ lines from the mockup are first-class settings (not hardcoded). R
 | Hero overlay | `hero_overlay_from`, `hero_overlay_via`, `hero_overlay_to` (rgba; sanitized via `CssColor`) |
 | Contacts map | `map_latitude`, `map_longitude`, `map_marker_label`; optional `map_embed_url` forces iframe. With `YANDEX_MAPS_API_KEY`, public map is JS API + logo from `logo`. Route CTA via `YandexMap::routeUrl`. |
 | Favicon | `favicon` (public disk path; Filament «Подвал и CTA») |
-| Logo / OG | `logo` («Подвал и CTA»); `og_image` (tab **SEO**) |
-| SEO | `seo_title`, `seo_description`, `seo_title_suffix`, `home_seo_title`, `home_seo_description`, `menu_seo_title`; `block_search_indexing` on tab **SEO**. Public titles via `SiteSettings::documentTitle()`. Dashboard `AdminQuickSettings` duplicates SEO text fields. |
+| Logo / OG | `logo` («Подвал и CTA»); `og_image` + `menu_og_image` (tab **SEO**) |
+| Nav | `nav_links` (LIST_KEYS): `label`, `type` (`link`\|`booking`), `url` / `booking_source`. Tab **Навигация** + QuickSettings. Render only via `<x-site.nav-item>`. |
+| SEO | `seo_title`, `seo_description`, `seo_title_suffix`, `home_seo_title`, `home_seo_description`, `menu_seo_title`, `menu_seo_description`; `block_search_indexing` on tab **SEO**. Public titles via `SiteSettings::documentTitle()`. Dashboard `AdminQuickSettings` duplicates SEO text fields (not OG uploads). |
 | MAX bot | `max_bot_token`, `max_chat_id` (Filament tab «Интеграция с мессенджером MAX»; both required to save full settings form) |
 
 Also: hero icons / kids benefits / social links use `icon` + optional `custom_icon` (uploaded SVG).
@@ -105,15 +106,21 @@ Section title fields (kids / menu / concept / stories / contacts) are Textareas 
 - When true: layout meta `noindex, nofollow` + `/robots.txt` `Disallow: /`.
 - Demo host stays blocked; turn off only for real production indexing. See [DEPLOY.md](DEPLOY.md).
 
-## SEO (CMS)
+## SEO (CMS) / Open Graph
 
-| Key | Role |
+| Key / page | Role |
 | --- | --- |
 | `seo_title` / `seo_description` | Site-wide fallback `<title>` / meta + og description |
 | `seo_title_suffix` | Brand tail for «Part — {suffix}» (menu, dish, privacy) |
 | `home_seo_title` / `home_seo_description` | Home overrides (empty home description → general) |
-| `menu_seo_title` | Middle segment: `{category?} — {menu_seo_title} — {suffix}` |
-| `og_image` | Share image (absolute URL in layout) |
+| `menu_seo_title` / `menu_seo_description` | Menu title segment + `/menu` description (empty → general) |
+| `og_image` | Home share image; fallback for other pages |
+| `menu_og_image` | `/menu` and category pages (empty → `og_image`) |
+| Dish page | `og:image` = `MenuItem.image` → `menu_og_image` → `og_image`; description = item text → `seo_description` |
+
+Layout `layouts/site.blade.php`: `@section('og_image_path')` → `PublicMedia::absoluteUrl` (relative paths are not enough for Telegram). Empty yield → `og_image`.
+
+Telegram previews need a public HTTPS host, working `/storage` link, and uploaded images; crawler cache may lag (@webpagebot).
 
 Do not hardcode public title/description strings in Blade. Edit on dashboard **Быстрые настройки** or ManageSiteSettings **SEO**.
 
@@ -128,7 +135,7 @@ Do not hardcode public title/description strings in Blade. Edit on dashboard **�
 | --- | --- |
 | `AccountWidget` | Welcome + Sign out (full width) |
 | `AdminQuickLinks` | Tiles → Categories, Dishes, Stories, Site settings |
-| `AdminQuickSettings` | Contacts, hero title/bg, SEO text → partial `SiteSettings::save` |
+| `AdminQuickSettings` | Contacts, hero title/bg, nav_links, SEO text → partial `SiteSettings::save` |
 
 ## Links
 

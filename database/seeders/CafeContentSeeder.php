@@ -168,6 +168,13 @@ class CafeContentSeeder extends Seeder
             'hero_background_image' => fn (): string => $this->storeStockImage('hero-bg', 'site/hero/background.jpg'),
             'hero_video_path' => fn (): string => $this->storePlaceholderVideo('site/hero/hero.mp4'),
             'hero_video_preview' => fn (): string => $this->storeStockImage('hero-preview', 'site/hero/preview.jpg'),
+            'nav_links' => [
+                ['label' => 'О нас', 'type' => 'link', 'url' => '/#concept'],
+                ['label' => 'Детская', 'type' => 'link', 'url' => '/#kids'],
+                ['label' => 'Меню', 'type' => 'link', 'url' => '/menu'],
+                ['label' => 'Банкет', 'type' => 'booking', 'booking_source' => 'banket'],
+                ['label' => 'Контакты', 'type' => 'link', 'url' => '#contacts'],
+            ],
             'kids_eyebrow' => 'ДЛЯ ВСЕЙ СЕМЬИ',
             'kids_images' => fn (): array => [
                 $this->storeStockImage('kids-1', 'site/kids/exterior.jpg'),

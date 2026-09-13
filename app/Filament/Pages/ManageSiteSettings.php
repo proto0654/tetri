@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Story;
 use App\Settings\SiteSettings;
 use App\Support\IconFieldSchema;
+use App\Support\NavLinkFieldSchema;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
@@ -110,6 +111,11 @@ class ManageSiteSettings extends Page
                                     ->defaultItems(3)
                                     ->maxItems(6)
                                     ->reorderable(),
+                            ]),
+                        Tab::make('Навигация')
+                            ->schema([
+                                NavLinkFieldSchema::repeater()
+                                    ->helperText('Шапка и блок «НАВИГАЦИЯ» в подвале. Порядок общий.'),
                             ]),
                         Tab::make('Дети и родители')
                             ->schema([
@@ -274,6 +280,11 @@ class ManageSiteSettings extends Page
                                     ->required()
                                     ->helperText('Собирается как «Категория — {сегмент} — {суффикс}» или «{сегмент} — {суффикс}».')
                                     ->columnSpanFull(),
+                                Textarea::make('menu_seo_description')
+                                    ->label('Меню — description')
+                                    ->rows(3)
+                                    ->helperText('Пусто → подставится общий description.')
+                                    ->columnSpanFull(),
                                 FileUpload::make('og_image')
                                     ->label('OG-картинка')
                                     ->image()
@@ -286,7 +297,21 @@ class ManageSiteSettings extends Page
                                     ->directory('site/og')
                                     ->visibility('public')
                                     ->maxSize(5120)
-                                    ->helperText('Рекомендуемо 1200×630 для репостов.')
+                                    ->helperText('Главная и fallback для остальных страниц. Рекомендуемо 1200×630.')
+                                    ->columnSpanFull(),
+                                FileUpload::make('menu_og_image')
+                                    ->label('OG-картинка меню')
+                                    ->image()
+                                    ->acceptedFileTypes([
+                                        'image/png',
+                                        'image/jpeg',
+                                        'image/webp',
+                                    ])
+                                    ->disk('public')
+                                    ->directory('site/og')
+                                    ->visibility('public')
+                                    ->maxSize(5120)
+                                    ->helperText('Страница меню и категорий. Пусто → общая OG-картинка.')
                                     ->columnSpanFull(),
                             ]),
                         Tab::make('Подвал и CTA')
