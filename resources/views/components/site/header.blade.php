@@ -3,6 +3,7 @@
 @php
     $bookingLabel = $settings['booking_cta_label'] ?? 'ЗАБРОНИРОВАТЬ';
     $linkClass = 'text-ink/90 transition hover:text-plum';
+    $navLinks = $settings['nav_links'] ?? [];
 @endphp
 
 <header
@@ -39,16 +40,9 @@
             </a>
 
             <nav class="hidden items-center gap-7 text-sm font-medium md:flex" data-header-nav>
-                <a href="{{ route('home') }}#concept" class="{{ $linkClass }}" data-header-nav-item>О нас</a>
-                <a href="{{ route('home') }}#kids" class="{{ $linkClass }}" data-header-nav-item>Детская</a>
-                <a href="{{ route('menu') }}" class="{{ $linkClass }}" data-header-nav-item>Меню</a>
-                <x-site.book-button
-                    source="nav-banket"
-                    :label="'Банкет'"
-                    :class="'bg-transparent p-0 text-sm font-medium shadow-none hover:bg-transparent '.$linkClass"
-                    data-header-nav-item
-                />
-                <a href="#contacts" class="{{ $linkClass }}" data-header-nav-item>Контакты</a>
+                @foreach ($navLinks as $item)
+                    <x-site.nav-item :item="$item" variant="header" :link-class="$linkClass" />
+                @endforeach
             </nav>
 
             <div class="flex items-center gap-3" data-header-cta>
@@ -85,16 +79,9 @@
             ])
         >
             <nav class="flex flex-col gap-3 text-sm font-medium text-ink">
-                <a href="{{ route('home') }}#concept" @click="open = false">О нас</a>
-                <a href="{{ route('home') }}#kids" @click="open = false">Детская</a>
-                <a href="{{ route('menu') }}" @click="open = false">Меню</a>
-                <x-site.book-button
-                    source="nav-banket-mobile"
-                    :label="'Банкет'"
-                    class="bg-transparent p-0 text-left text-sm font-medium text-ink shadow-none hover:bg-transparent"
-                    @click="open = false"
-                />
-                <a href="#contacts" @click="open = false">Контакты</a>
+                @foreach ($navLinks as $item)
+                    <x-site.nav-item :item="$item" variant="header-mobile" />
+                @endforeach
             </nav>
         </div>
     </div>

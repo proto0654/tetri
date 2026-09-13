@@ -25,10 +25,11 @@ class AdminDashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/admin');
 
         $response->assertOk();
-        $response->assertSee('Sign out');
+        $response->assertSee('Выйти');
         $response->assertSee('Быстрый переход');
         $response->assertSee('Быстрые настройки');
         $response->assertSee('SEO');
+        $response->assertSee('Навигация');
         $response->assertSee('Категории');
         $response->assertSee('Блюда');
         $response->assertSee('Сторисы');
@@ -53,6 +54,9 @@ class AdminDashboardTest extends TestCase
             'phones' => [
                 ['number' => '+7 (900) 000-00-00'],
             ],
+            'nav_links' => [
+                ['label' => 'О нас', 'type' => 'link', 'url' => '/#concept'],
+            ],
             'footer_about' => 'Не трогать',
             'map_latitude' => '44.95',
         ]);
@@ -67,12 +71,17 @@ class AdminDashboardTest extends TestCase
                 'phones' => [
                     ['number' => '+7 (978) 111-22-33'],
                 ],
+                'nav_links' => [
+                    ['label' => 'Меню', 'type' => 'link', 'url' => '/menu'],
+                    ['label' => 'Банкет', 'type' => 'booking', 'booking_source' => 'banket'],
+                ],
                 'seo_title' => 'Новый SEO title',
                 'seo_description' => 'Новый SEO description',
                 'seo_title_suffix' => 'ТЕТРИ',
                 'home_seo_title' => 'Главная SEO title',
                 'home_seo_description' => 'Главная SEO description',
                 'menu_seo_title' => 'Меню',
+                'menu_seo_description' => 'Меню SEO description',
             ])
             ->call('save')
             ->assertNotified();
@@ -87,8 +96,13 @@ class AdminDashboardTest extends TestCase
         $this->assertSame('+7 (978) 111-22-33', $loaded->get('phones.0.number'));
         $this->assertSame('Новый SEO title', $loaded->get('seo_title'));
         $this->assertSame('Главная SEO title', $loaded->get('home_seo_title'));
+        $this->assertSame('Меню SEO description', $loaded->get('menu_seo_description'));
         $this->assertSame('Не трогать', $loaded->get('footer_about'));
         $this->assertSame('44.95', $loaded->get('map_latitude'));
+        $this->assertSame('Меню', $loaded->get('nav_links.0.label'));
+        $this->assertSame('/menu', $loaded->get('nav_links.0.url'));
+        $this->assertSame('booking', $loaded->get('nav_links.1.type'));
+        $this->assertCount(2, $loaded->get('nav_links'));
     }
 
     public function test_guest_is_redirected_from_dashboard_to_login(): void

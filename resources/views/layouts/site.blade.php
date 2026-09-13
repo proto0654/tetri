@@ -15,7 +15,8 @@
         <meta name="description" content="{{ $pageDescription }}">
     @endif
     <x-site.favicon :path="$settings['favicon'] ?? null" />
-    @php($ogImageUrl = \App\Support\PublicMedia::absoluteUrl($settings['og_image'] ?? null))
+    @php($pageOgImagePath = trim($__env->yieldContent('og_image_path')))
+    @php($ogImageUrl = \App\Support\PublicMedia::absoluteUrl(filled($pageOgImagePath) ? $pageOgImagePath : ($settings['og_image'] ?? null)))
     <meta property="og:type" content="website">
     <meta property="og:title" content="@yield('title', $defaultTitle)">
     <meta property="og:url" content="{{ url()->current() }}">

@@ -53,6 +53,8 @@ class SiteSettingsTest extends TestCase
         $this->assertSame('Меню', $loaded->get('menu_seo_title'));
         $this->assertNotEmpty($loaded->get('seo_description'));
         $this->assertNotEmpty($loaded->get('home_seo_description'));
+        $this->assertNotEmpty($loaded->get('menu_seo_description'));
+        $this->assertNull($loaded->get('menu_og_image'));
         $this->assertInstanceOf(Setting::class, Setting::query()->where('key', SiteSettings::KEY)->first());
     }
 

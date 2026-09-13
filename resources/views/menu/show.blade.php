@@ -2,6 +2,9 @@
 
 @section('title', \App\Settings\SiteSettings::documentTitle($settings, $item->title))
 
+@section('meta_description', filled($item->description) ? $item->description : ($settings['seo_description'] ?? ''))
+
+@section('og_image_path', filled($item->image) ? $item->image : ($settings['menu_og_image'] ?? ''))
 
 @section('content')
     <section class="bg-cream px-4 pt-10 sm:px-6 lg:px-8" data-entrance data-state="pending">

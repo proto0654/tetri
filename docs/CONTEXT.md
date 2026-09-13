@@ -27,6 +27,8 @@ Public site for family cafe **Тетри**: Laravel + Filament admin, Vite front
 - Hero load caps concurrent modules at two; never overlap story `clip-path` with title 3D glyphs.
 - Menu-preview cards use mergeable `x-media` `loading="eager"` to avoid Swiper fade hitch.
 - `docs/` is tracked in git (hub + branches).
+- Header/footer nav from CMS `nav_links` via `<x-site.nav-item>` (not hardcoded Blade labels).
+- OG share images: home `og_image`, menu `menu_og_image`→`og_image`, dish photo→menu→site; absolute URLs only from layout.
 
 ## Open questions
 
@@ -34,4 +36,4 @@ Public site for family cafe **Тетри**: Laravel + Filament admin, Vite front
 
 ## Last actualized
 
-- 2026-09-14 — Motion UX polish (entrance timing, post related delay, hero concurrency); track `docs/` in git.
+- 2026-09-14 — CMS nav_links + per-page OG (menu/dish); docs hub refreshed.

@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Filament\Pages\ManageSiteSettings;
 use App\Settings\SiteSettings;
+use App\Support\NavLinkFieldSchema;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
@@ -46,6 +47,7 @@ class AdminQuickSettings extends Widget implements HasSchemas
         'hero_title',
         'hero_subtitle',
         'hero_background_image',
+        'nav_links',
         'address',
         'phones',
         'working_hours',
@@ -55,6 +57,7 @@ class AdminQuickSettings extends Widget implements HasSchemas
         'home_seo_title',
         'home_seo_description',
         'menu_seo_title',
+        'menu_seo_description',
     ];
 
     public function mount(SiteSettings $settings): void
@@ -100,6 +103,11 @@ class AdminQuickSettings extends Widget implements HasSchemas
                             ->maxSize(8192),
                     ])
                     ->columns(2),
+                Section::make('Навигация')
+                    ->schema([
+                        NavLinkFieldSchema::repeater()
+                            ->helperText('Шапка и блок «НАВИГАЦИЯ» в подвале.'),
+                    ]),
                 Section::make('SEO')
                     ->schema([
                         TextInput::make('seo_title')
@@ -116,6 +124,11 @@ class AdminQuickSettings extends Widget implements HasSchemas
                         TextInput::make('menu_seo_title')
                             ->label('Меню — сегмент title')
                             ->required(),
+                        Textarea::make('menu_seo_description')
+                            ->label('Меню — description')
+                            ->rows(2)
+                            ->helperText('Пусто → общий description.')
+                            ->columnSpanFull(),
                         TextInput::make('home_seo_title')
                             ->label('Главная — title')
                             ->required()

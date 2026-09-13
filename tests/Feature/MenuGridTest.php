@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\MenuGrid;
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Settings\SiteSettings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -242,6 +243,42 @@ class MenuGridTest extends TestCase
 
         $this->get(route('menu.category', $category))
             ->assertNotFound();
+    }
+
+    public function test_menu_page_renders_menu_seo_description_and_og_image(): void
+    {
+        app(SiteSettings::class)->save([
+            'og_image' => 'site/og/share.jpg',
+            'menu_og_image' => 'site/og/menu.jpg',
+            'menu_seo_description' => 'Кастомный description меню для превью.',
+            'seo_description' => 'Общий description сайта',
+        ]);
+
+        $response = $this->get(route('menu'));
+
+        $response->assertOk();
+        $response->assertSee('property="og:image"', false);
+        $response->assertSee('/storage/site/og/menu.jpg', false);
+        $response->assertDontSee('/storage/site/og/share.jpg', false);
+        $response->assertSee('Кастомный description меню для превью.', false);
+        $response->assertSee('property="og:description"', false);
+        $response->assertDontSee('Общий description сайта', false);
+    }
+
+    public function test_menu_page_falls_back_to_site_og_image_when_menu_og_unset(): void
+    {
+        app(SiteSettings::class)->save([
+            'og_image' => 'site/og/share.jpg',
+            'menu_og_image' => null,
+            'menu_seo_description' => null,
+            'seo_description' => 'Общий description сайта',
+        ]);
+
+        $response = $this->get(route('menu'));
+
+        $response->assertOk();
+        $response->assertSee('/storage/site/og/share.jpg', false);
+        $response->assertSee('Общий description сайта', false);
     }
 
     public function test_legacy_category_query_redirects_to_category_path(): void
