@@ -59,6 +59,8 @@
                     }
 
                     $overlapFactor = 0.42;
+                    // Leave ≥50% of each seam's overlap budget after Y jitter (avoids olive hairlines).
+                    $yRoomScale = 0.5;
                     $bands = [];
                     for ($i = 0; $i < $bandCount; $i++) {
                         $overlapAbove = $i === 0
@@ -68,10 +70,10 @@
                             ? 0.0
                             : min($baseHeights[$i], $baseHeights[$i + 1]) * $overlapFactor;
 
-                        // Keep coverage of the base slice: y ∈ [−overlapBelow/2, +overlapAbove/2].
-                        $yMin = -$overlapBelow / 2;
-                        $yMax = $overlapAbove / 2;
-                        $ySpan = ($overlapAbove + $overlapBelow) / 2;
+                        // Y stays inside a reduced half-overlap room so seams never go near-zero.
+                        $yMin = -($overlapBelow / 2) * $yRoomScale;
+                        $yMax = ($overlapAbove / 2) * $yRoomScale;
+                        $ySpan = (($overlapAbove + $overlapBelow) / 2) * $yRoomScale;
                         $y = max($yMin, min($yMax, $bandYFactors[$i] * $ySpan));
 
                         if ($i === 0) {
@@ -106,7 +108,10 @@
         <div class="absolute inset-0" style="background: {{ $overlayGradient }}"></div>
     @endif
 
-    <div class="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-4 pb-16 pt-32 text-center sm:px-6">
+    <div
+        class="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-4 text-center sm:px-6"
+        data-hero-content
+    >
         <div class="relative flex w-full flex-col items-center">
             <div class="relative flex w-full items-center justify-center">
                 @if ($subtitleWords !== [])
@@ -120,12 +125,12 @@
                 @endif
 
                 <div
-                    class="relative z-0 w-full max-w-xs overflow-hidden rounded-[2rem] border border-white/20 bg-black/20 shadow-2xl backdrop-blur-sm sm:max-w-sm"
+                    class="relative z-0 aspect-[3/4] overflow-hidden rounded-[2rem] bg-black/20 shadow-2xl backdrop-blur-sm"
                     data-hero-story
                 >
                     @if ($videoUrl)
                         <video
-                            class="aspect-[3/4] w-full object-cover"
+                            class="absolute inset-[-3px] h-[calc(100%+6px)] w-[calc(100%+6px)] max-w-none object-cover"
                             muted
                             loop
                             playsinline
@@ -135,7 +140,7 @@
                             <source src="{{ $videoUrl }}" type="video/mp4">
                         </video>
                     @else
-                        <x-media :path="$settings['hero_video_preview'] ?? null" alt="ТЕТРИ" class="aspect-[3/4] w-full object-cover" />
+                        <x-media :path="$settings['hero_video_preview'] ?? null" alt="ТЕТРИ" class="absolute inset-[-3px] h-[calc(100%+6px)] w-[calc(100%+6px)] max-w-none object-cover" />
                     @endif
                 </div>
             </div>
@@ -150,7 +155,7 @@
             @endphp
 
             <h1
-                class="pointer-events-none absolute bottom-0 left-1/2 z-10 translate-y-[35%] font-display text-[clamp(2.75rem,11vw,7.5rem)] font-normal leading-none text-white drop-shadow"
+                class="pointer-events-none absolute bottom-0 left-1/2 z-10 translate-y-[35%] font-display font-normal leading-none text-white drop-shadow"
                 aria-label="{{ $heroTitle }}"
                 data-hero-title
                 style="--hero-title-step: 1.2em"
@@ -171,7 +176,7 @@
 
             @if ($subtitleWords !== [])
                 <p
-                    class="site-info pointer-events-none absolute bottom-0 left-1/2 z-10 max-w-none -translate-x-1/2 translate-y-[calc(0.35*clamp(2.75rem,11vw,7.5rem)+4.25em)] whitespace-nowrap !w-max !text-center !text-white drop-shadow hyphens-none lg:hidden"
+                    class="site-info pointer-events-none absolute bottom-0 left-1/2 z-10 max-w-none -translate-x-1/2 translate-y-[calc(0.35*var(--hero-title-size)+4.25em)] whitespace-nowrap !w-max !text-center !text-white drop-shadow hyphens-none lg:hidden"
                     data-hero-subtitle
                 >
                     @typo($heroSubtitle)
@@ -181,18 +186,18 @@
     </div>
 
     @if (! empty($settings['hero_icons']))
-        <div class="absolute inset-x-0 bottom-0 z-20 flex translate-y-1/2 items-center justify-center gap-5" data-hero-icons>
+        <div class="absolute inset-x-0 bottom-0 z-20 flex translate-y-1/2 items-center justify-center" data-hero-icons>
             @foreach ($settings['hero_icons'] as $iconIndex => $icon)
                 @php($href = $icon['url'] ?? '#')
                 <a
                     href="{{ $href }}"
-                    class="inline-flex h-20 w-20 items-center justify-center rounded-full bg-cream text-plum transition hover:bg-cream-dark"
+                    class="inline-flex items-center justify-center rounded-full bg-cream text-plum transition hover:bg-cream-dark"
                     data-hero-icon
                     style="--i: {{ $iconIndex }}"
                     @if (\Illuminate\Support\Str::startsWith($href, ['http://', 'https://'])) target="_blank" rel="noopener noreferrer" @endif
                 >
-                    <span class="inline-flex" data-hero-icon-glyph>
-                        <x-site.icon :name="$icon['icon'] ?? null" :custom="$icon['custom_icon'] ?? null" class="h-7 w-7" />
+                    <span data-hero-icon-glyph>
+                        <x-site.icon :name="$icon['icon'] ?? null" :custom="$icon['custom_icon'] ?? null" class="h-full w-full" />
                     </span>
                 </a>
             @endforeach

@@ -136,7 +136,9 @@ const applyStory = (root, local) => {
     }
 
     if (local >= FULL_LOCAL) {
-        frame.style.clipPath = 'inset(0 round 2rem)';
+        // Drop clip-path when fully open — Chromium paints a 1px dark fringe
+        // along inset(... round ...); overflow + border-radius already clip.
+        frame.style.clipPath = 'none';
         frame.style.opacity = '1';
         syncStoryVideo(frame, 1);
 

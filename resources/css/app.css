@@ -69,28 +69,20 @@
     /*
      * Stretch from the current content right edge to the viewport left edge.
      * Mirror of .site-bleed-right (contacts map). Parent: overflow-x-clip.
+     * Desktop only — on mobile the map stays in the shell with equal side gutters.
+     * Do not use lg:site-bleed-left: plain @layer utilities do not emit variants.
      */
-    .site-bleed-left {
-        --site-shell-max: 80rem;
-        --site-shell-pad: 1rem;
-        width: calc(
-            100% + var(--site-shell-pad) + max(0px, (100vw - min(100vw, var(--site-shell-max))) / 2)
-        );
-        margin-left: calc(
-            -1 * (var(--site-shell-pad) + max(0px, (100vw - min(100vw, var(--site-shell-max))) / 2))
-        );
-        max-width: none;
-    }
-
-    @media (min-width: 640px) {
-        .site-bleed-left {
-            --site-shell-pad: 1.5rem;
-        }
-    }
-
     @media (min-width: 1024px) {
         .site-bleed-left {
+            --site-shell-max: 80rem;
             --site-shell-pad: 2rem;
+            width: calc(
+                100% + var(--site-shell-pad) + max(0px, (100vw - min(100vw, var(--site-shell-max))) / 2)
+            );
+            margin-left: calc(
+                -1 * (var(--site-shell-pad) + max(0px, (100vw - min(100vw, var(--site-shell-max))) / 2))
+            );
+            max-width: none;
         }
     }
 
@@ -108,25 +100,28 @@
 
     /*
      * Paint olive-deep across the full viewport behind the element via ::before.
-     * Element itself stays in-flow (column width). Parent must not overflow-x-clip.
-     * Works when the element's horizontal center matches the viewport center
-     * (full shell / col-span-full row).
+     * Mobile only: on lg+ the map column’s .site-contacts-map-olive-half covers
+     * the left third and the footer’s own bg fills the 2/3 column.
+     * Element stays in-flow. Works when the element’s horizontal center matches
+     * the viewport center (full shell width on mobile).
      */
     .site-bg-viewport-olive {
         position: relative;
         z-index: 0;
     }
 
-    .site-bg-viewport-olive::before {
-        content: '';
-        position: absolute;
-        inset-block: 0;
-        left: 50%;
-        width: 100vw;
-        margin-left: -50vw;
-        z-index: -1;
-        pointer-events: none;
-        background-color: var(--color-olive-deep);
+    @media (max-width: 1023px) {
+        .site-bg-viewport-olive::before {
+            content: '';
+            position: absolute;
+            inset-block: 0;
+            left: 50%;
+            width: 100vw;
+            margin-left: -50vw;
+            z-index: -1;
+            pointer-events: none;
+            background-color: var(--color-olive-deep);
+        }
     }
 
     /*
@@ -141,18 +136,21 @@
         z-index: 0;
     }
 
-    .site-contacts-map-olive-half::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        bottom: 0;
-        left: calc(
-            -1 * (var(--site-shell-pad) + max(0px, (100vw - min(100vw, var(--site-shell-max))) / 2))
-        );
-        width: 100vw;
-        z-index: -1;
-        pointer-events: none;
-        background-color: var(--color-olive-deep);
+    /* Desktop only: on mobile the half-band peeks beside the map. */
+    @media (min-width: 1024px) {
+        .site-contacts-map-olive-half::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            bottom: 0;
+            left: calc(
+                -1 * (var(--site-shell-pad) + max(0px, (100vw - min(100vw, var(--site-shell-max))) / 2))
+            );
+            width: 100vw;
+            z-index: -1;
+            pointer-events: none;
+            background-color: var(--color-olive-deep);
+        }
     }
 
     @media (min-width: 640px) {
@@ -364,8 +362,9 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: var(--top);
-    height: var(--h);
+    /* ±0.5px absorbs subpixel raster gaps between percentage band seams. */
+    top: calc(var(--top) - 0.5px);
+    height: calc(var(--h) + 1px);
     /* Match site cream (#ede2cf), not section olive. */
     background-color: var(--color-cream);
     opacity: 1;
@@ -382,9 +381,75 @@
 /*
  * Hero entrance chain: pending/done + reduced-motion finals.
  * Progress-driven transforms applied via JS; CSS only holds initial/final states.
+ *
+ * Sizing: story width is height-aware (min of max-w and remaining svh × 3/4).
+ * Short viewports densify chrome/title/icons so the first screen still fits.
  */
 [data-hero-entrance] {
     --hero-progress: 0;
+    --hero-chrome: 14.5rem;
+    --hero-story-max-w: 20rem;
+    --hero-title-size: clamp(2.75rem, 11vw, 7.5rem);
+    --hero-icon-size: 5rem;
+    --hero-icon-glyph: 1.75rem;
+    --hero-icons-gap: 1.25rem;
+    --hero-pad-t: 8rem;
+    --hero-pad-b: 4rem;
+}
+
+@media (min-width: 640px) {
+    [data-hero-entrance] {
+        --hero-story-max-w: 24rem;
+    }
+}
+
+@media (max-height: 900px) {
+    [data-hero-entrance] {
+        --hero-chrome: 12rem;
+        --hero-title-size: clamp(2.5rem, min(11vw, 9svh), 5.5rem);
+        --hero-icon-size: 3.75rem;
+        --hero-icon-glyph: 1.35rem;
+        --hero-icons-gap: 1rem;
+        --hero-pad-t: 6rem;
+        --hero-pad-b: 3rem;
+    }
+
+    [data-hero-subtitle].site-info {
+        font-size: 1rem;
+    }
+}
+
+@media (max-height: 780px) {
+    [data-hero-entrance] {
+        --hero-chrome: 10.5rem;
+        --hero-title-size: clamp(2.25rem, min(11vw, 8svh), 4.5rem);
+        --hero-icon-size: 3.25rem;
+        --hero-icon-glyph: 1.15rem;
+        --hero-icons-gap: 0.75rem;
+        --hero-pad-t: 5rem;
+        --hero-pad-b: 2.5rem;
+    }
+
+    [data-hero-subtitle].site-info {
+        font-size: 0.9375rem;
+    }
+}
+
+[data-hero-content] {
+    padding-top: var(--hero-pad-t);
+    padding-bottom: var(--hero-pad-b);
+}
+
+[data-hero-story] {
+    width: min(100%, var(--hero-story-max-w), calc((100svh - var(--hero-chrome)) * 3 / 4));
+}
+
+[data-hero-title] {
+    font-size: var(--hero-title-size);
+}
+
+[data-hero-icons] {
+    gap: var(--hero-icons-gap);
 }
 
 [data-hero-entrance][data-state='pending'] [data-hero-story],
@@ -395,7 +460,7 @@
 
 [data-hero-entrance][data-state='done'] [data-hero-story] {
     opacity: 1;
-    clip-path: inset(0 round 2rem);
+    clip-path: none;
 }
 
 /* Equal center-to-center step; middle glyph sits on viewport center (h1 left:50%). */
@@ -431,11 +496,15 @@
 }
 
 [data-hero-icon] {
+    width: var(--hero-icon-size);
+    height: var(--hero-icon-size);
     transform-origin: center center;
 }
 
 [data-hero-icon-glyph] {
     display: inline-flex;
+    width: var(--hero-icon-glyph);
+    height: var(--hero-icon-glyph);
     transform-origin: center center;
 }
 
@@ -515,6 +584,71 @@
     transform: none;
 }
 
+/* Short-height densify: laptop / short browser chrome (pill + bar). */
+@media (max-height: 900px) {
+    [data-header-entrance][data-header-variant='pill'] > div {
+        padding-top: 0.75rem;
+    }
+
+    [data-header-entrance] [data-header-shell] {
+        gap: 1rem;
+        padding-block: 0.375rem;
+    }
+
+    [data-header-entrance][data-header-variant='pill'] [data-header-shell] {
+        padding-inline: 1rem;
+    }
+
+    [data-header-entrance] [data-header-logo] img {
+        height: 1.75rem;
+    }
+
+    [data-header-entrance] [data-header-logo] span {
+        font-size: 1.125rem;
+    }
+
+    [data-header-entrance] [data-header-nav] {
+        gap: 1.25rem;
+        font-size: 0.75rem;
+    }
+
+    [data-header-entrance] [data-header-nav] [data-header-nav-item] {
+        font-size: inherit;
+    }
+
+    [data-header-entrance] [data-header-cta] > button:first-child {
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-height: 780px) {
+    [data-header-entrance][data-header-variant='pill'] > div {
+        padding-top: 0.5rem;
+    }
+
+    [data-header-entrance] [data-header-shell] {
+        gap: 0.75rem;
+        padding-block: 0.25rem;
+    }
+
+    [data-header-entrance] [data-header-logo] img {
+        height: 1.5rem;
+    }
+
+    [data-header-entrance] [data-header-logo] span {
+        font-size: 1rem;
+    }
+
+    [data-header-entrance] [data-header-nav] {
+        gap: 1rem;
+    }
+
+    [data-header-entrance] [data-header-cta] > button:first-child {
+        padding: 0.375rem 0.875rem;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     [data-hero-entrance] [data-hero-story],
     [data-hero-entrance] [data-hero-char],
@@ -528,10 +662,6 @@
         opacity: 1 !important;
         transform: none !important;
         clip-path: none !important;
-    }
-
-    [data-hero-entrance] [data-hero-story] {
-        clip-path: inset(0 round 2rem) !important;
     }
 }
 
