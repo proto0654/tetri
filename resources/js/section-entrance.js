@@ -10,6 +10,8 @@ import {
 } from './motion-morph';
 
 gsap.registerPlugin(ScrollTrigger);
+// Default lagSmoothing(500) still lets a ~200ms image first-paint hitch jump opacity.
+gsap.ticker.lagSmoothing(120, 33);
 
 /** Overlapping timeline positions (seconds offsets relative to previous add). */
 const ENTRANCE_OFFSETS = {
@@ -30,9 +32,21 @@ const FADE_DURATION = 0.55;
 const MEDIA_FADE_DURATION = 0.65;
 const TITLE_DURATION = 0.65;
 const MORPH_DURATION = 0.85;
+/** Title lines — wider gap so each line reads before the next. */
+const TITLE_LINE_STAGGER = 0.16;
+/** Info / secondary line fades. */
 const LINE_STAGGER = 0.08;
 const ITEM_STAGGER = 0.07;
 const MEDIA_STAGGER = 0.16;
+/** Settle after scroll enter so the block is readable before the chain. */
+const ENTER_PLAY_DELAY_MS = 160;
+/**
+ * Post related ([data-entrance-follow]): extra delay when both roots are visible on load,
+ * so the second title does not slide up with the first.
+ */
+const FOLLOW_WHEN_BOTH_VISIBLE_MS = 1800;
+/** Section top must reach this viewport line before onEnter. */
+const ENTRANCE_START = 'top 65%';
 
 /**
  * Nested [data-entrance] roots (e.g. footer inside contacts) own their own attrs.
@@ -83,6 +97,39 @@ const isSwiperDuplicateMedia = (el) => {
  * @param {HTMLElement} el
  */
 const isSlideMediaFade = (el) => Boolean(el.closest('.swiper-slide'));
+
+/**
+ * Decode + near-invisible paint during copy so the first visible fade frame
+ * does not upload large bitmaps and hitch (~200ms → GSAP opacity catch-up).
+ *
+ * @param {HTMLElement[]} els
+ */
+const prewarmFadeMedia = (els) => {
+    if (els.length === 0) {
+        return;
+    }
+
+    els.forEach((el) => {
+        const img = el.querySelector('img');
+
+        if (img?.decode) {
+            void img.decode().catch(() => {});
+        }
+
+        el.style.opacity = '0.001';
+    });
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            els.forEach((el) => {
+                // Proxy fade may already own opacity if copy phase was skipped.
+                if (Number.parseFloat(el.style.opacity || '0') <= 0.002) {
+                    el.style.opacity = '0';
+                }
+            });
+        });
+    });
+};
 
 /**
  * @param {HTMLElement} section
@@ -338,6 +385,8 @@ const buildSectionTimeline = (section) => {
         defaults: { ease: 'power2.out' },
         onStart: () => {
             section.dataset.state = 'playing';
+            // Warm GPU textures during title/fade before media+=0.
+            prewarmFadeMedia(mediaFadeEls);
         },
         onComplete: () => {
             // Clears fade media (incl. skipped clones) + text roles; CSS done owns finals.
@@ -350,7 +399,7 @@ const buildSectionTimeline = (section) => {
             yPercent: 0,
             opacity: 1,
             duration: TITLE_DURATION,
-            stagger: LINE_STAGGER,
+            stagger: TITLE_LINE_STAGGER,
             force3D: true,
         }, ENTRANCE_OFFSETS.title);
     }
@@ -437,11 +486,113 @@ const buildSectionTimeline = (section) => {
 };
 
 /**
+ * Any pixel counts — including a 1px edge at the bottom of the viewport.
+ *
+ * @param {HTMLElement} el
+ */
+const isPartiallyInViewport = (el) => {
+    const rect = el.getBoundingClientRect();
+
+    return rect.top < window.innerHeight && rect.bottom > 0;
+};
+
+/**
+ * @param {HTMLElement} section
+ * @param {HTMLElement[]} ordered
+ * @returns {HTMLElement | null}
+ */
+const previousEntrance = (section, ordered) => {
+    const index = ordered.indexOf(section);
+
+    return index > 0 ? ordered[index - 1] : null;
+};
+
+/**
+ * @param {HTMLElement} section
+ * @param {HTMLElement[]} ordered
+ * @returns {HTMLElement | null}
+ */
+const nextEntrance = (section, ordered) => {
+    const index = ordered.indexOf(section);
+
+    return index >= 0 && index < ordered.length - 1 ? ordered[index + 1] : null;
+};
+
+/**
+ * Follow root shares the screen with the previous one (even by an edge).
+ *
+ * @param {HTMLElement} section
+ * @param {HTMLElement[]} ordered
+ */
+const followSharesViewportWithPrev = (section, ordered) => {
+    if (! section.hasAttribute('data-entrance-follow')) {
+        return false;
+    }
+
+    const prev = previousEntrance(section, ordered);
+
+    return Boolean(prev && isPartiallyInViewport(prev) && isPartiallyInViewport(section));
+};
+
+/**
+ * Build timeline and play after paint + settle delay.
+ *
+ * @param {HTMLElement} section
+ * @param {{ delayMs?: number }} [options]
+ */
+const beginSectionPlay = (section, options = {}) => {
+    const { delayMs = ENTER_PLAY_DELAY_MS } = options;
+
+    if (
+        section._entranceStarted
+        || section.dataset.state === 'done'
+        || section.dataset.state === 'playing'
+    ) {
+        return;
+    }
+
+    section._entranceStarted = true;
+
+    const { tl, splits, titleEl, titleRestoreHtml } = buildSectionTimeline(section);
+
+    section._entranceSplits = splits;
+    section._entranceTimeline = tl;
+    section._entranceTitleRestore = titleEl && titleRestoreHtml
+        ? { el: titleEl, html: titleRestoreHtml }
+        : null;
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (section.dataset.state === 'done') {
+                return;
+            }
+
+            if (delayMs <= 0) {
+                tl.play(0);
+
+                return;
+            }
+
+            section._entranceDelayTimer = window.setTimeout(() => {
+                section._entranceDelayTimer = null;
+
+                if (section.dataset.state === 'done') {
+                    return;
+                }
+
+                tl.play(0);
+            }, delayMs);
+        });
+    });
+};
+
+/**
  * Register ScrollTrigger only — timeline/SplitType built on first enter.
  *
  * @param {HTMLElement} section
+ * @param {HTMLElement[]} ordered
  */
-const setupSection = (section) => {
+const setupSection = (section, ordered) => {
     if (section.dataset.entranceReady === 'true') {
         return;
     }
@@ -454,32 +605,39 @@ const setupSection = (section) => {
     ScrollTrigger.create({
         id: triggerId,
         trigger: section,
-        start: 'top 78%',
+        start: ENTRANCE_START,
         once: true,
         fastScrollEnd: true,
         onEnter: () => {
-            if (section.dataset.state === 'done' || section.dataset.state === 'playing') {
+            if (
+                section._entranceStarted
+                || section.dataset.state === 'done'
+                || section.dataset.state === 'playing'
+            ) {
                 return;
             }
 
-            const { tl, splits, titleEl, titleRestoreHtml } = buildSectionTimeline(section);
+            const delayMs = ENTER_PLAY_DELAY_MS + (
+                followSharesViewportWithPrev(section, ordered)
+                    ? FOLLOW_WHEN_BOTH_VISIBLE_MS
+                    : 0
+            );
 
-            section._entranceSplits = splits;
-            section._entranceTimeline = tl;
-            section._entranceTitleRestore = titleEl && titleRestoreHtml
-                ? { el: titleEl, html: titleRestoreHtml }
-                : null;
+            beginSectionPlay(section, { delayMs });
 
-            // Wait a paint so SplitType layout settles before first tween frame.
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    if (section.dataset.state === 'done') {
-                        return;
-                    }
+            // Edge of related already on screen — don't leave it pending until 65%.
+            const next = nextEntrance(section, ordered);
 
-                    tl.play(0);
+            if (
+                next
+                && next.hasAttribute('data-entrance-follow')
+                && ! next._entranceStarted
+                && isPartiallyInViewport(next)
+            ) {
+                beginSectionPlay(next, {
+                    delayMs: ENTER_PLAY_DELAY_MS + FOLLOW_WHEN_BOTH_VISIBLE_MS,
                 });
-            });
+            }
         },
     });
 };
@@ -489,6 +647,11 @@ const setupSection = (section) => {
  */
 export const destroySectionEntrance = (root = document) => {
     root.querySelectorAll('[data-entrance]').forEach((section) => {
+        if (section._entranceDelayTimer) {
+            window.clearTimeout(section._entranceDelayTimer);
+            section._entranceDelayTimer = null;
+        }
+
         section._entranceTimeline?.kill();
         section._entranceSplits?.forEach((split) => {
             try {
@@ -508,6 +671,7 @@ export const destroySectionEntrance = (root = document) => {
         section._entranceTimeline = undefined;
         section._entranceSplits = undefined;
         section._entranceTitleRestore = undefined;
+        section._entranceStarted = undefined;
         delete section.dataset.entranceReady;
     });
 
@@ -537,5 +701,5 @@ export const initSectionEntrance = (root = document) => {
         return;
     }
 
-    sections.forEach((section) => setupSection(section));
+    sections.forEach((section) => setupSection(section, sections));
 };
