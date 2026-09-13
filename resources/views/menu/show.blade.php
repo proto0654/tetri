@@ -54,7 +54,7 @@
     </section>
 
     @if ($related->isNotEmpty())
-        <section class="bg-cream px-4 pb-24 pt-20 sm:px-6 lg:px-8" data-entrance data-state="pending">
+        <section class="bg-cream px-4 pb-24 pt-20 sm:px-6 lg:px-8" data-entrance data-entrance-follow data-state="pending">
             <div class="mx-auto max-w-7xl">
                 <h2 class="font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl" data-entrance-title>
                     @typoBr('Смотри также')

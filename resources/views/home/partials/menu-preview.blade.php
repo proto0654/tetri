@@ -41,9 +41,9 @@
                                         class="group relative block overflow-hidden rounded-[1.75rem] bg-cream-dark shadow-sm transition-shadow group-hover:shadow-md"
                                         data-entrance-media="fade"
                                     >
-                                        <x-media :path="$category->image" :alt="$category->title" class="aspect-[3/4] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                                        <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-4 pb-4 pt-12">
-                                            <p class="text-sm font-semibold uppercase tracking-wide text-white">
+                                        <x-media :path="$category->image" :alt="$category->title" class="aspect-[3/4] w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="eager" />
+                                        <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent px-4 pb-4 pt-32 sm:pt-40">
+                                            <p class="text-center font-display text-xl font-normal uppercase tracking-wide text-white sm:text-2xl">
                                                 @typo($category->title)
                                             </p>
                                         </div>

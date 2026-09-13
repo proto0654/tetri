@@ -6,19 +6,20 @@ import {
 } from './motion-utils';
 
 /**
- * Global progress windows. Overlap neighbors lightly — do not stack starts.
- * Wall-clock (linear master, ~2100ms): bg 0 → header ~130ms → story ~380ms →
- * title ~840ms → icons ~1220ms → subtitle ~1510ms → settle 2100ms.
+ * Global progress windows. Max 2 concurrent modules; never overlap story
+ * (clip-path) with title (3D glyphs). Neighbors may hand off lightly.
+ * Wall-clock (linear master, ~2100ms): bg 0 → header ~168ms → story ~588ms →
+ * title ~1050ms → icons ~1386ms → subtitle ~1680ms → settle 2100ms.
  *
  * @type {Record<string, [number, number]>}
  */
 export const HERO_RANGES = {
-    background: [0.0, 0.42],
-    header: [0.06, 0.3],
-    story: [0.18, 0.48],
-    title: [0.4, 0.65],
-    icons: [0.58, 0.78],
-    subtitle: [0.72, 1.0],
+    background: [0.0, 0.3],
+    header: [0.08, 0.26],
+    story: [0.28, 0.5],
+    title: [0.5, 0.68],
+    icons: [0.66, 0.82],
+    subtitle: [0.8, 1.0],
 };
 
 const DURATION_MS = 2100;
@@ -33,6 +34,44 @@ const SUBTITLE_MOBILE_END_VH = 0.5;
 const LG_QUERY = '(min-width: 1024px)';
 const SCROLL_TOP_SNAP_PX = 1;
 const FULL_LOCAL = 0.999;
+
+/** @type {WeakMap<HTMLElement, { w: number, h: number }>} */
+const storyBoxCache = new WeakMap();
+
+/**
+ * @param {HTMLElement} frame
+ * @param {{ force?: boolean }} [options]
+ * @returns {{ w: number, h: number }}
+ */
+const getStoryBox = (frame, options = {}) => {
+    const { force = false } = options;
+
+    if (! force) {
+        const cached = storyBoxCache.get(frame);
+
+        if (cached) {
+            return cached;
+        }
+    }
+
+    const box = {
+        w: frame.offsetWidth || 1,
+        h: frame.offsetHeight || 1,
+    };
+
+    storyBoxCache.set(frame, box);
+
+    return box;
+};
+
+/**
+ * @param {HTMLElement | null} frame
+ */
+const invalidateStoryBox = (frame) => {
+    if (frame) {
+        storyBoxCache.delete(frame);
+    }
+};
 
 /**
  * @param {number} t
@@ -145,8 +184,7 @@ const applyStory = (root, local) => {
         return;
     }
 
-    const w = frame.offsetWidth || 1;
-    const h = frame.offsetHeight || 1;
+    const { w, h } = getStoryBox(frame);
     const minSide = Math.min(w, h);
     const finalRadius = 32;
 
@@ -302,33 +340,71 @@ const applySubtitle = (root, local) => {
  * @param {{ setProgress: (n: number) => void, finish: () => void } | null} header
  * @param {{ setProgress?: (n: number, opts?: { scrollScrub?: boolean }) => void, play?: () => void, finish: () => void } | null} bg
  * @param {HeroLocals} locals
- * @param {{ driveHeader?: boolean, scrollScrub?: boolean }} [options]
+ * @param {{ driveHeader?: boolean, scrollScrub?: boolean, lastLocals?: HeroLocals | null }} [options]
+ * @returns {HeroLocals}
  */
 const applyLocals = (root, header, bg, locals, options = {}) => {
-    const { driveHeader = true, scrollScrub = false } = options;
+    const { driveHeader = true, scrollScrub = false, lastLocals = null } = options;
     const background = clamp(locals.background);
     const story = clamp(locals.story);
     const title = clamp(locals.title);
     const icons = clamp(locals.icons);
     const subtitle = clamp(locals.subtitle);
+    const headerLocal = clamp(locals.header ?? 1);
+
+    /**
+     * Skip rewriting styles when a module already settled last frame (and still is).
+     *
+     * @param {keyof HeroLocals} key
+     * @param {number} value
+     */
+    const isSteady = (key, value) => {
+        if (scrollScrub) {
+            return false;
+        }
+
+        const prev = lastLocals?.[key];
+
+        return value >= FULL_LOCAL && typeof prev === 'number' && prev >= FULL_LOCAL;
+    };
 
     root.style.setProperty(
         '--hero-progress',
         String(Math.min(background, story, title, icons, subtitle)),
     );
 
-    if (bg?.setProgress) {
+    if (! isSteady('background', background) && bg?.setProgress) {
         bg.setProgress(background, { scrollScrub });
     }
 
-    if (driveHeader && header) {
-        header.setProgress(clamp(locals.header ?? 1));
+    if (driveHeader && header && ! isSteady('header', headerLocal)) {
+        header.setProgress(headerLocal);
     }
 
-    applyStory(root, story);
-    applyTitle(root, title);
-    applyIcons(root, icons, { together: scrollScrub });
-    applySubtitle(root, subtitle);
+    if (! isSteady('story', story)) {
+        applyStory(root, story);
+    }
+
+    if (! isSteady('title', title)) {
+        applyTitle(root, title);
+    }
+
+    if (! isSteady('icons', icons)) {
+        applyIcons(root, icons, { together: scrollScrub });
+    }
+
+    if (! isSteady('subtitle', subtitle)) {
+        applySubtitle(root, subtitle);
+    }
+
+    return {
+        background,
+        header: headerLocal,
+        story,
+        title,
+        icons,
+        subtitle,
+    };
 };
 
 /**
@@ -415,6 +491,8 @@ export const initHeroEntrance = (root = document) => {
     /** @type {number | null} */
     let scrollRaf = null;
     let scrollDriverEnabled = false;
+    /** @type {HeroLocals | null} */
+    let lastLocals = null;
 
     const storyEl = () => el.querySelector('[data-hero-story]');
     const titleEl = () => el.querySelector('[data-hero-title]');
@@ -534,14 +612,17 @@ export const initHeroEntrance = (root = document) => {
      * @param {{ driveHeader?: boolean, scrollScrub?: boolean }} [options]
      */
     const paint = (locals, options = {}) => {
-        applyLocals(el, header, bg, locals, options);
+        lastLocals = applyLocals(el, header, bg, locals, {
+            ...options,
+            lastLocals,
+        });
 
         const minLocal = Math.min(
-            locals.background,
-            locals.story,
-            locals.title,
-            locals.icons,
-            locals.subtitle,
+            lastLocals.background,
+            lastLocals.story,
+            lastLocals.title,
+            lastLocals.icons,
+            lastLocals.subtitle,
         );
 
         if (minLocal >= 1) {
@@ -604,6 +685,8 @@ export const initHeroEntrance = (root = document) => {
     };
 
     const onResize = () => {
+        invalidateStoryBox(storyEl());
+
         if (scrubbing || progress >= 1) {
             applyScroll();
         }
@@ -692,6 +775,13 @@ export const initHeroEntrance = (root = document) => {
             playing = true;
             scrubbing = false;
             el.dataset.state = 'playing';
+            invalidateStoryBox(storyEl());
+            const frame = storyEl();
+
+            if (frame) {
+                getStoryBox(frame, { force: true });
+            }
+
             const start = performance.now();
 
             const tick = (now) => {
