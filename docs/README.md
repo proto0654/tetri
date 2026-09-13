@@ -12,6 +12,8 @@ Start here: **[CONTEXT.md](CONTEXT.md)** — project hub with deep links to mean
 | Setup | [setup.md](setup.md) |
 | Content | [content.md](content.md) |
 | Design | [design.md](design.md) |
+| Motion | [motion.md](motion.md) |
+| Deploy | [DEPLOY.md](DEPLOY.md) |
 | Changelog | [changelog.md](changelog.md) |
 
 ## Actualize
