@@ -4,7 +4,6 @@
 
     $bgUrl = PublicMedia::url($settings['hero_background_image'] ?? null);
     $videoUrl = PublicMedia::url($settings['hero_video_path'] ?? null);
-    $posterUrl = PublicMedia::url($settings['hero_video_preview'] ?? null);
 
     $overlayFrom = CssColor::resolve($settings['hero_overlay_from'] ?? null, 'rgba(0, 0, 0, 0.45)');
     $overlayVia = CssColor::resolve($settings['hero_overlay_via'] ?? null, 'rgba(0, 0, 0, 0.3)');
@@ -129,16 +128,15 @@
                     data-hero-story
                 >
                     @if ($videoUrl)
+                        {{-- Video wins over preview image; #t=0.1 paints first frame from metadata while paused (no poster flash). --}}
                         <video
                             class="absolute inset-[-3px] h-[calc(100%+6px)] w-[calc(100%+6px)] max-w-none object-cover"
+                            src="{{ $videoUrl }}#t=0.1"
                             muted
                             loop
                             playsinline
                             preload="metadata"
-                            @if ($posterUrl) poster="{{ $posterUrl }}" @endif
-                        >
-                            <source src="{{ $videoUrl }}" type="video/mp4">
-                        </video>
+                        ></video>
                     @else
                         <x-media :path="$settings['hero_video_preview'] ?? null" alt="ТЕТРИ" class="absolute inset-[-3px] h-[calc(100%+6px)] w-[calc(100%+6px)] max-w-none object-cover" />
                     @endif
