@@ -36,7 +36,7 @@
                     rel="noopener noreferrer"
                     aria-label="{{ $label }}"
                 >
-                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-cream/30">
+                    <span class="inline-flex h-11 w-11 items-center justify-center">
                         <x-site.icon :name="$icon" :custom="$link['custom_icon'] ?? null" class="h-5 w-5" />
                     </span>
                     <span class="text-[0.65rem] uppercase tracking-wide text-cream/70">{{ $label }}</span>
