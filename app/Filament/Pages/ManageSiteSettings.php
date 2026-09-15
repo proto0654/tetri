@@ -81,12 +81,13 @@ class ManageSiteSettings extends Page
                                     ->maxSize(30720)
                                     ->helperText('MP4 или WebM, до 30 МБ. Для hero лучше короткий muted-ролик.'),
                                 FileUpload::make('hero_video_preview')
-                                    ->label('Превью видео')
+                                    ->label('Превью (если нет видео)')
                                     ->image()
                                     ->disk('public')
                                     ->directory('site/hero')
                                     ->visibility('public')
-                                    ->maxSize(5120),
+                                    ->maxSize(5120)
+                                    ->helperText('Используется только когда центральное видео не загружено. С видео кадр берётся из метаданных ролика.'),
                                 Fieldset::make('Градиент оверлея')
                                     ->schema([
                                         ColorPicker::make('hero_overlay_from')

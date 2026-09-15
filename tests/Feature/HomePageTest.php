@@ -92,6 +92,38 @@ class HomePageTest extends TestCase
         $response->assertSee('nav-banket', false);
     }
 
+    public function test_home_page_hero_story_uses_video_metadata_frame_not_preview_poster(): void
+    {
+        app(SiteSettings::class)->save([
+            'hero_video_path' => 'site/hero/story.mp4',
+            'hero_video_preview' => 'site/hero/preview.jpg',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('data-hero-story', false);
+        $response->assertSee('/storage/site/hero/story.mp4#t=0.1', false);
+        $response->assertDontSee('poster="/storage/site/hero/preview.jpg"', false);
+        $response->assertDontSee('src="/storage/site/hero/preview.jpg"', false);
+    }
+
+    public function test_home_page_hero_story_falls_back_to_preview_image_without_video(): void
+    {
+        app(SiteSettings::class)->save([
+            'hero_video_path' => null,
+            'hero_video_preview' => 'site/hero/preview.jpg',
+        ]);
+
+        $response = $this->get(route('home'));
+
+        $response->assertOk();
+        $response->assertSee('data-hero-story', false);
+        $response->assertSee('/storage/site/hero/preview.jpg', false);
+        $response->assertDontSee('site/hero/story.mp4', false);
+        $response->assertDontSee('#t=0.1', false);
+    }
+
     public function test_home_page_renders_custom_nav_links_from_settings(): void
     {
         app(SiteSettings::class)->save([
