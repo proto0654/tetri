@@ -24,10 +24,16 @@ class DemoPushCommand extends Command
         $this->loadDeployEnvFile();
 
         $host = $this->option('host') ?: env('DEPLOY_HOST');
-        $user = $this->option('user') ?: env('DEPLOY_USER', '<DEPLOY_USER>');
-        $path = $this->option('path') ?: env('DEPLOY_PATH', 'www/tetri-cafe.ru/');
+        $user = $this->option('user') ?: env('DEPLOY_USER');
+        $path = $this->option('path') ?: env('DEPLOY_PATH');
         $key = $this->option('key') ?: env('DEPLOY_SSH_KEY', $this->defaultSshKeyPath());
         $php = $this->option('php') ?: env('DEPLOY_PHP', '/opt/php/8.4/bin/php');
+
+        if (! filled($path)) {
+            $this->error('DEPLOY_PATH / --path is required.');
+
+            return self::FAILURE;
+        }
 
         if (! str_ends_with($path, '/')) {
             $path .= '/';
@@ -46,6 +52,12 @@ class DemoPushCommand extends Command
 
         if (! filled($host)) {
             $this->error('DEPLOY_HOST / --host is required.');
+
+            return self::FAILURE;
+        }
+
+        if (! filled($user)) {
+            $this->error('DEPLOY_USER / --user is required.');
 
             return self::FAILURE;
         }
@@ -107,7 +119,7 @@ class DemoPushCommand extends Command
     {
         $home = getenv('HOME') ?: getenv('USERPROFILE') ?: '';
 
-        return $home !== '' ? $home.DIRECTORY_SEPARATOR.'.ssh'.DIRECTORY_SEPARATOR.'deploy_key' : 'deploy_key';
+        return $home !== '' ? $home.DIRECTORY_SEPARATOR.'.ssh'.DIRECTORY_SEPARATOR.'id_ed25519' : 'id_ed25519';
     }
 
     protected function loadDeployEnvFile(): void

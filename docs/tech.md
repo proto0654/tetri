@@ -12,7 +12,7 @@ Record settled technical choices for the Tetri Laravel application.
 | --- | --- | --- |
 | Runtime | PHP | 8.4 (Herd local; REG.RU prod `/opt/php/8.4` — required ≥8.4.1) |
 | Local URL | Herd | `http://tetri.test` (not localhost/:8000) |
-| Production URL | REG.RU ISPmanager | `https://tetri-cafe.ru` (`<DEPLOY_HOST>` / `<DEPLOY_USER>`) |
+| Production URL | REG.RU ISPmanager | `https://tetri-cafe.ru` |
 | Framework | Laravel | 13.31 |
 | Admin | Filament | 5.8 (`AdminPanelProvider`) + Peek 4.1 Page Preview |
 | Public UI | Blade + Livewire + Alpine | Livewire 4.4 (via Filament) |

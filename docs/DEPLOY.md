@@ -2,15 +2,15 @@
 
 Back to [project context](CONTEXT.md)
 
-Production on REG.RU (ISPmanager). Pattern: GitHub Actions → rsync over SSH. Content is **not** seeded on deploy.
+Production on shared REG.RU hosting (ISPmanager). Pattern: GitHub Actions → rsync over SSH. Content is **not** seeded on deploy.
 
-**Status (2026-09-17):** live — https://tetri-cafe.ru (indexing on; content cut over from former demo `former-staging.example`).
+**Status (2026-09-17):** live — https://tetri-cafe.ru (indexing on; former staging demo removed after cutover).
 
 ## Architecture
 
 ```
 push main
-  └─ deploy.yml  →  rsync code  →  ~/www/tetri-cafe.ru/  (+ migrate)
+  └─ deploy.yml  →  rsync code  →  production app root  (+ migrate)
                                          │
 one-shot cutover ── demo:pull (old host) / demo:push ──► import tables + media
 ```
@@ -22,24 +22,22 @@ one-shot cutover ── demo:pull (old host) / demo:push ──► import tables
 | `php artisan demo:push` | Manual content replace on a host | Yes — replaces content tables + `storage/app/public` |
 | Day-to-day production | Same code deploy | Do **not** routine `demo:push` |
 
-Former demo `https://former-staging.example` (account `<DEPLOY_USER>` / `<DEPLOY_HOST>`) was removed after cutover.
-
 ## GitHub
 
 - Repo: https://github.com/proto0654/tetri (**public**; trade-controls blocked private create).
 - Tracked: `docs/`. Still local-only (gitignored): `.cursor/`, `.ai/`, `AGENTS.md`, `boost.json`.
 - Secrets → Actions: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH`, `DEPLOY_PHP` (optional; default `/opt/php/8.4/bin/php`).
-- Typical values (also in local `.env.deploy`, never commit): host `<DEPLOY_HOST>`, user `<DEPLOY_USER>`, path `www/tetri-cafe.ru/`, key `~/.ssh/deploy_key`.
-- ISPmanager password: panel login only (`https://<DEPLOY_HOST>:1500/`). Never put it in `.env` / `.env.deploy` / git. Resetting the panel password does not affect SSH deploy or the Laravel app.
+- Real host / SSH user / path / key path live only in local `.env.deploy` and GitHub Actions secrets — **never** commit account IDs, panel URLs, or passwords.
+- ISPmanager password: panel login only. Never put it in `.env` / `.env.deploy` / git. Resetting the panel password does not affect SSH deploy or the Laravel app.
 
 ## Server facts
 
-1. App root: `~/www/tetri-cafe.ru/`; root `.htaccess` forwards into `public/`.
-2. PHP **8.4** for CLI and CGI: `/opt/php/8.4/bin/php`, `~/php-bin/tetri-cafe.ru/php` → `php-cgi` 8.4. Composer platform check requires ≥8.4.1 (Symfony 8).
+1. App root under the account `www/` tree for the production domain; root `.htaccess` forwards into `public/`.
+2. PHP **8.4** for CLI and CGI (`/opt/php/8.4/bin/php`, account `php-bin/…/php` → `php-cgi` 8.4). Composer platform check requires ≥8.4.1 (Symfony 8).
 3. Prod `.env`: SQLite at `database/database.sqlite` (absolute `DB_DATABASE` under hosting home). `SESSION_DRIVER`/`CACHE_STORE=file`, `QUEUE_CONNECTION=sync`. No Redis (extension absent on host). `APP_URL=https://tetri-cafe.ru`.
 4. Windows has no native `rsync`; Actions runs on Ubuntu. Large content zips may need chunked SFTP from Windows (hosting resets long SCP).
 5. Deploy step creates `storage/framework/*` and touches SQLite before `migrate` on fresh hosts.
-6. Panel: https://<DEPLOY_HOST>:1500/ (ISPmanager). Password is panel-only — not mirrored in app env.
+6. Hosting panel: ISPmanager (credentials and panel URL stay out of the repo).
 
 ## What ships vs stays in git
 
@@ -49,11 +47,11 @@ Former demo `https://former-staging.example` (account `<DEPLOY_USER>` / `<DEPLOY
 
 **Excluded from rsync** (see `.github/workflows/deploy.yml`): `.git/`, `.github/`, `.env` / `.env.*`, `.editorconfig`, `.gitattributes`, `.gitignore`, `.npmrc`, `docs/`, `tests/`, `node_modules/`, `README.md`, `phpunit.xml`, `package.json`, `package-lock.json`, `vite.config.js`, `database/factories/`, `database/seeders/`, runtime `storage/*` paths, `database/database.sqlite*`.
 
-rsync `--delete` does **not** remove paths that are excluded. After adding excludes, junk already on the server was removed once by hand (`rm -rf docs tests` …); future deploys simply never re-upload those files.
+rsync `--delete` does **not** remove paths that are excluded. After adding excludes, junk already on the server was removed once by hand; future deploys simply never re-upload those files.
 
 ## Local helpers
 
-Copy [`.env.deploy.example`](../.env.deploy.example) → `.env.deploy` (gitignored):
+Copy [`.env.deploy.example`](../.env.deploy.example) → `.env.deploy` (gitignored) and fill host/user/path/key:
 
 ```bash
 php artisan demo:export
