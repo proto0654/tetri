@@ -48,7 +48,7 @@ Record settled technical choices for the Tetri Laravel application.
 - Unsafe CSS color strings from CMS: `App\Support\CssColor::resolve` (rgba/hex allowlist + fallback).
 - Russian typography: `akh/typograf` via `App\Support\Typograph`; Blade `@typo` (strip all HTML) and `@typoBr` (keep newlines/`<br>` for section titles).
 - Booking → MAX: `App\Services\MaxNotificationService` posts to `https://platform-api2.max.ru/messages?chat_id=`; `Authorization` is the raw bot token (no Bearer). Credentials: SiteSettings `max_bot_token` / `max_chat_id`. Temporary `withoutVerifying()` for Минцифры TLS — prefer installing the CA in production.
-- Deploy: Actions rsync (code + migrate only); `demo:export` / `demo:pull` / `demo:push` / `demo:import` for content snapshot. Details: [DEPLOY.md](DEPLOY.md).
+- Deploy: Actions rsync (lean runtime tree + migrate); `docs/`/tests/npm sources excluded — [DEPLOY.md](DEPLOY.md#what-ships-vs-stays-in-git). Content: `demo:export` / `demo:pull` / `demo:push` / `demo:import`.
 - Robots: `block_search_indexing` (default true in code; **false** on prod) → layout meta + `RobotsController` at `/robots.txt`. ManageSiteSettings tab **SEO**.
 - Public SEO / OG: SiteSettings keys + `documentTitle()`; layout `@yield('og_image_path')` → absolute `og:image` (home `og_image`; menu `menu_og_image`; dish `MenuItem.image` with fallbacks). See [content.md](content.md#seo-cms--open-graph).
 - CMS nav: `SiteSettings.nav_links` (LIST_KEYS wholesale on read/save) + `NavLinkFieldSchema` + `<x-site.nav-item>`; booking sources `nav-{slug}` / `footer-{slug}` labeled in `MaxNotificationService`.

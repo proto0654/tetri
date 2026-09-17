@@ -8,6 +8,7 @@ Back to [project context](CONTEXT.md)
 - Content pulled from former demo `former-staging.example` via `demo:export`/`demo:pull`, imported on prod; weblaba app + php-bin removed.
 - Indexing enabled on prod (`block_search_indexing` false). SQLite + file session/cache; Redis not used.
 - Clarified: ISPmanager panel password is not in `.env` — reset does not require env updates.
+- Lean host tree: rsync excludes `docs/`, tests, npm/Vite sources, `phpunit`, factories/seeders, etc.; one-time cleanup on server. See [DEPLOY.md](DEPLOY.md#what-ships-vs-stays-in-git).
 - Docs: [DEPLOY.md](DEPLOY.md), [tech.md](tech.md), [setup.md](setup.md), [content.md](content.md), hub [CONTEXT.md](CONTEXT.md).
 
 ## 2026-09-14

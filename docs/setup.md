@@ -55,8 +55,8 @@ Directives for seeders:
 See [DEPLOY.md](DEPLOY.md).
 
 - Production: **https://tetri-cafe.ru** (live as of 2026-09-17).
-- GitHub: https://github.com/proto0654/tetri (public). `docs/` tracked; Cursor / `.ai` stay gitignored.
-- Code: push `main` → Actions rsync + migrate (SSH key; ISPmanager password not in env).
+- GitHub: https://github.com/proto0654/tetri (public). `docs/` tracked in git but **not** rsynced to the host; Cursor / `.ai` stay gitignored.
+- Code: push `main` → Actions rsync + migrate (SSH key; ISPmanager password not in env). Lean excludes: [DEPLOY.md](DEPLOY.md#what-ships-vs-stays-in-git).
 - Content: `demo:pull` / `demo:push` cutover only (not remote seed; do not routine-push).
 
 ## Links
