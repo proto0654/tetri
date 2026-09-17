@@ -79,4 +79,4 @@ jobs:
           PHP_BIN="${DEPLOY_PHP:-/opt/php/8.4/bin/php}"
           ssh -o StrictHostKeyChecking=accept-new \
             "${DEPLOY_USER}@${DEPLOY_HOST}" \
-            "cd ${DEPLOY_PATH} && ${PHP_BIN} artisan migrate --force && ${PHP_BIN} artisan storage:link --force && ${PHP_BIN} artisan optimize"
+            "cd ${DEPLOY_PATH} && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/public bootstrap/cache && touch database/database.sqlite && ${PHP_BIN} artisan migrate --force && ${PHP_BIN} artisan storage:link --force && ${PHP_BIN} artisan optimize"
