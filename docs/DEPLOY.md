@@ -77,4 +77,11 @@ Production has indexing **enabled** (`false`).
 - https://tetri-cafe.ru — site loads with media
 - https://tetri-cafe.ru/robots.txt — empty `Disallow` (indexing allowed)
 - View source — no `noindex` meta
-- https://tetri-cafe.ru/admin — Filament login (from imported users)
+- https://tetri-cafe.ru/admin — Filament login for studio + client operators (passwords out of band; seed users removed from prod)
+
+## Filament users (production)
+
+- Two `User` rows with panel access (`User::canAccessPanel` → true for all users).
+- Seed/demo accounts (`admin@tetri.test`, `test@example.com`) must **not** exist on production.
+- Local seed still creates `admin@tetri.test` / `password` for Herd only — do not `demo:push` users after go-live unless intentional.
+- Never commit production admin passwords or put them in `docs/`.

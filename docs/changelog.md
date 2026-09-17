@@ -9,7 +9,8 @@ Back to [project context](CONTEXT.md)
 - Indexing enabled on prod (`block_search_indexing` false). SQLite + file session/cache; Redis not used.
 - Clarified: ISPmanager panel password is not in `.env` — reset does not require env updates.
 - Lean host tree: rsync excludes `docs/`, tests, npm/Vite sources, `phpunit`, factories/seeders, etc.; one-time cleanup on server. See [DEPLOY.md](DEPLOY.md#what-ships-vs-stays-in-git).
-- Public docs omit hosting account IDs / panel URLs (local `.env.deploy` + Actions secrets only).
+- Public docs omit hosting account IDs / panel URLs (local `.env.deploy` + Actions secrets only). Git history rewritten + force-pushed to scrub prior leaks.
+- Prod Filament: studio + client admins; seed users removed. Passwords never in git.
 - Docs: [DEPLOY.md](DEPLOY.md), [tech.md](tech.md), [setup.md](setup.md), [content.md](content.md), hub [CONTEXT.md](CONTEXT.md).
 
 ## 2026-09-14

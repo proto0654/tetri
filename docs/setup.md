@@ -58,6 +58,7 @@ See [DEPLOY.md](DEPLOY.md).
 - GitHub: https://github.com/proto0654/tetri (public). `docs/` tracked in git but **not** rsynced to the host; Cursor / `.ai` stay gitignored.
 - Code: push `main` → Actions rsync + migrate (SSH key; ISPmanager password not in env). Lean excludes: [DEPLOY.md](DEPLOY.md#what-ships-vs-stays-in-git).
 - Content: `demo:pull` / `demo:push` cutover only (not remote seed; do not routine-push).
+- Prod `/admin`: studio + client Filament users (credentials out of band). Local seed `admin@tetri.test` / `password` is Herd-only — see [DEPLOY.md](DEPLOY.md#filament-users-production).
 
 ## Links
 

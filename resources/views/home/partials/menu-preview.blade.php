@@ -1,4 +1,4 @@
-<section id="menu-preview" class="overflow-x-clip bg-cream py-16" data-entrance data-state="pending">
+<section id="menu-preview" class="overflow-x-clip bg-cream py-16 lg:sticky lg:top-0 lg:z-[1]" data-entrance data-state="pending">
     <x-site.shell>
         <div class="grid gap-10 lg:grid-cols-3 lg:items-stretch lg:gap-x-10" data-swiper-root>
             <div class="max-w-md lg:col-span-1 lg:flex lg:h-full lg:flex-col">

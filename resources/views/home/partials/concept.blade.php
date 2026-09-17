@@ -1,4 +1,4 @@
-<section id="concept" class="bg-surface py-20" data-entrance data-state="pending">
+<section id="concept" class="bg-surface py-20 lg:sticky lg:top-0 lg:z-[2]" data-entrance data-state="pending">
     <x-site.shell>
         <div class="site-text-shift-scope">
             <x-site.mark

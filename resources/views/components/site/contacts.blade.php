@@ -21,7 +21,7 @@
     $mapTitle = filled($mapMarkerLabel) ? $mapMarkerLabel : 'Карта ТЕТРИ';
 @endphp
 
-<section id="contacts" data-entrance data-state="pending" {{ $attributes->class(['overflow-x-clip']) }}>
+<section id="contacts" data-entrance data-state="pending" {{ $attributes->class(['overflow-x-clip', 'lg:relative', 'lg:z-[3]']) }}>
     <x-site.shell>
         <div class="grid lg:grid-cols-3 lg:items-stretch">
             <div class="site-contacts-map-olive-half relative min-h-[16rem] max-lg:mb-8 lg:min-h-0">

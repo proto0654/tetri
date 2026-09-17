@@ -1,6 +1,6 @@
 <section
     id="stories"
-    class="overflow-x-clip bg-cream py-16"
+    class="overflow-x-clip bg-cream py-16 lg:relative lg:z-[3]"
     data-entrance
     data-state="pending"
 >
