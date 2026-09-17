@@ -10,9 +10,9 @@ Record settled technical choices for the Tetri Laravel application.
 
 | Layer | Choice | Version / note |
 | --- | --- | --- |
-| Runtime | PHP | 8.4 (Herd local; REG.RU demo `/opt/php/8.4` — required ≥8.4.1) |
+| Runtime | PHP | 8.4 (Herd local; REG.RU prod `/opt/php/8.4` — required ≥8.4.1) |
 | Local URL | Herd | `http://tetri.test` (not localhost/:8000) |
-| Demo URL | REG.RU | `https://former-staging.example` |
+| Production URL | REG.RU ISPmanager | `https://tetri-cafe.ru` (`<DEPLOY_HOST>` / `<DEPLOY_USER>`) |
 | Framework | Laravel | 13.31 |
 | Admin | Filament | 5.8 (`AdminPanelProvider`) + Peek 4.1 Page Preview |
 | Public UI | Blade + Livewire + Alpine | Livewire 4.4 (via Filament) |
@@ -20,9 +20,10 @@ Record settled technical choices for the Tetri Laravel application.
 | Frontend tooling | Vite + Tailwind CSS | Vite 8 / Tailwind 4 |
 | Sliders | Swiper (local npm) | bundled via Vite; no CDN |
 | Motion | GSAP + SplitType | section entrance; hero stays hand-rolled |
-| DB (local + demo) | SQLite | demo server file under app `database/` |
+| DB (local + prod) | SQLite | prod absolute path under app `database/` |
+| Cache / session / queue (prod) | file / file / sync | Redis not installed on shared host |
 | AI boost | laravel/boost | 2.8 (dev) |
-| Git remote | GitHub | `proto0654/tetri` (public; docs/Cursor not tracked) |
+| Git remote | GitHub | `proto0654/tetri` (public; `docs/` tracked) |
 
 ## Decisions
 
@@ -47,15 +48,15 @@ Record settled technical choices for the Tetri Laravel application.
 - Unsafe CSS color strings from CMS: `App\Support\CssColor::resolve` (rgba/hex allowlist + fallback).
 - Russian typography: `akh/typograf` via `App\Support\Typograph`; Blade `@typo` (strip all HTML) and `@typoBr` (keep newlines/`<br>` for section titles).
 - Booking → MAX: `App\Services\MaxNotificationService` posts to `https://platform-api2.max.ru/messages?chat_id=`; `Authorization` is the raw bot token (no Bearer). Credentials: SiteSettings `max_bot_token` / `max_chat_id`. Temporary `withoutVerifying()` for Минцифры TLS — prefer installing the CA in production.
-- Deploy: Actions rsync (code + migrate only); `demo:push` / `demo:import` for content snapshot. Details: [DEPLOY.md](DEPLOY.md).
-- Robots: `block_search_indexing` (default true) → layout meta + `RobotsController` at `/robots.txt`. ManageSiteSettings tab **SEO**.
+- Deploy: Actions rsync (code + migrate only); `demo:export` / `demo:pull` / `demo:push` / `demo:import` for content snapshot. Details: [DEPLOY.md](DEPLOY.md).
+- Robots: `block_search_indexing` (default true in code; **false** on prod) → layout meta + `RobotsController` at `/robots.txt`. ManageSiteSettings tab **SEO**.
 - Public SEO / OG: SiteSettings keys + `documentTitle()`; layout `@yield('og_image_path')` → absolute `og:image` (home `og_image`; menu `menu_og_image`; dish `MenuItem.image` with fallbacks). See [content.md](content.md#seo-cms--open-graph).
 - CMS nav: `SiteSettings.nav_links` (LIST_KEYS wholesale on read/save) + `NavLinkFieldSchema` + `<x-site.nav-item>`; booking sources `nav-{slug}` / `footer-{slug}` labeled in `MaxNotificationService`.
 - Contacts map: prefer Yandex Maps **JS API 2.1** (`YANDEX_MAPS_API_KEY` → `config/services.php` `yandex_maps.key`). Blade `x-site.contacts` renders `div[data-yandex-map]` with coords/label/logo/apikey; `resources/js/yandex-map.js` lazy-loads CDN API, inits from `app.js` (DOMContentLoaded + `livewire:navigated`). Map options: `controls: []`, `suppressMapOpenBlock: true` (no ruler/traffic/«Открыть в Яндекс Картах»). Custom HTML placemark (rounded-rect cream plate + site logo via `data-logo` / text fallback). Tile tint: CSS filter on ground/areas/borders/buildings panes only (pin stays crisp). Fallback: `map_embed_url` iframe override, or `YandexMap::widgetUrl` when key missing. Route CTA still `YandexMap::routeUrl`. Do not put API key in SiteSettings/Filament. Restrict key by HTTP Referrer in Yandex dashboard.
 
 ## Open questions
 
-- Final production domain; SQLite vs MySQL for client prod.
+- MySQL instead of SQLite for client prod (optional later).
 - Production TLS trust store for MAX API (drop `withoutVerifying()` when CA is installed).
 
 ## Links

@@ -1,65 +1,72 @@
-# Deploy — former-staging.example
+# Deploy — tetri-cafe.ru
 
 Back to [project context](CONTEXT.md)
 
-Demo host on REG.RU (same account as weblaba.ru). Pattern mirrors molecule: GitHub Actions → rsync over SSH. Content is **not** seeded on deploy.
+Production on REG.RU (ISPmanager). Pattern: GitHub Actions → rsync over SSH. Content is **not** seeded on deploy.
 
-**Status (2026-09-12):** live — https://former-staging.example (noindex, content synced from local via `demo:push`).
+**Status (2026-09-17):** live — https://tetri-cafe.ru (indexing on; content cut over from former demo `former-staging.example`).
 
 ## Architecture
 
 ```
 push main
-  └─ deploy.yml  →  rsync code  →  ~/www/former-staging.example/  (+ migrate)
+  └─ deploy.yml  →  rsync code  →  ~/www/tetri-cafe.ru/  (+ migrate)
                                          │
-local demo content ── php artisan demo:push ──► import tables + media
+one-shot cutover ── demo:pull (old host) / demo:push ──► import tables + media
 ```
 
 | Action | When | Touches DB data? |
 |--------|------|------------------|
 | Code deploy (`deploy.yml`) | push `main` / Run workflow | No — only `migrate --force` |
-| `php artisan demo:push` | Manually, when demo should match local | Yes — replaces content tables + `storage/app/public` |
-| Real production later | Same code deploy | Do **not** run `demo:push` |
+| `php artisan demo:pull` | Pull zip from a remote (export + scp) | Local only if `--import` |
+| `php artisan demo:push` | Manual content replace on a host | Yes — replaces content tables + `storage/app/public` |
+| Day-to-day production | Same code deploy | Do **not** routine `demo:push` |
+
+Former demo `https://former-staging.example` (account `<DEPLOY_USER>` / `<DEPLOY_HOST>`) was removed after cutover.
 
 ## GitHub
 
 - Repo: https://github.com/proto0654/tetri (**public**; trade-controls blocked private create).
-- Local-only (gitignored, not pushed): `docs/`, `.cursor/`, `.ai/`, `AGENTS.md`, `boost.json`.
+- Tracked: `docs/`. Still local-only (gitignored): `.cursor/`, `.ai/`, `AGENTS.md`, `boost.json`.
 - Secrets → Actions: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH`, `DEPLOY_PHP` (optional; default `/opt/php/8.4/bin/php`).
-- Typical values (also in local `.env.deploy`, never commit): host `<DEPLOY_HOST>`, user `<DEPLOY_USER>`, path `www/former-staging.example/`, key `~/.ssh/deploy_key`.
+- Typical values (also in local `.env.deploy`, never commit): host `<DEPLOY_HOST>`, user `<DEPLOY_USER>`, path `www/tetri-cafe.ru/`, key `~/.ssh/deploy_key`.
+- ISPmanager password: panel login only (`https://<DEPLOY_HOST>:1500/`). Never put it in `.env` / `.env.deploy` / git. Resetting the panel password does not affect SSH deploy or the Laravel app.
 
 ## Server facts
 
-1. App root: `~/www/former-staging.example/`; root `.htaccess` forwards into `public/`.
-2. PHP **8.4** for CLI and CGI: `/opt/php/8.4/bin/php`, `~/php-bin/former-staging.example/php` → `php-cgi` 8.4. Composer platform check requires ≥8.4.1 (Symfony 8).
-3. Demo `.env`: SQLite at `database/database.sqlite` (absolute `DB_DATABASE` path under hosting home). Sessions/cache file drivers.
-4. Windows has no native `rsync`; Actions runs on Ubuntu. Local one-shot sync used `tar`/`scp` or WSL when needed.
-5. `demo:push` uses long Process timeouts (SCP can exceed 60s for media zips).
+1. App root: `~/www/tetri-cafe.ru/`; root `.htaccess` forwards into `public/`.
+2. PHP **8.4** for CLI and CGI: `/opt/php/8.4/bin/php`, `~/php-bin/tetri-cafe.ru/php` → `php-cgi` 8.4. Composer platform check requires ≥8.4.1 (Symfony 8).
+3. Prod `.env`: SQLite at `database/database.sqlite` (absolute `DB_DATABASE` under hosting home). `SESSION_DRIVER`/`CACHE_STORE=file`, `QUEUE_CONNECTION=sync`. No Redis (extension absent on host). `APP_URL=https://tetri-cafe.ru`.
+4. Windows has no native `rsync`; Actions runs on Ubuntu. Large content zips may need chunked SFTP from Windows (hosting resets long SCP).
+5. Deploy step creates `storage/framework/*` and touches SQLite before `migrate` on fresh hosts.
+6. Panel: https://<DEPLOY_HOST>:1500/ (ISPmanager). Password is panel-only — not mirrored in app env.
 
 ## Local helpers
 
 Copy [`.env.deploy.example`](../.env.deploy.example) → `.env.deploy` (gitignored):
 
 ```bash
-php artisan demo:push
+php artisan demo:export
+php artisan demo:pull --host=…   # remote export + download zip
+php artisan demo:push            # upload local zip + remote demo:import
 ```
 
-Options: `--dry-run`, `--host`, `--user`, `--path`, `--key`, `--php`. SCP uses `DEPLOY_PATH/storage/app/demo-sync/…`; remote `demo:import` gets **app-relative** `storage/app/demo-sync/demo-content.zip` after `cd` into the app (not the DEPLOY_PATH-prefixed path).
+Options: `--dry-run`, `--host`, `--user`, `--path`, `--key`, `--php`; `demo:pull` also `--import`. SCP uses `DEPLOY_PATH/storage/app/demo-sync/…`; remote `demo:import` gets **app-relative** `storage/app/demo-sync/demo-content.zip` after `cd` into the app.
 
 Tables in the zip: `users`, `categories`, `menu_items`, `stories`, `settings` (`DemoContentExporter` / `DemoContentImporter`).
 
 ## Search indexing
 
-`SiteSettings.block_search_indexing` defaults to **true** (Filament «Подвал и CTA»). Effects:
+`SiteSettings.block_search_indexing` — Filament SEO tab. Effects when **true**:
 
 - `<meta name="robots" content="noindex, nofollow">`
 - `/robots.txt` → `Disallow: /` (`RobotsController`; do not restore static `public/robots.txt`)
 
-Turn off only when the real production domain should be indexed.
+Production has indexing **enabled** (`false`).
 
 ## Verify
 
-- https://former-staging.example — site loads with demo media
-- https://former-staging.example/robots.txt — `Disallow: /`
-- View source — `noindex, nofollow`
-- https://former-staging.example/admin — Filament login (from pushed users)
+- https://tetri-cafe.ru — site loads with media
+- https://tetri-cafe.ru/robots.txt — empty `Disallow` (indexing allowed)
+- View source — no `noindex` meta
+- https://tetri-cafe.ru/admin — Filament login (from imported users)

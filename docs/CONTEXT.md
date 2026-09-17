@@ -22,6 +22,11 @@ Public site for family cafe **Тетри**: Laravel + Filament admin, Vite front
 
 ## Current decisions
 
+- Production: **https://tetri-cafe.ru** (REG.RU ISPmanager, `<DEPLOY_HOST>`, user `<DEPLOY_USER>`). Deploy: GitHub Actions rsync + SSH key — details [DEPLOY.md](DEPLOY.md).
+- ISPmanager panel password is **not** in app `.env`; changing it does not require env edits. Deploy uses `~/.ssh/deploy_key` / Actions `DEPLOY_SSH_KEY`.
+- Prod runtime: SQLite, `SESSION`/`CACHE` file drivers, `QUEUE_CONNECTION=sync`. **No Redis** (PHP redis ext not installed on host).
+- Search indexing on for production (`block_search_indexing` false). Former demo `former-staging.example` removed after cutover.
+- Content sync helpers: `demo:export` / `demo:pull` / `demo:push` / `demo:import` — cutover only, not routine prod pushes.
 - Section entrance starts at `top 65%` with settle delay `ENTER_PLAY_DELAY_MS` 160.
 - Dish related uses `[data-entrance-follow]`: any shared viewport edge with the dish section → `FOLLOW_WHEN_BOTH_VISIBLE_MS` 1800 so titles do not slide up together; below the fold keeps its own ScrollTrigger.
 - Hero load caps concurrent modules at two; never overlap story `clip-path` with title 3D glyphs.
@@ -33,7 +38,9 @@ Public site for family cafe **Тетри**: Laravel + Filament admin, Vite front
 ## Open questions
 
 - Exact `FOLLOW_WHEN_BOTH_VISIBLE_MS` may need tuning per dish layout height.
+- Optional later: MySQL instead of SQLite; MAX TLS CA so `withoutVerifying()` can drop.
 
 ## Last actualized
 
+- 2026-09-17 — Prod cutover to tetri-cafe.ru; weblaba demo removed; ISP password not in `.env`; no Redis on shared host.
 - 2026-09-14 — CMS nav_links + per-page OG (menu/dish); docs hub refreshed.

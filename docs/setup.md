@@ -54,10 +54,10 @@ Directives for seeders:
 
 See [DEPLOY.md](DEPLOY.md).
 
-- Demo: **https://former-staging.example** (live as of 2026-09-12).
-- GitHub: https://github.com/proto0654/tetri (public). Local `docs/` / Cursor / `.ai` stay gitignored.
-- Code: push `main` → Actions rsync + migrate.
-- Content: `php artisan demo:push` (not remote seed).
+- Production: **https://tetri-cafe.ru** (live as of 2026-09-17).
+- GitHub: https://github.com/proto0654/tetri (public). `docs/` tracked; Cursor / `.ai` stay gitignored.
+- Code: push `main` → Actions rsync + migrate (SSH key; ISPmanager password not in env).
+- Content: `demo:pull` / `demo:push` cutover only (not remote seed; do not routine-push).
 
 ## Links
 

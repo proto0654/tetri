@@ -104,7 +104,7 @@ Section title fields (kids / menu / concept / stories / contacts) are Textareas 
 
 - `SiteSettings.block_search_indexing` (default **true**, Filament tab **SEO**).
 - When true: layout meta `noindex, nofollow` + `/robots.txt` `Disallow: /`.
-- Demo host stays blocked; turn off only for real production indexing. See [DEPLOY.md](DEPLOY.md).
+- Production indexing is on (`block_search_indexing` false). See [DEPLOY.md](DEPLOY.md).
 
 ## SEO (CMS) / Open Graph
 

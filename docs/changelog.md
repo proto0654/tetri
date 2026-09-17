@@ -2,6 +2,14 @@
 
 Back to [project context](CONTEXT.md)
 
+## 2026-09-17
+
+- Production cutover to **https://tetri-cafe.ru** (REG.RU `<DEPLOY_HOST>` / `<DEPLOY_USER>`); Actions secrets and `deploy.yml` retargeted; SSH key `deploy_key`.
+- Content pulled from former demo `former-staging.example` via `demo:export`/`demo:pull`, imported on prod; weblaba app + php-bin removed.
+- Indexing enabled on prod (`block_search_indexing` false). SQLite + file session/cache; Redis not used.
+- Clarified: ISPmanager panel password is not in `.env` — reset does not require env updates.
+- Docs: [DEPLOY.md](DEPLOY.md), [tech.md](tech.md), [setup.md](setup.md), [content.md](content.md), hub [CONTEXT.md](CONTEXT.md).
+
 ## 2026-09-14
 
 - CMS header/footer nav: `SiteSettings.nav_links` + `NavLinkFieldSchema` + `<x-site.nav-item>`; LIST_KEYS wholesale on read; MAX booking source labels for nav/footer.
