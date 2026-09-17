@@ -1,11 +1,11 @@
-name: Deploy · former-staging.example
+name: Deploy · tetri-cafe.ru
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-run-name: Deploy — former-staging.example (${{ github.sha }})
+run-name: Deploy — tetri-cafe.ru (${{ github.sha }})
 
 concurrency:
   group: tetri-production

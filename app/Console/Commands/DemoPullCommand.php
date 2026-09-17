@@ -2,24 +2,25 @@
 
 namespace App\Console\Commands;
 
-use App\Support\DemoContentExporter;
+use App\Support\DemoContentImporter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 
-class DemoPushCommand extends Command
+class DemoPullCommand extends Command
 {
-    protected $signature = 'demo:push
+    protected $signature = 'demo:pull
         {--host= : SSH host (default DEPLOY_HOST env)}
         {--user= : SSH user (default DEPLOY_USER env)}
         {--path= : Remote app path relative to home (default DEPLOY_PATH env)}
         {--key= : SSH private key path (default DEPLOY_SSH_KEY env)}
         {--php= : Remote PHP binary (default DEPLOY_PHP env)}
-        {--dry-run : Build zip only, do not upload}';
+        {--import : Import the downloaded zip into the local database}
+        {--dry-run : Only print the remote export/scp plan}';
 
-    protected $description = 'Export local demo content and push it to the demo host over SSH';
+    protected $description = 'Export content on a remote host and download the zip over SSH';
 
-    public function handle(DemoContentExporter $exporter): int
+    public function handle(DemoContentImporter $importer): int
     {
         $this->loadDeployEnvFile();
 
@@ -36,14 +37,6 @@ class DemoPushCommand extends Command
         $zipPath = storage_path('app/demo-sync/demo-content.zip');
         File::ensureDirectoryExists(dirname($zipPath));
 
-        $this->info('Exporting local content…');
-        $exporter->exportToZip($zipPath);
-        $this->info('Zip ready: '.$zipPath);
-
-        if ($this->option('dry-run')) {
-            return self::SUCCESS;
-        }
-
         if (! filled($host)) {
             $this->error('DEPLOY_HOST / --host is required.');
 
@@ -57,23 +50,37 @@ class DemoPushCommand extends Command
         }
 
         $remoteZipScp = $path.'storage/app/demo-sync/demo-content.zip';
-        // After `cd $path`, artisan must get an app-relative (or absolute) zip path — not DEPLOY_PATH-prefixed.
-        $remoteZipImport = 'storage/app/demo-sync/demo-content.zip';
+        $remoteZipExport = 'storage/app/demo-sync/demo-content.zip';
         $sshBase = ['ssh', '-i', $key, '-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes', "{$user}@{$host}"];
 
-        $this->info('Uploading zip…');
-        $mkdir = Process::timeout(120)->run([...$sshBase, "mkdir -p {$path}storage/app/demo-sync"]);
+        if ($this->option('dry-run')) {
+            $this->info("Would export on {$user}@{$host}:{$path}");
+            $this->info("Would download {$remoteZipScp} → {$zipPath}");
 
-        if ($mkdir->failed()) {
-            $this->error($mkdir->errorOutput() ?: $mkdir->output());
+            return self::SUCCESS;
+        }
+
+        $this->info('Exporting on remote…');
+        $export = Process::timeout(300)->run([
+            ...$sshBase,
+            "cd {$path} && mkdir -p storage/app/demo-sync && {$php} artisan demo:export --path=".escapeshellarg($remoteZipExport),
+        ]);
+
+        if ($export->failed()) {
+            $this->error($export->errorOutput() ?: $export->output());
 
             return self::FAILURE;
         }
 
+        if (filled($export->output())) {
+            $this->info($export->output());
+        }
+
+        $this->info('Downloading zip…');
         $scp = Process::timeout(600)->run([
             'scp', '-i', $key, '-o', 'StrictHostKeyChecking=accept-new', '-o', 'BatchMode=yes',
-            $zipPath,
             "{$user}@{$host}:{$remoteZipScp}",
+            $zipPath,
         ]);
 
         if ($scp->failed()) {
@@ -82,23 +89,13 @@ class DemoPushCommand extends Command
             return self::FAILURE;
         }
 
-        $this->info('Importing on remote…');
-        $import = Process::timeout(300)->run([
-            ...$sshBase,
-            "cd {$path} && {$php} artisan demo:import ".escapeshellarg($remoteZipImport)." && {$php} artisan optimize:clear",
-        ]);
+        $this->info('Zip ready: '.$zipPath);
 
-        if ($import->failed()) {
-            $this->error($import->errorOutput() ?: $import->output());
-
-            return self::FAILURE;
+        if ($this->option('import')) {
+            $this->info('Importing into local database…');
+            $importer->importFromZip($zipPath);
+            $this->info('Local import complete.');
         }
-
-        if (filled($import->output())) {
-            $this->info($import->output());
-        }
-
-        $this->info('Demo content pushed.');
 
         return self::SUCCESS;
     }
