@@ -55,8 +55,20 @@ jobs:
             --exclude '.github/' \
             --exclude '.env' \
             --exclude '.env.*' \
-            --exclude 'node_modules/' \
+            --exclude '.editorconfig' \
+            --exclude '.gitattributes' \
+            --exclude '.gitignore' \
+            --exclude '.npmrc' \
+            --exclude 'docs/' \
             --exclude 'tests/' \
+            --exclude 'node_modules/' \
+            --exclude 'README.md' \
+            --exclude 'phpunit.xml' \
+            --exclude 'package.json' \
+            --exclude 'package-lock.json' \
+            --exclude 'vite.config.js' \
+            --exclude 'database/factories/' \
+            --exclude 'database/seeders/' \
             --exclude 'storage/app/public/' \
             --exclude 'storage/app/demo-sync/' \
             --exclude 'storage/logs/' \

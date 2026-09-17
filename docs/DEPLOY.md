@@ -41,6 +41,16 @@ Former demo `https://former-staging.example` (account `<DEPLOY_USER>` / `<DEPLOY
 5. Deploy step creates `storage/framework/*` and touches SQLite before `migrate` on fresh hosts.
 6. Panel: https://<DEPLOY_HOST>:1500/ (ISPmanager). Password is panel-only — not mirrored in app env.
 
+## What ships vs stays in git
+
+`docs/` and other dev files live in the GitHub repo for the team; they are **not** needed on the host. Actions builds assets in CI (`npm run build` → `public/build`), then rsyncs a lean tree.
+
+**On the host (runtime):** `app/`, `bootstrap/`, `config/`, `database/migrations/` (+ sqlite file, not overwritten by rsync), `lang/`, `public/`, `resources/`, `routes/`, `artisan`, `composer.json` / `composer.lock`, `vendor/`, `.htaccess`, server `.env`.
+
+**Excluded from rsync** (see `.github/workflows/deploy.yml`): `.git/`, `.github/`, `.env` / `.env.*`, `.editorconfig`, `.gitattributes`, `.gitignore`, `.npmrc`, `docs/`, `tests/`, `node_modules/`, `README.md`, `phpunit.xml`, `package.json`, `package-lock.json`, `vite.config.js`, `database/factories/`, `database/seeders/`, runtime `storage/*` paths, `database/database.sqlite*`.
+
+rsync `--delete` does **not** remove paths that are excluded. After adding excludes, junk already on the server was removed once by hand (`rm -rf docs tests` …); future deploys simply never re-upload those files.
+
 ## Local helpers
 
 Copy [`.env.deploy.example`](../.env.deploy.example) → `.env.deploy` (gitignored):
