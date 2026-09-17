@@ -9,6 +9,7 @@
 /.claude/
 /.codex
 /.cursor/
+/docs/
 /.idea
 /.nova
 /.phpunit.cache
