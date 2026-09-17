@@ -703,3 +703,49 @@ export const initSectionEntrance = (root = document) => {
 
     sections.forEach((section) => setupSection(section, sections));
 };
+
+/**
+ * Recalculate entrance ScrollTriggers after DOM height changes
+ * (e.g. Livewire MenuGrid category/pagination morph). Without this,
+ * pending footers keep stale start positions and never fire onEnter.
+ */
+let entranceRefreshQueued = false;
+
+export const refreshSectionEntrance = () => {
+    if (entranceRefreshQueued) {
+        return;
+    }
+
+    entranceRefreshQueued = true;
+
+    // Double rAF: wait until morph layout + paint settle.
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            entranceRefreshQueued = false;
+            ScrollTrigger.refresh();
+        });
+    });
+};
+
+/**
+ * Bind once — Livewire AJAX morphs change page height without navigating.
+ */
+export const bindLivewireSectionEntranceRefresh = () => {
+    const bind = () => {
+        if (typeof Livewire === 'undefined' || typeof Livewire.hook !== 'function') {
+            return;
+        }
+
+        Livewire.hook('morphed', () => {
+            refreshSectionEntrance();
+        });
+    };
+
+    if (typeof window.Livewire !== 'undefined') {
+        bind();
+
+        return;
+    }
+
+    document.addEventListener('livewire:init', bind, { once: true });
+};

@@ -4,10 +4,11 @@ import 'swiper/css';
 import { initHeroBg } from './hero-bg';
 import { startHeroEntrance } from './hero-entrance';
 import { initHeaderEntrance } from './header-entrance';
-import { destroySectionEntrance, initSectionEntrance } from './section-entrance';
+import { destroySectionEntrance, initSectionEntrance, bindLivewireSectionEntranceRefresh } from './section-entrance';
 import { destroyStoryViewer, initStoryViewer } from './story-viewer';
 import { initYandexMaps } from './yandex-map';
 
+bindLivewireSectionEntranceRefresh();
 const resolveSlidesOffset = (el, datasetKey) => {
     const raw = el.dataset[datasetKey];
 
