@@ -7,7 +7,7 @@
 @endphp
 
 <div class="relative">
-    <div class="flex w-full flex-wrap gap-2 sm:gap-3 lg:flex-nowrap" data-entrance-fade>
+    <div class="flex w-full flex-wrap gap-2 sm:gap-3" data-entrance-fade>
         <button
             type="button"
             wire:key="category-tab-all"
