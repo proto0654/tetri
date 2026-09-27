@@ -3,7 +3,7 @@
     $menuPanePage = $items instanceof \Illuminate\Contracts\Pagination\Paginator
         ? $items->currentPage()
         : 1;
-    $tabClass = 'min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-full px-3 py-2.5 text-center text-xs font-semibold tracking-wide transition data-loading:pointer-events-none data-loading:opacity-60 sm:basis-0 sm:px-4 sm:text-sm';
+    $tabClass = 'min-w-0 flex-1 basis-[calc(50%-0.25rem)] rounded-full px-3 py-2.5 text-center text-xs font-semibold tracking-wide transition data-loading:pointer-events-none data-loading:opacity-60 sm:flex-none sm:basis-auto sm:px-4 sm:text-sm';
 @endphp
 
 <div class="relative">
