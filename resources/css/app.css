@@ -754,6 +754,16 @@
     transform: none;
 }
 
+/* Nested root (footer inside contacts): parent `done` must not reveal a still-pending child. */
+[data-entrance] [data-entrance][data-state='pending'] [data-entrance-fade],
+[data-entrance] [data-entrance][data-state='pending'] [data-entrance-cta],
+[data-entrance] [data-entrance][data-state='pending'] [data-entrance-list] > *,
+[data-entrance] [data-entrance][data-state='pending'] [data-entrance-title],
+[data-entrance] [data-entrance][data-state='pending'] [data-entrance-info],
+[data-entrance] [data-entrance][data-state='pending'] [data-entrance-media] {
+    opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
     [data-entrance] [data-entrance-media],
     [data-entrance] [data-entrance-fade],

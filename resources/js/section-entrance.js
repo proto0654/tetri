@@ -24,6 +24,9 @@ const ENTRANCE_OFFSETS = {
     cta: '-=0.15',
 };
 
+/** `data-entrance-order="media-first"`: title starts while media morph is still opening. */
+const MEDIA_FIRST_TITLE_OFFSET = 0.35;
+
 /** Soft cap — clip-path morph is paint-heavy. */
 const MAX_MORPH = 3;
 const MAX_FADE_MEDIA = 8;
@@ -394,6 +397,16 @@ const buildSectionTimeline = (section) => {
         },
     });
 
+    const hasMedia = mediaFadeEls.length > 0 || mediaMorphEls.length > 0;
+    const isMediaFirst = hasMedia && section.dataset.entranceOrder === 'media-first';
+
+    if (isMediaFirst) {
+        tl.add('media', 0);
+        addMediaTweens(tl, mediaFadeEls, mediaMorphEls);
+    }
+
+    const copyStart = isMediaFirst ? `media+=${MEDIA_FIRST_TITLE_OFFSET}` : 0;
+
     if (titleLines.length) {
         tl.to(titleLines, {
             yPercent: 0,
@@ -401,7 +414,7 @@ const buildSectionTimeline = (section) => {
             duration: TITLE_DURATION,
             stagger: TITLE_LINE_STAGGER,
             force3D: true,
-        }, ENTRANCE_OFFSETS.title);
+        }, isMediaFirst ? copyStart : ENTRANCE_OFFSETS.title);
     }
 
     if (fadeEls.length) {
@@ -410,7 +423,7 @@ const buildSectionTimeline = (section) => {
             duration: FADE_DURATION,
             stagger: ITEM_STAGGER,
             force3D: true,
-        }, titleLines.length ? ENTRANCE_OFFSETS.fade : 0);
+        }, titleLines.length ? ENTRANCE_OFFSETS.fade : copyStart);
     }
 
     if (listItems.length) {
@@ -425,12 +438,42 @@ const buildSectionTimeline = (section) => {
     // Own phase after title/fade/list — slides must not share the copy-role `-=` overlap
     // (menu-preview: short title + 2 fades drowned the card stagger; stories felt fine
     // because the title phase is longer). Label + absolute offsets = stable stagger.
-    const hasMedia = mediaFadeEls.length > 0 || mediaMorphEls.length > 0;
-
-    if (hasMedia) {
+    if (hasMedia && ! isMediaFirst) {
         tl.add('media', '>');
+        addMediaTweens(tl, mediaFadeEls, mediaMorphEls);
     }
 
+    infoLineGroups.forEach((lines, index) => {
+        if (! lines.length) {
+            return;
+        }
+
+        tl.to(lines, {
+            opacity: 1,
+            duration: FADE_DURATION,
+            stagger: LINE_STAGGER,
+        }, index === 0 ? ENTRANCE_OFFSETS.info : `-=${FADE_DURATION - LINE_STAGGER}`);
+    });
+
+    if (ctaEls.length) {
+        tl.to(ctaEls, {
+            opacity: 1,
+            duration: FADE_DURATION,
+            stagger: ITEM_STAGGER,
+        }, ENTRANCE_OFFSETS.cta);
+    }
+
+    return { tl, splits, titleEl, titleRestoreHtml };
+};
+
+/**
+ * Media phase from the `media` label (must already exist on the timeline).
+ *
+ * @param {gsap.core.Timeline} tl
+ * @param {HTMLElement[]} mediaFadeEls
+ * @param {HTMLElement[]} mediaMorphEls
+ */
+const addMediaTweens = (tl, mediaFadeEls, mediaMorphEls) => {
     mediaFadeEls.forEach((el, index) => {
         const proxy = { o: 0 };
 
@@ -461,28 +504,6 @@ const buildSectionTimeline = (section) => {
             onComplete: () => setMorphFinal(el, box ?? cacheMorphBox(el)),
         }, `media+=${index * MEDIA_STAGGER}`);
     });
-
-    infoLineGroups.forEach((lines, index) => {
-        if (! lines.length) {
-            return;
-        }
-
-        tl.to(lines, {
-            opacity: 1,
-            duration: FADE_DURATION,
-            stagger: LINE_STAGGER,
-        }, index === 0 ? ENTRANCE_OFFSETS.info : `-=${FADE_DURATION - LINE_STAGGER}`);
-    });
-
-    if (ctaEls.length) {
-        tl.to(ctaEls, {
-            opacity: 1,
-            duration: FADE_DURATION,
-            stagger: ITEM_STAGGER,
-        }, ENTRANCE_OFFSETS.cta);
-    }
-
-    return { tl, splits, titleEl, titleRestoreHtml };
 };
 
 /**
