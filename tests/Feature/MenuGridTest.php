@@ -57,6 +57,53 @@ class MenuGridTest extends TestCase
             ->assertSee('Чизкейк', false);
     }
 
+    public function test_all_menu_preview_headings_link_to_their_category(): void
+    {
+        $breakfast = Category::factory()->create([
+            'title' => 'Завтраки',
+            'slug' => 'zavtraki',
+            'sort_order' => 1,
+            'columns' => 2,
+            'is_active' => true,
+        ]);
+
+        $desserts = Category::factory()->create([
+            'title' => 'Десерты',
+            'slug' => 'deserty',
+            'sort_order' => 2,
+            'columns' => 3,
+            'is_active' => true,
+        ]);
+
+        MenuItem::factory()->create([
+            'category_id' => $breakfast->id,
+            'title' => 'Сырники',
+            'is_active' => true,
+        ]);
+
+        MenuItem::factory()->create([
+            'category_id' => $desserts->id,
+            'title' => 'Чизкейк',
+            'is_active' => true,
+        ]);
+
+        $scrollJs = <<<'JS'
+            document.getElementById('menu-grid-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        JS;
+
+        Livewire::test(MenuGrid::class)
+            ->assertSee(route('menu.category', $breakfast), false)
+            ->assertSee(route('menu.category', $desserts), false)
+            ->assertSee('aria-label="Все блюда раздела Завтраки"', false)
+            ->assertSee('aria-label="Все блюда раздела Десерты"', false)
+            ->call('openCategory', $desserts->id)
+            ->assertSet('activeCategoryId', $desserts->id)
+            ->assertSee('Чизкейк')
+            ->assertDontSee('Сырники')
+            ->assertJs($scrollJs)
+            ->assertJs('window.history.pushState({}, "", '.json_encode(route('menu.category', 'deserty')).')');
+    }
+
     public function test_set_category_and_show_all_swap_visible_menu_items(): void
     {
         $breakfast = Category::factory()->create([

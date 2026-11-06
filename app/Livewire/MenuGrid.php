@@ -57,6 +57,15 @@ class MenuGrid extends Component
         $this->syncBrowserUrl(route('menu.category', $slug));
     }
 
+    public function openCategory(int $id): void
+    {
+        $this->setCategory($id);
+
+        $this->js(<<<'JS'
+            document.getElementById('menu-grid-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        JS);
+    }
+
     public function paginationView(): string
     {
         return 'pagination.site';

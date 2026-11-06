@@ -59,9 +59,21 @@
                         class="menu-grid-block"
                         style="--menu-i: {{ $loop->index }}"
                     >
-                        <h2 class="font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl">
-                            @typo(mb_strtoupper($category->title))
-                        </h2>
+                        <div class="flex items-baseline justify-between gap-4">
+                            <h2 class="font-display text-4xl font-normal text-olive sm:text-5xl lg:text-6xl">
+                                @typo(mb_strtoupper($category->title))
+                            </h2>
+
+                            <a
+                                href="{{ route('menu.category', $category) }}"
+                                wire:click.prevent="openCategory({{ $category->id }})"
+                                class="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold tracking-wide text-ink transition hover:text-olive sm:text-base"
+                                aria-label="{{ 'Все блюда раздела '.$category->title }}"
+                            >
+                                @typo('Все')
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
 
                         <div class="{{ $blockGridClass }} mt-8">
                             @forelse ($previewItems as $item)
