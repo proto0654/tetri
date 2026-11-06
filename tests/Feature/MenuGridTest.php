@@ -87,26 +87,17 @@ class MenuGridTest extends TestCase
             'is_active' => true,
         ]);
 
-        $scrollJs = <<<'JS'
-            const root = document.documentElement
-            const previous = root.style.scrollBehavior
-            root.style.scrollBehavior = 'auto'
-            window.scrollTo(0, 0)
-            root.style.scrollBehavior = previous
-        JS;
-
         Livewire::test(MenuGrid::class)
             ->assertSee(route('menu.category', $breakfast), false)
             ->assertSee(route('menu.category', $desserts), false)
             ->assertSee('Смотреть все', false)
             ->assertSee('aria-label="Смотреть все блюда раздела Завтраки"', false)
-            ->assertSee('aria-label="Смотреть все блюда раздела Десерты"', false)
-            ->call('openCategory', $desserts->id)
-            ->assertSet('activeCategoryId', $desserts->id)
-            ->assertSee('Чизкейк')
-            ->assertDontSee('Сырники')
-            ->assertJs($scrollJs)
-            ->assertJs('window.history.pushState({}, "", '.json_encode(route('menu.category', 'deserty')).')');
+            ->assertSee('aria-label="Смотреть все блюда раздела Десерты"', false);
+
+        $this->get(route('menu.category', $desserts))
+            ->assertOk()
+            ->assertSee('Чизкейк', false)
+            ->assertDontSee('Сырники', false);
     }
 
     public function test_set_category_and_show_all_swap_visible_menu_items(): void

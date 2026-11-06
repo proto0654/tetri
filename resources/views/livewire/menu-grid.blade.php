@@ -66,7 +66,6 @@
 
                             <a
                                 href="{{ route('menu.category', $category) }}"
-                                wire:click.prevent="openCategory({{ $category->id }})"
                                 class="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm font-semibold tracking-wide text-ink transition hover:text-olive sm:text-base"
                                 aria-label="{{ 'Смотреть все блюда раздела '.$category->title }}"
                             >
