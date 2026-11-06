@@ -61,8 +61,16 @@ class MenuGrid extends Component
     {
         $this->setCategory($id);
 
+        if ($this->activeCategoryId !== $id) {
+            return;
+        }
+
         $this->js(<<<'JS'
-            document.getElementById('menu-grid-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            const root = document.documentElement
+            const previous = root.style.scrollBehavior
+            root.style.scrollBehavior = 'auto'
+            window.scrollTo(0, 0)
+            root.style.scrollBehavior = previous
         JS);
     }
 

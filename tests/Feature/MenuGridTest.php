@@ -88,7 +88,11 @@ class MenuGridTest extends TestCase
         ]);
 
         $scrollJs = <<<'JS'
-            document.getElementById('menu-grid-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            const root = document.documentElement
+            const previous = root.style.scrollBehavior
+            root.style.scrollBehavior = 'auto'
+            window.scrollTo(0, 0)
+            root.style.scrollBehavior = previous
         JS;
 
         Livewire::test(MenuGrid::class)
